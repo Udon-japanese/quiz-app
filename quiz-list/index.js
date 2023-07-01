@@ -1,4 +1,7 @@
 import { storage } from "../utils/storage.js";
+import { isLocal, ROOT_PATH, switchURL } from "../utils/switchURL.js";
+
+switchURL();
 
 const animalQuizId = crypto.randomUUID();
 const animalQuiz = {
@@ -54,14 +57,18 @@ for (let i = 0; i < storage.length; i++) {
   quizList[key] = JSON.parse(item);
 }
 
-console.log(quizList)
+console.log(quizList);
 
 const quizListContainer = document.createElement("div");
 for (const [quizId, quiz] of Object.entries(quizList)) {
   const a = document.createElement("a");
   const br = document.createElement("br");
   a.innerText = quiz.name;
-  a.setAttribute("href", `/quiz/index.html?id=${quizId}`);
+  let url = "/quiz-app/quiz/";
+  if (isLocal) {
+    url = url.split(ROOT_PATH)[1];
+  }
+  a.setAttribute("href", `${url}?id=${quizId}`);
   quizListContainer.appendChild(a);
   quizListContainer.appendChild(br);
 }
