@@ -1,4 +1,9 @@
-const storage = localStorage;
+import { renderTemplate } from "../utils/renderTemplate.js";
+import { storage } from "../utils/storage.js";
+import { switchURL } from "../utils/switchURL.js";
+
+switchURL();
+
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get("id");
 
@@ -36,24 +41,6 @@ for (const [n, question] of Object.entries(quiz.questions)) {
 const container = document.getElementById("container");
 container.innerHTML = header;
 container.appendChild(quizContainer);
-
-/**
- * @description テンプレートとデータを受け取り、HTMLを生成する関数
- * @param {string} template
- * @param {object} data
- * @returns {string} HTML文字列
- */
-function renderTemplate(template, data) {
-  const keys = Object.keys(data);
-  let result = template;
-
-  keys.forEach((key) => {
-    const regex = new RegExp(`{{${key}}}`, "g");
-    result = result.replace(regex, data[key]);
-  });
-
-  return result;
-}
 
 /**
  * @description 選択肢の順番をランダムに並び替える関数

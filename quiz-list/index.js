@@ -1,4 +1,4 @@
-const storage = localStorage;
+import { storage } from "../utils/storage.js";
 
 const animalQuizId = crypto.randomUUID();
 const animalQuiz = {
