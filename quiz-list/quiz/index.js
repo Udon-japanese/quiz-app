@@ -1,14 +1,14 @@
-import { renderTemplate } from "../utils/renderTemplate.js";
-import { storage } from "../utils/storage.js";
-import { switchURL } from "../utils/switchURL.js";
-
-switchURL();
+import { renderTemplate } from "../../utils/renderTemplate.js";
+import { storage } from "../../utils/storage.js";
+import { createElement } from "../../utils/createElement.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get("id");
 
 const quiz = JSON.parse(storage.getItem(id));
-console.log(quiz);
+if (!quiz) {
+  alert("クイズが見つかりません！");
+}
 
 const headerTemplate = `
   <h1>{{title}}</h1>
@@ -16,26 +16,40 @@ const headerTemplate = `
       <h3>{{description}}</h3>
     </p>
   <p>問題</p>`;
-const headerData = { title: quiz.name, description: quiz.description };
+const headerData = { title: quiz.title, description: quiz.description };
 const header = renderTemplate(headerTemplate, headerData);
 
-const quizContainer = document.createElement("div");
-for (const [n, question] of Object.entries(quiz.questions)) {
-  const shuffledChoices = shuffleChoices(question.choices);
-  const choices = renderChoices(shuffledChoices);
-
-  const qTemplate = `
-  <p>{{question}}
-    <br>
-    ${choices}
-    <p>正解：{{correctAnswer}}</p>
-  </p>`;
-  const qData = {
-    question: question.question,
-    correctAnswer: question.correctAnswer,
-  };
-  const q = renderTemplate(qTemplate, qData);
-  quizContainer.innerHTML += q;
+const quizContainer = createElement("div");
+for (const [key, question] of Object.entries(quiz.questions)) {
+  if (question.answerType !== "type-text") {
+    const shuffledChoices = shuffleChoices(question.choices);
+    const choices = renderChoices(shuffledChoices);
+    const qTemplate = `
+    <p>{{question}}
+      <br>
+      ${choices}
+      <p>正解：{{correctAnswer}}</p>
+    </p>`;
+    const qData = {
+      question: question.statement,
+      correctAnswer: question.answerType === "select" ? question.correctAnswer : question.correctAnswers,
+    };
+    const q = renderTemplate(qTemplate, qData);
+    quizContainer.innerHTML += q;
+  } else {
+    const qTemplate = `
+    <p>{{question}}
+      <br>
+      入力してください
+      <p>正解：{{correctAnswer}}</p>
+    </p>`;
+    const qData = {
+      question: question.statement,
+      correctAnswer: question.correctAnswer,
+    };
+    const q = renderTemplate(qTemplate, qData);
+    quizContainer.innerHTML += q;
+  }
 }
 
 const container = document.getElementById("container");
