@@ -4,6 +4,7 @@ import { createElement } from "../utils/createElement.js";
 import { displayQuizList } from "./quizList.js";
 import { closeModal } from "../utils/modal.js";
 import { showToast } from "../utils/showToast.js";
+import { setCookie, getCookie } from "../utils/cookie.js";
 
 const topPage = document.getElementById("top-page");
 const crtQPage = document.getElementById("crt-quiz-page");
@@ -16,7 +17,10 @@ const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
 const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 
-navigateToPage("quizList");
+const lastAccess = getCookie("lastAccess");
+let page = "top";
+if (lastAccess) page = lastAccess;
+navigateToPage(page);
 
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -132,7 +136,7 @@ export function navigateToPage(pageName) {
       createQuiz: crtQPage,
       quizList: qListPage,
     }
-
+    setCookie("lastAccess", pageName, 14);
     hideOtherPages(pageMap[pageName]);
   }
 

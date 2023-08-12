@@ -1,5 +1,11 @@
 "use strict";
 // クッキーの設定
+/**
+ * @description
+ * @param {string} name 
+ * @param {string} value 
+ * @param {number} daysToExpire 
+ */
 export function setCookie(name, value, daysToExpire) {
   const expires = new Date();
   expires.setDate(expires.getDate() + daysToExpire);
@@ -8,6 +14,11 @@ export function setCookie(name, value, daysToExpire) {
 }
 
 // クッキーの取得
+/**
+ * @description
+ * @param {string} name 
+ * @returns 
+ */
 export function getCookie(name) {
   const cookieName = `${name}=`;
   const cookies = document.cookie.split(';');
@@ -21,6 +32,10 @@ export function getCookie(name) {
 }
 
 // クッキーの削除
+/**
+ * @description
+ * @param {string} name 
+ */
 export function deleteCookie(name) {
   setCookie(name, '', -1); // 過去の日付で上書きして削除
 }
