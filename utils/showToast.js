@@ -1,4 +1,5 @@
-import { cloneFromTemplate } from "../index.js";
+"use strict";
+import { cloneFromTemplate } from "../js/index.js";
 
 /**
  * @description トーストを表示する

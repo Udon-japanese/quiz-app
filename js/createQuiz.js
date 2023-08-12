@@ -1,16 +1,16 @@
-import { createElement } from "./utils/createElement.js";
-import { storage } from "./utils/storage.js";
+"use strict";
+import { createElement } from "../utils/createElement.js";
+import { storage } from "../utils/storage.js";
 import { cloneFromTemplate, hideOtherPages } from "./index.js";
-import { showToast } from "./utils/showToast.js";
+import { showToast } from "../utils/showToast.js";
+import { replaceAttrVals } from "../utils/replaceAttrVals.js";
+
 const crtQPage = document.getElementById("crt-quiz-page");
 const qListPage = document.getElementById("quiz-list-page");
-const addQBtn = document.querySelector(".add-question");
-const questionsCont = document.getElementById("questions");
-
 const counterInitialState = 2;
 const isSelectAllInitialState = null;
 const answerTypeInitialState = null;
-const createQuizObj = {
+let createQuizObj = {
   createChoiceCallLimit: 4,
   createQuestionCallLimit: 10,
   selectCounter: {},
@@ -19,9 +19,14 @@ const createQuizObj = {
   isSelectAll: {},
   answerType: {},
 };
+const crtQPageClone = cloneFromTemplate("crt-q-page-tem");
+crtQPage.appendChild(crtQPageClone);
+let addQBtn = document.querySelector(".add-question");
+let questionsCont = document.getElementById("questions");
 initQuizObject(createQuizObj);
 createQuestion(true);
 toggleAnswerType(1);
+checkQuestionsState();
 
 crtQPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -154,7 +159,8 @@ crtQPage.addEventListener("click", (e) => {
         createQuizObj[counterKey][strQN] = choices.length + 1;
       });
 
-      addQBtn.innerHTML = `<i class="bi bi-plus float-start" aria-hidden="true"></i>${newQuestionN}問目を作成する`;
+      const addQBtnTxt = addQBtn.innerText;
+      addQBtn.innerText = addQBtnTxt.replace(/\d+/, newQuestionN);
 
       checkQuestionsState();
 
@@ -220,7 +226,7 @@ crtQPage.addEventListener("change", (e) => {
     if (!checked) {
       textareaCont.querySelector(optTextareaCl).value = "";
     }
-    textareaCont.classList.toggle("is-hidden", !checked);
+    textareaCont.classList.toggle("d-none", !checked);
   }
 });
 crtQPage.addEventListener("input", (e) => {
@@ -239,8 +245,6 @@ crtQPage.addEventListener("input", (e) => {
     }
   });
 });
-
-checkQuestionsState();
 
 /**
  * @description 入力された内容をもとに、クイズを作成、ローカルストレージに保存する
@@ -387,6 +391,26 @@ function createQuiz() {
   }
 
   storage.setItem(id, JSON.stringify(quiz));
+
+  createQuizObj = {
+    createChoiceCallLimit: 4,
+    createQuestionCallLimit: 10,
+    selectCounter: {},
+    selectAllCounter: {},
+    questionCounter: counterInitialState,
+    isSelectAll: {},
+    answerType: {},
+  };
+  crtQPage.innerHTML = "";
+  const crtQPageClone = cloneFromTemplate("crt-q-page-tem");
+  crtQPage.appendChild(crtQPageClone);
+  addQBtn = document.querySelector(".add-question");
+  questionsCont = document.getElementById("questions");
+  initQuizObject(createQuizObj);
+  createQuestion(true);
+  toggleAnswerType(1);
+  checkQuestionsState();
+
   hideOtherPages(qListPage);
 
   /**
@@ -432,22 +456,8 @@ function createChoice(
   const elsHasAttrQN = choice.querySelectorAll(
     "[id*='{q-num}'], [for*='{q-num}'], [name*='{q-num}']"
   );
-  elsHasAttrCN.forEach((e) => {
-    Array.from(e.attributes).forEach((a) => {
-      const attr = a.value;
-      if (attr.includes("{c-num}")) {
-        a.value = attr.replace("{c-num}", options.isInit ? 1 : counter);
-      }
-    });
-  });
-  elsHasAttrQN.forEach((e) => {
-    Array.from(e.attributes).forEach((a) => {
-      const attr = a.value;
-      if (attr.includes("{q-num}")) {
-        a.value = attr.replace("{q-num}", questionN);
-      }
-    });
-  });
+  replaceAttrVals(elsHasAttrCN, "{c-num}", options.isInit ? 1 : counter);
+  replaceAttrVals(elsHasAttrQN, "{q-num}", questionN);
 
   choicesCont.appendChild(choice);
   if (options.isInit) return;
@@ -473,14 +483,7 @@ function createQuestion(isInit = false) {
   const elsHasAttrQN = question.querySelectorAll(
     "[id*='{num}'], [for*='{num}']"
   );
-  elsHasAttrQN.forEach((e) => {
-    Array.from(e.attributes).forEach((a) => {
-      const attr = a.value;
-      if (attr.includes("{num}")) {
-        a.value = attr.replace("{num}", isInit ? 1 : counter);
-      }
-    });
-  });
+  replaceAttrVals(elsHasAttrQN, "{num}", isInit ? 1 : counter)
   question.querySelector(".q-header").innerText = `${isInit ? 1 : counter}問目`;
 
   const selectAlls = question.querySelector(".select-alls");
@@ -497,9 +500,8 @@ function createQuestion(isInit = false) {
   questionsCont.appendChild(question);
 
   const questions = getQuestions();
-  addQBtn.innerHTML = `<i class="bi bi-plus float-start" aria-hidden="true"></i>${
-    questions.length + 1
-  }問目を作成する`;
+  const addQBtnTxt = addQBtn.innerText;
+  addQBtn.innerHTML = addQBtnTxt.replace(isInit ? "{q-n}" : /\d+/, questions.length + 1);
 
   questionsCont.appendChild(question);
 
@@ -532,13 +534,13 @@ function toggleAnswerType(questionN) {
   const question = document.getElementById(`q${questionN}`);
   question
     .querySelector(`#q${questionN}-type-txt-cont`)
-    .classList.toggle("is-hidden", answerTypeObjVal !== typeText);
+    .classList.toggle("d-none", answerTypeObjVal !== typeText);
   question
     .querySelector(`#q${questionN}-select-cont`)
-    .classList.toggle("is-hidden", answerTypeObjVal !== select);
+    .classList.toggle("d-none", answerTypeObjVal !== select);
   question
     .querySelector(`#q${questionN}-select-all-cont`)
-    .classList.toggle("is-hidden", answerTypeObjVal !== selectAll);
+    .classList.toggle("d-none", answerTypeObjVal !== selectAll);
 
   const isSelectAll = createQuizObj.isSelectAll[strQN];
 
@@ -578,7 +580,7 @@ function checkChoicesState(strQN, btn, parent, isSelectAll) {
     const hasOnlyChoice = choices.length === 1;
 
     const delCBtn = c.querySelector(".del-choice");
-    delCBtn.classList.toggle("is-hidden", hasOnlyChoice);
+    delCBtn.classList.toggle("d-none", hasOnlyChoice);
 
     const typeInput = c.querySelector(".type-choice");
     typeInput.classList.toggle("rounded-end", hasOnlyChoice);
@@ -586,7 +588,7 @@ function checkChoicesState(strQN, btn, parent, isSelectAll) {
 
   const isReachedLimit = choices.length === createQuizObj.createChoiceCallLimit;
 
-  btn.classList.toggle("is-hidden", isReachedLimit);
+  btn.classList.toggle("d-none", isReachedLimit);
 
   if (isReachedLimit) {
     const infoText = createElement(
@@ -612,13 +614,13 @@ function checkQuestionsState() {
   const questions = getQuestions();
   questions.forEach((q) => {
     const delBtn = q.querySelector(".del-q");
-    delBtn.classList.toggle("is-hidden", questions.length === 1);
+    delBtn.classList.toggle("d-none", questions.length === 1);
   });
 
   const isReachedLimit =
     questions.length === createQuizObj.createQuestionCallLimit;
 
-  addQBtn.classList.toggle("is-hidden", isReachedLimit);
+  addQBtn.classList.toggle("d-none", isReachedLimit);
 
   const infoTextId = "questions-info-text";
   if (isReachedLimit) {

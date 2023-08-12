@@ -1,5 +1,6 @@
+"use strict";
 /**
- * @description 引数で指定したタグネーム、属性、テキストコンテンツを持つ要素を作成し、返す関数
+ * @description 引数で指定したタグネーム、属性、テキストコンテンツを持つ要素を作成し、返す
  * @param {string} tagName タグの名前
  * @param {Object} attributes 要素に設定する属性のオブジェクト
  * @param {string} textContent 要素のテキストコンテンツ

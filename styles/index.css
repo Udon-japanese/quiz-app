@@ -1,5 +1,7 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css");
 
+
+/* 全体 */
 *, *::before, *::after {
   box-sizing: border-box;
   word-break: break-all;
@@ -7,62 +9,15 @@
 
 html, body {
   height: 100%;
+  width: 100%;
 }
 
 textarea {
   resize: none;
 }
 
-.modal-outer {
-  display: none;
-}
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 99999;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 400px;
-  height: 300px;
-  border: 1px solid #000;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-  background: #fff;
-}
-
-.modal-inner {
-  overflow-y: scroll;
-  height: inherit;
-  padding: 1rem;
-}
-
-.modal-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.modal-close {
-  display: grid;
-  place-content: center;
-  position: absolute;
-  top: -15px;
-  right: -15px;
-  width: 40px;
-  height: 40px;
-  border: 2px solid #000;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
-}
 
 /* スクロールバー */
-
 @media (max-width: 575px) {
   ::-webkit-scrollbar {
     display: none;
@@ -84,10 +39,8 @@ textarea {
   background-color: #A9A9A9;
 }
 
-.is-hidden {
-  display: none;
-}
 
+/* トグルボタン */
 .toggle-label {
   background-color: #d2d2d2;
   width: 60px;

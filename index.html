@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
   <link rel="stylesheet" href="/styles/index.css">
-  <title>クイズアプリ</title>
+  <title>クイズビルダー</title>
 </head>
 
 <body class="bg-warning">
@@ -22,31 +22,167 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar">
         <div class="navbar-nav d-flex gap-3">
-          <button type="button" class="nav-link fw-semibold to-crt-q-page"><i
-              class="bi bi-pencil me-1"></i>クイズを作る</button>
-          <button type="button" class="nav-link fw-semibold to-q-list-page"><i
-              class="bi bi-list-task me-1"></i>クイズ一覧</button>
+          <button type="button" class="nav-link fw-semibold to-crt-q-page">
+            <i class="bi bi-pencil me-1"></i>クイズを作る
+          </button>
+          <button type="button" class="nav-link fw-semibold to-q-list-page">
+            <i class="bi bi-list-task me-1"></i>クイズ一覧
+          </button>
         </div>
       </div>
     </div>
   </nav>
-  <div id="top-page" class="page">
+  <div id="top-page" class="page d-none">
     <div class="container">
       <div class="card p-3 my-4">
         <img src="/images/quiz-app.png" alt="クイズビルダー">
         <div class="card-body">
           <h4 class="text-center">自分でクイズを作って遊んだり、他の人が作ったクイズで遊んだりしてみよう！</h4>
-          <div class="d-grid gap-3 d-sm-block d-sm-flex justify-content-sm-center mt-4">
-            <button class="btn btn-primary w-100 to-crt-q-page" type="button"><i
-                class="bi bi-pencil float-start"></i>クイズを作る</button><button class="btn btn-primary w-100 to-q-list-page"
-              type="button"><i class="bi bi-list-task float-start"></i>クイズ一覧</button>
+          <div class="d-grid gap-3 d-lg-block d-lg-flex justify-content-lg-center mt-4 btn-cont">
+            <button class="btn btn-primary w-100 to-crt-q-page" type="button">
+              <i class="bi bi-pencil float-start"></i>クイズを作る
+            </button>
+            <button class="btn btn-primary w-100 to-q-list-page" type="button">
+              <i class="bi bi-list-task float-start"></i>クイズ一覧
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div id="crt-quiz-page" class="is-hidden page">
-    <div class="container card p-5 bg-body-tertiary mt-4">
+  <div id="crt-quiz-page" class="d-none page px-3"></div>
+  <div id="quiz-list-page" class="page">
+    <div class="container">
+      <div id="header-cont" class="d-flex justify-content-between align-items-center flex-sm-row flex-column mb-3">
+        <h3 class="my-3 fw-bold">クイズ一覧</h3>
+      </div>
+      <input type="text" id="search-q" class="form-control" placeholder="キーワードからクイズを検索">
+      <div id="quizzes" class="row p-3 p-sm-0 mt-3 g-3"></div>
+    </div>
+  </div>
+  <div id="quiz-page" class="d-none page">クイズのページだよ</div>
+
+  <!-- テンプレート -->
+  <!-- 全体用テンプレート -->
+  <template id="toast-tem">
+    <div class="d-flex justify-content-center align-items-center w-100 pt-3 position-fixed z-3">
+      <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true"
+        data-bs-animation="true" data-bs-autohide="true" data-bs-delay="4000">
+        <!-- class="text-bg-danger | text-bg-warning | text-bg-success" が入る -->
+        <div class="d-flex" data-bs-theme="dark">
+          <div class="toast-body">
+            {toast message}
+          </div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="閉じる"></button>
+        </div>
+      </div>
+    </div>
+  </template>
+  <template id="upload-quiz-tem">
+    <label class="btn btn-primary w-100 upload-q-btn" role="button">
+      <input type="file" accept=".json" class="d-none upload-q">
+      <i class="bi bi-upload float-start"></i>クイズを読み込む (JSONファイル)
+    </label>
+  </template>
+  <template id="modal-tem">
+    <div class="modal fade" tabindex="-1" aria-labelledby="modal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modal">{title}</h5>
+            <button type="button" data-bs-dismiss="modal" class="btn-close" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {body}
+          </div>
+          <div class="modal-footer ">
+            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">閉じる</button>
+            <button type="button" tabindex="-1" class="btn action-btn">{action-btn-txt}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  <!-- クイズ一覧ページ用テンプレート -->
+  <template id="none-result-tem">
+    <div class="card" id="none-result">
+      <div class="card-body">
+        <p class="card-text text-center">
+          「{query}」に当てはまるクイズは見つかりませんでした
+          <br>
+          自分で作成してみるか、他の人のクイズで遊んでみましょう！
+        </p>
+        <div class="d-grid gap-3 d-sm-block d-sm-flex justify-content-sm-center mt-4 btn-cont">
+          <button class="btn btn-primary w-100 to-crt-q-page" type="button">
+            <i class="bi bi-pencil float-start"></i>クイズを作る
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+  <template id="none-quiz-tem">
+    <div class="card">
+      <div class="card-body">
+        <p class="card-text text-center">
+          クイズがまだありません
+          <br>
+          自分で作成してみるか、他の人のクイズで遊んでみましょう！
+        </p>
+        <div class="d-grid gap-3 d-sm-block d-sm-flex justify-content-sm-center mt-4 btn-cont">
+          <button class="btn btn-primary w-100 to-crt-q-page" type="button">
+            <i class="bi bi-pencil float-start"></i>クイズを作る
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+  <template id="quiz-item-tem">
+    <div class="col-sm-6 col-lg-4 col-xxl-3">
+      <div id="{quiz-id}" class="card h-100">
+        <div class="card-body d-flex flex-column gap-3">
+          <div class="d-flex flex-row">
+            <div>
+              <h5 class="card-title q-title">{quiz-title}</h5>
+              <p class="card-text q-desc">{quiz-description}</p>
+              <span class="card-text text-primary q-length">問題数: {quiz-length}問</span>
+            </div>
+            <div class="ms-auto">
+              <div class="dropdown">
+                <button class="btn rounded-circle border-0" type="button" id="menu-{quiz-id}" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <i class="bi bi-three-dots-vertical fs-5"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="menu-{quiz-id}">
+                  <li class="d-flex align-items-center">
+                    <button class="dropdown-item share-q" type="button" id="share-{quiz-id}">
+                      <i class="bi bi-share me-3"></i>
+                      <span>クイズを共有する (JSON形式で保存)</span>
+                    </button>
+                  </li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li class="d-flex align-items-center">
+                    <button id="del-{quiz-id}" class="dropdown-item open-del-q-m" type="button">
+                      <i class="bi bi-x-circle-fill text-danger me-3"></i>
+                      <span>このクイズを削除する</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary d-flex align-items-center mt-auto play-q" id="play-{quiz-id}" type="button">
+            <i class="bi bi-play fs-5"></i>
+            <span class="mx-auto">このクイズで遊ぶ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+  <!-- クイズ作成ページ用テンプレート -->
+  <template id="crt-q-page-tem">
+    <div class="container card p-sm-5 p-3 bg-body-tertiary mt-4">
       <h1 id="quiz-header" class="text-center my-3 fw-bold">クイズを作成する</h1>
       <div class="d-grid gap-3">
         <div class="card p-3 gap-2">
@@ -68,10 +204,10 @@
               <h5 class="card-subtitle mb-1">オプション</h5>
               <div class="d-flex align-items-center">
                 <p class="me-2 mb-0">各問題に制限時間を設ける</p>
-                <input type="checkbox" class="is-hidden timer-toggle">
+                <input type="checkbox" class="d-none timer-toggle">
                 <div class="toggle-label"></div>
               </div>
-              <div class="is-hidden mt-4 type-timer-cont">
+              <div class="d-none mt-4 type-timer-cont">
                 <label class="form-label" for="timer">制限時間を設定(1~600秒)</label>
                 <div class="input-group">
                   <input type="number" class="form-control timer-input" id="timer" min="1" max="600" step="1">
@@ -88,32 +224,12 @@
         <div id="questions"></div>
         <div class="d-grid d-sm-flex">
           <button class="btn bg-success-subtle border-secondary-subtle add-question"><i class="bi bi-plus float-start"
-              aria-hidden="true"></i>2問目を追加する</button>
+              aria-hidden="true"></i>{q-n}問目を追加する</button>
         </div>
       </div>
-      <button type="button" class="btn btn-success my-sm-5 my-2 mt crt-quiz">クイズを作成する</button>
-      <button class="btn btn-secondary" type="button"><i class="bi bi-arrow-return-left float-start"
-          aria-hidden="true"></i>クイズ一覧に戻る</button>
-    </div>
-  </div>
-  <div id="quiz-list-page" class="is-hidden page">クイズ一覧だよ</div>
-  <div id="quiz-page" class="is-hidden page">クイズのページだよ</div>
-  <!-- 全体用テンプレート -->
-  <template id="toast-tem">
-    <div class="d-flex justify-content-center align-items-center w-100 z-3 pt-3 position-fixed">
-      <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true"
-        data-bs-animation="true" data-bs-autohide="true" data-bs-delay="4000">
-        <!-- class="text-bg-danger | text-bg-warning | text-bg-success" が入る -->
-        <div class="d-flex" data-bs-theme="dark">
-          <div class="toast-body">
-            {toast message}
-          </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="閉じる"></button>
-        </div>
-      </div>
+      <button type="button" class="btn btn-success my-sm-5 mt-2 mt crt-quiz">クイズを作成する</button>
     </div>
   </template>
-  <!-- クイズ作成ページ用テンプレート -->
   <template id="crt-choice-tem">
     <div class="d-grid d-sm-flex">
       <button type="button" class="btn btn-primary crt-choice">
@@ -130,7 +246,7 @@
       </label>
       <input type="text" class="form-control rounded-end type-choice" placeholder="{c-num}つ目の選択肢" required>
 
-      <button type="button" class="is-hidden btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
+      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
           aria-hidden="true"></i></button>
       <div class="invalid-feedback">回答を設定してください</div>
     </div>
@@ -142,7 +258,7 @@
           class="form-check-input set-correct">
       </label>
       <input type="text" class="form-control rounded-end type-choice" placeholder="{c-num}つ目の選択肢" required>
-      <button type="button" class="is-hidden btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
+      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
           aria-hidden="true"></i></button>
       <div class="invalid-feedback">回答を設定してください</div>
     </div>
@@ -152,7 +268,7 @@
       <div class="row">
         <h3 class="col-sm-6 order-1 mx-sm-auto q-header">1問目</h3>
         <div class="col-sm-6 order-2">
-          <button class="is-hidden w-100 btn btn-danger del-q"><i class="bi bi-x-lg float-start"
+          <button class="d-none w-100 btn btn-danger del-q"><i class="bi bi-x-lg float-start"
               aria-hidden="true"></i>この問題を削除</button>
         </div>
       </div>
@@ -171,7 +287,7 @@
           <option value="type-text">入力形式(回答を文字で入力する形式)</option>
         </select>
       </div>
-      <div id="q{num}-type-txt-cont" class="is-hidden">
+      <div id="q{num}-type-txt-cont" class="d-none">
         <label for="q{num}-type-txt-correct" class="form-label">正解を設定</label>
         <div class="input-group has-validation">
           <input type="text" id="q{num}-type-txt-correct" class="form-control" required>
@@ -182,7 +298,7 @@
         <p>正解と選択肢を設定</p>
         <div class="selects"></div>
       </div>
-      <div id="q{num}-select-all-cont" class="is-hidden">
+      <div id="q{num}-select-all-cont" class="d-none">
         <p>正解と選択肢を設定</p>
         <div class="select-alls"></div>
       </div>
@@ -191,10 +307,10 @@
         <div id="q{num}-option-expl">
           <div class="d-flex align-items-center">
             <p class="me-2 mb-0">解説を設定する</p>
-            <input type="checkbox" class="is-hidden expl-toggle">
+            <input type="checkbox" class="d-none expl-toggle">
             <div class="toggle-label"></div>
           </div>
-          <div id="q{num}-type-expl-cont" class="is-hidden type-expl-cont mt-3">
+          <div id="q{num}-type-expl-cont" class="d-none type-expl-cont mt-3">
             <label class="form-label" for="q{num}-explanation">解説文</label>
             <textarea id="q{num}-explanation" class="form-control expl-textarea" rows="3"
               placeholder="例: パンダ以外にも当てはまる動物がいたらごめんなさい。"></textarea>
@@ -203,8 +319,9 @@
       </div>
     </div>
   </template>
-  <script type="module" src="index.js"></script>
-  <script type="module" src="createQuiz.js"></script>
+  <script type="module" src="js/index.js"></script>
+  <script type="module" src="js/createQuiz.js"></script>
+  <script type="module" src="js/quizList.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
     crossorigin="anonymous"></script>
