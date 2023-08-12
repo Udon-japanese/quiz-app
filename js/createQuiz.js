@@ -1,9 +1,10 @@
 "use strict";
 import { createElement } from "../utils/createElement.js";
 import { storage } from "../utils/storage.js";
-import { cloneFromTemplate, hideOtherPages } from "./index.js";
+import { cloneFromTemplate, navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
+import { displayQuizList } from "./quizList.js";
 
 const crtQPage = document.getElementById("crt-quiz-page");
 const qListPage = document.getElementById("quiz-list-page");
@@ -411,7 +412,9 @@ function createQuiz() {
   toggleAnswerType(1);
   checkQuestionsState();
 
-  hideOtherPages(qListPage);
+  navigateToPage("quizList", "quizList");
+  showToast("green", "クイズが作成されました");
+  displayQuizList();
 
   /**
    * @description 指定した要素の親要素のclassにwas-validatedを追加する関数

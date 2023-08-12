@@ -24,25 +24,13 @@ document.addEventListener("click", (e) => {
     if (!el.className) return;
 
     if (classList.contains("to-top-page")) {
-      hideOtherPages(topPage);
-      navbarBtns.forEach((b) => {
-        b.classList.remove("active");
-      });
+      navigateToPage("top");
     } else if (classList.contains("to-crt-q-page")) {
-      hideOtherPages(crtQPage);
-      navbarBtns.forEach((b) => {
-        b.classList.toggle("active", b === navToCrtQPBtn);
-      });
+      navigateToPage("createQuiz", "createQuiz");
     } else if (classList.contains("to-q-list-page")) {
-      hideOtherPages(qListPage);
-      navbarBtns.forEach((b) => {
-        b.classList.toggle("active", b === navToQListPBtn);
-      });
+      navigateToPage("quizList", "quizList");
     } else if (classList.contains("to-q-page")) {
-      hideOtherPages(qPage);
-      navbarBtns.forEach((b) => {
-        b.classList.remove("active");
-      });
+      navigateToPage("quiz");
     } else if (classList.contains("share-q")) {
       const qId = el.id.split("share-")[1];
       const quiz = storage.getItem(qId);
@@ -56,6 +44,7 @@ document.addEventListener("click", (e) => {
       dlLink.click();
       dlLink.remove();
       URL.revokeObjectURL(url);
+      navigateToPage("quizList", "quizList");
     } else if (classList.contains("del-quiz")) {
       const delQId = el.id.split("del-")[1];
       storage.removeItem(delQId);
@@ -66,10 +55,57 @@ document.addEventListener("click", (e) => {
   });
 });
 
-export function hideOtherPages(showPage) {
-  pages.forEach((p) => {
-    p.classList.toggle("d-none", showPage !== p);
+/**
+ * @description
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
+ * @param {"quizList" | "createQuiz"} activePageName
+ */
+export function navigateToPage(pageName, activePageName = null) {
+  switchToPage(pageName);
+
+  const navbarBtnsObj = {
+    quizList: navToQListPBtn,
+    createQuiz: navToCrtQPBtn,
+  };
+  const activeBtn = navbarBtnsObj[activePageName];
+  navbarBtns.forEach((b) => {
+    if (activePageName === null) {
+      b.classList.remove("active");
+    } else {
+      b.classList.toggle("active", b === activeBtn);
+    }
   });
+
+  /**
+   * @description
+   * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
+   */
+  function switchToPage(pageName) {
+    switch (pageName) {
+      case "top":
+        hideOtherPages(topPage);
+        break;
+      case "quiz":
+        hideOtherPages(qPage);
+        break;
+      case "createQuiz":
+        hideOtherPages(crtQPage);
+        break;
+      case "quizList":
+        hideOtherPages(qListPage);
+        break;
+    }
+  }
+
+  /**
+   * @description
+   * @param {HTMLElement} showPage
+   */
+  function hideOtherPages(showPage) {
+    pages.forEach((p) => {
+      p.classList.toggle("d-none", showPage !== p);
+    });
+  }
 }
 
 /**
