@@ -65,16 +65,14 @@
   <!-- テンプレート -->
   <!-- 全体用テンプレート -->
   <template id="toast-tem">
-    <div class="d-flex justify-content-center align-items-center w-100 pt-3 position-fixed z-3">
-      <div id="toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true"
-        data-bs-animation="true" data-bs-autohide="true" data-bs-delay="4000">
-        <!-- class="text-bg-danger | text-bg-warning | text-bg-success" が入る -->
-        <div class="d-flex" data-bs-theme="dark">
-          <div class="toast-body">
-            {toast message}
-          </div>
-          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="閉じる"></button>
+    <div id="toast" class="toast border-0 position-absolute z-9999 top-0 start-50 translate-middle-x mt-3" role="alert" aria-live="assertive" aria-atomic="true"
+      data-bs-animation="true" data-bs-autohide="true" data-bs-delay="4000">
+      <!-- class="text-bg-danger | text-bg-warning | text-bg-success" が入る -->
+      <div class="d-flex" data-bs-theme="dark">
+        <div class="toast-body">
+          {toast message}
         </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="閉じる"></button>
       </div>
     </div>
   </template>

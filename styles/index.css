@@ -78,3 +78,7 @@ input:checked + .toggle-label::before {
 .ellipsis-hover:hover {
   background-color: #f2f2f2;
 }
+
+.z-9999 {
+  z-index: 9999;
+}
