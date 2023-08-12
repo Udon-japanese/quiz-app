@@ -33,7 +33,7 @@ export function openModal(option) {
     actionBtnEl.classList.add(c);
   });
   actionBtnEl.innerText = actionBtn.text;
-  document.body.appendChild(modalClone);
+  document.body.insertBefore(modalClone, document.body.firstChild);
 
   const modalEl = document.querySelector(".modal");
   trapFocus(modalEl);
