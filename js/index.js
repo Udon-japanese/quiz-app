@@ -15,6 +15,8 @@ const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
 const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 
+navigateToPage("quizList", "quizList");
+
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
   if (!els) return;
@@ -131,10 +133,6 @@ export function initUploadBtn(btnCont, width = 0, className = "") {
   const uploadQBtnEls = btnCont.querySelectorAll(".upload-q-btn");
   uploadQBtnEls.forEach((b) => {
     if (b.classList.contains("initialized")) return;
-
-    if (width !== 100) {
-      b.classList.remove("w-100");
-    }
     if (width) {
       b.classList.add(`w-${width}`);
     }

@@ -32,18 +32,18 @@
       </div>
     </div>
   </nav>
-  <div id="top-page" class="page d-none">
-    <div class="container">
-      <div class="card p-3 my-4">
+  <div id="top-page" class="d-none page">
+    <div class="container d-flex justify-content-center">
+      <div class="card p-2 p-sm-3 my-4 col-lg-9">
         <img src="./images/thumbnail.png" alt="クイズビルダー">
-        <div class="card-body">
+        <div class="card-body btn-cont">
           <h4 class="text-center">自分でクイズを作って遊んだり、他の人が作ったクイズで遊んだりしてみよう！</h4>
-          <div class="d-grid gap-3 d-lg-block d-lg-flex justify-content-lg-center mt-4 btn-cont">
-            <button class="btn btn-primary w-100 to-crt-q-page" type="button">
-              <i class="bi bi-pencil float-start"></i>クイズを作る
+          <div class="d-grid gap-3 d-lg-block d-lg-flex justify-content-lg-center mt-4 mb-3">
+            <button class="btn btn-primary to-crt-q-page w-100" type="button">
+              <i class="bi bi-pencil float-start me-lg-1"></i>クイズを作る
             </button>
-            <button class="btn btn-primary w-100 to-q-list-page" type="button">
-              <i class="bi bi-list-task float-start"></i>クイズ一覧
+            <button class="btn btn-primary to-q-list-page w-100" type="button">
+              <i class="bi bi-list-task float-start me-lg-1"></i>クイズ一覧
             </button>
           </div>
         </div>
@@ -51,7 +51,7 @@
     </div>
   </div>
   <div id="crt-quiz-page" class="d-none page px-3"></div>
-  <div id="quiz-list-page" class="page">
+  <div id="quiz-list-page" class="d-none page">
     <div class="container">
       <div id="header-cont" class="d-flex justify-content-between align-items-center flex-sm-row flex-column mb-3">
         <h3 class="my-3 fw-bold">クイズ一覧</h3>
@@ -79,9 +79,9 @@
     </div>
   </template>
   <template id="upload-quiz-tem">
-    <label class="btn btn-primary w-100 upload-q-btn" role="button">
+    <label class="btn btn-primary upload-q-btn" role="button">
       <input type="file" accept=".json" class="d-none upload-q">
-      <i class="bi bi-upload float-start"></i>クイズを読み込む (JSONファイル)
+      <i class="bi bi-upload me-lg-1 float-start"></i>クイズを読み込む (JSONファイル)
     </label>
   </template>
   <template id="modal-tem">
@@ -112,7 +112,7 @@
           <br>
           自分で作成してみるか、他の人のクイズで遊んでみましょう！
         </p>
-        <div class="d-grid gap-3 d-sm-block d-sm-flex justify-content-sm-center mt-4 btn-cont">
+        <div class="d-grid gap-3 d-md-block d-md-flex justify-content-md-center mt-4 btn-cont">
           <button class="btn btn-primary w-100 to-crt-q-page" type="button">
             <i class="bi bi-pencil float-start"></i>クイズを作る
           </button>
@@ -128,7 +128,7 @@
           <br>
           自分で作成してみるか、他の人のクイズで遊んでみましょう！
         </p>
-        <div class="d-grid gap-3 d-sm-block d-sm-flex justify-content-sm-center mt-4 btn-cont">
+        <div class="d-grid gap-3 d-md-block d-md-flex justify-content-md-center mt-4 btn-cont">
           <button class="btn btn-primary w-100 to-crt-q-page" type="button">
             <i class="bi bi-pencil float-start"></i>クイズを作る
           </button>
@@ -245,9 +245,9 @@
           class="form-check-input set-correct" required>
       </label>
       <input type="text" class="form-control rounded-end type-choice" placeholder="{c-num}つ目の選択肢" required>
-
-      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
-          aria-hidden="true"></i></button>
+      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
       <div class="invalid-feedback">回答を設定してください</div>
     </div>
   </template>
