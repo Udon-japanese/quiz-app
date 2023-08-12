@@ -1,7 +1,6 @@
 "use strict";
 import { cloneFromTemplate, initUploadBtn } from "./index.js";
 import { storage } from "../utils/storage.js";
-import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { showToast } from "../utils/showToast.js";
 import { openModal } from "../utils/modal.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
@@ -53,46 +52,6 @@ qListPage.addEventListener("click", (e) => {
       });
     } else if (classList.contains("ellipsis-btn")) {
       el.classList.add("ellipsis-bg");
-    }
-  });
-});
-qListPage.addEventListener("change", (e) => {
-  const els = e.composedPath();
-  if (!els) return;
-
-  Array.from(els).forEach((el) => {
-    const classList = el.classList;
-    if (!el.className) return;
-
-    if (classList.contains("upload-q")) {
-      const file = el.files[0];
-      if (!file) return;
-      if (file.type !== "application/json") {
-        showToast("red", "JSONファイルのみアップロードできます");
-        el.value = "";
-        return;
-      }
-      const reader = new FileReader();
-      reader.readAsText(file);
-      reader.onload = (e) => {
-        const jsonContent = e.target.result;
-        try {
-          const obj = JSON.parse(jsonContent);
-
-          if (isValidQuizObj(obj)) {
-            storage.setItem(obj.id, JSON.stringify(obj));
-            showToast("green", "クイズが保存されました");
-          } else {
-            showToast("red", "無効なクイズデータです");
-            return;
-          }
-        } catch (err) {
-          showToast("red", "JSONファイルの解析に失敗しました");
-          return;
-        }
-        displayQuizList();
-      };
-    } else if (classList.contains("")) {
     }
   });
 });

@@ -3,6 +3,7 @@ import { storage } from "../utils/storage.js";
 import { createElement } from "../utils/createElement.js";
 import { displayQuizList } from "./quizList.js";
 import { closeModal } from "../utils/modal.js";
+import { showToast } from "../utils/showToast.js";
 
 const topPage = document.getElementById("top-page");
 const crtQPage = document.getElementById("crt-quiz-page");
@@ -15,7 +16,7 @@ const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
 const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 
-navigateToPage("quizList", "quizList");
+navigateToPage("quizList");
 
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -28,9 +29,9 @@ document.addEventListener("click", (e) => {
     if (classList.contains("to-top-page")) {
       navigateToPage("top");
     } else if (classList.contains("to-crt-q-page")) {
-      navigateToPage("createQuiz", "createQuiz");
+      navigateToPage("createQuiz");
     } else if (classList.contains("to-q-list-page")) {
-      navigateToPage("quizList", "quizList");
+      navigateToPage("quizList");
     } else if (classList.contains("to-q-page")) {
       navigateToPage("quiz");
     } else if (classList.contains("share-q")) {
@@ -46,7 +47,7 @@ document.addEventListener("click", (e) => {
       dlLink.click();
       dlLink.remove();
       URL.revokeObjectURL(url);
-      navigateToPage("quizList", "quizList");
+      navigateToPage("quizList");
     } else if (classList.contains("del-quiz")) {
       const delQId = el.id.split("del-")[1];
       storage.removeItem(delQId);
@@ -56,47 +57,83 @@ document.addEventListener("click", (e) => {
     }
   });
 });
+document.addEventListener("change", (e) => {
+  const els = e.composedPath();
+  if (!els) return;
+
+  Array.from(els).forEach((el) => {
+    const classList = el.classList;
+    if (!el.className) return;
+
+    if (classList.contains("upload-q")) {
+      const file = el.files[0];
+      if (!file) return;
+      if (file.type !== "application/json") {
+        showToast("red", "JSONファイルのみアップロードできます");
+        el.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (e) => {
+        const jsonContent = e.target.result;
+        try {
+          const obj = JSON.parse(jsonContent);
+
+          if (isValidQuizObj(obj)) {
+            storage.setItem(obj.id, JSON.stringify(obj));
+            showToast("green", "クイズが保存されました");
+            navigateToPage("quizList");
+          } else {
+            showToast("red", "無効なクイズデータです");
+            return;
+          }
+        } catch (err) {
+          showToast("red", "JSONファイルの解析に失敗しました");
+          return;
+        }
+        displayQuizList();
+      };
+    }
+  });
+});
 
 /**
  * @description
  * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
- * @param {"quizList" | "createQuiz"} activePageName
  */
-export function navigateToPage(pageName, activePageName = null) {
+export function navigateToPage(pageName) {
   switchToPage(pageName);
 
-  const navbarBtnsObj = {
+  const navbarBtnMap = {
     quizList: navToQListPBtn,
     createQuiz: navToCrtQPBtn,
   };
-  const activeBtn = navbarBtnsObj[activePageName];
-  navbarBtns.forEach((b) => {
-    if (activePageName === null) {
+  
+  if (pageName === "quizList" || pageName === "createQuiz") {
+    navbarBtns.forEach((b) => {
+      const isActive = b === navbarBtnMap[pageName];
+      b.classList.toggle("active", isActive);
+    });
+  } else {
+    navbarBtns.forEach((b) => {
       b.classList.remove("active");
-    } else {
-      b.classList.toggle("active", b === activeBtn);
-    }
-  });
+    });
+  }
 
   /**
    * @description
    * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
    */
   function switchToPage(pageName) {
-    switch (pageName) {
-      case "top":
-        hideOtherPages(topPage);
-        break;
-      case "quiz":
-        hideOtherPages(qPage);
-        break;
-      case "createQuiz":
-        hideOtherPages(crtQPage);
-        break;
-      case "quizList":
-        hideOtherPages(qListPage);
-        break;
+    const pageMap = {
+      top: topPage,
+      quiz: qPage,
+      createQuiz: crtQPage,
+      quizList: qListPage,
     }
+
+    hideOtherPages(pageMap[pageName]);
   }
 
   /**
@@ -105,7 +142,8 @@ export function navigateToPage(pageName, activePageName = null) {
    */
   function hideOtherPages(showPage) {
     pages.forEach((p) => {
-      p.classList.toggle("d-none", showPage !== p);
+      const isShowPage = p === showPage;
+      p.classList.toggle("d-none", !isShowPage);
     });
   }
 }
@@ -144,4 +182,86 @@ export function initUploadBtn(btnCont, width = 0, className = "") {
     }
     b.classList.add("initialized");
   });
+}
+
+/**
+ *
+ * @param {object} obj
+ * @returns {boolean}
+ */
+function isValidQuizObj(obj) {
+  const requiredKeys = ["id", "title", "description", "questions"];
+  if (
+    !requiredKeys.every(
+      (key) =>
+        key === "questions" || (key in obj && typeof obj[key] === "string")
+    )
+  ) {
+    return false;
+  }
+
+  const { questions } = obj;
+  if (typeof questions !== "object") {
+    return false;
+  }
+
+  for (const questionKey in questions) {
+    const question = questions[questionKey];
+    if (!isValidQuestionObj(question)) {
+      return false;
+    }
+  }
+
+  return true;
+
+  function isValidQuestionObj(question) {
+    const requiredKeys = ["answerType", "statement"];
+    if (
+      !requiredKeys.every(
+        (key) => key in question && typeof question[key] === "string"
+      )
+    ) {
+      return false;
+    }
+
+    const validAnswerTypes = ["select", "select-all", "type-text"];
+    if (!validAnswerTypes.includes(question.answerType)) {
+      return false;
+    }
+
+    if (
+      question.answerType === "select" ||
+      question.answerType === "select-all"
+    ) {
+      if (
+        !("choices" in question) ||
+        !(question.answerType === "select-all"
+          ? "correctAnswers" in question
+          : "correctAnswer" in question)
+      ) {
+        return false;
+      }
+      if (
+        Array.isArray(question.choices) &&
+        question.choices.length > 0 &&
+        question.choices.every((choice) => typeof choice === "string") &&
+        ((question.answerType === "select" &&
+          typeof question.correctAnswer === "string") ||
+          (question.answerType === "select-all" &&
+            Array.isArray(question.correctAnswers) &&
+            question.correctAnswers.length > 0 &&
+            question.correctAnswers.every(
+              (answer) => typeof answer === "string"
+            )))
+      ) {
+        return true;
+      }
+    } else if (question.answerType === "type-text") {
+      if (typeof question.correctAnswer === "string") {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }

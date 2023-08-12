@@ -412,7 +412,7 @@ function createQuiz() {
   toggleAnswerType(1);
   checkQuestionsState();
 
-  navigateToPage("quizList", "quizList");
+  navigateToPage("quizList");
   showToast("green", "クイズが作成されました");
   displayQuizList();
 
