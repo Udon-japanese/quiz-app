@@ -34,7 +34,7 @@
   </nav>
   <div id="top-page" class="d-none page">
     <div class="container d-flex justify-content-center">
-      <div class="card p-2 p-sm-3 my-4 col-lg-9">
+      <div class="card p-1 p-sm-3 my-4 col-lg-9">
         <img src="./images/thumbnail.png" alt="クイズビルダー">
         <div class="card-body btn-cont">
           <h4 class="text-center">自分でクイズを作って遊んだり、他の人が作ったクイズで遊んだりしてみよう！</h4>
@@ -81,7 +81,7 @@
   <template id="upload-quiz-tem">
     <label class="btn btn-primary upload-q-btn" role="button">
       <input type="file" accept=".json" class="d-none upload-q">
-      <i class="bi bi-upload me-lg-1 float-start"></i>クイズを読み込む (JSONファイル)
+      <i class="bi bi-upload me-lg-1 float-start me-1 me-sm-0"></i>クイズを読み込む(JSONファイル)
     </label>
   </template>
   <template id="modal-tem">
@@ -106,7 +106,7 @@
   <!-- クイズ一覧ページ用テンプレート -->
   <template id="none-result-tem">
     <div class="card" id="none-result">
-      <div class="card-body">
+      <div class="card-body px-1 px-sm-2">
         <p class="card-text text-center">
           「{query}」に当てはまるクイズは見つかりませんでした
           <br>
@@ -122,7 +122,7 @@
   </template>
   <template id="none-quiz-tem">
     <div class="card">
-      <div class="card-body">
+      <div class="card-body px-1 px-sm-2">
         <p class="card-text text-center">
           クイズがまだありません
           <br>
@@ -148,7 +148,7 @@
             </div>
             <div class="ms-auto">
               <div class="dropdown">
-                <button class="btn rounded-circle border-0" type="button" id="menu-{quiz-id}" data-bs-toggle="dropdown"
+                <button class="btn rounded-circle border-0 ellipsis-hover ellipsis-btn" type="button" id="menu-{quiz-id}" data-bs-toggle="dropdown"
                   aria-expanded="false">
                   <i class="bi bi-three-dots-vertical fs-5"></i>
                 </button>

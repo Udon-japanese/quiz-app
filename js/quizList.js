@@ -51,6 +51,8 @@ qListPage.addEventListener("click", (e) => {
           class: "del-quiz",
         },
       });
+    } else if (classList.contains("ellipsis-btn")) {
+      el.classList.add("ellipsis-bg");
     }
   });
 });
@@ -118,6 +120,10 @@ searchQInput.addEventListener("input", (e) => {
       return;
     };
     displayQuizList(qListObj);
+});
+
+qListPage.addEventListener("hidden.bs.dropdown", (e) => {
+  e.relatedTarget.classList.remove("ellipsis-bg");
 });
 
 const animalQuizId = crypto.randomUUID();

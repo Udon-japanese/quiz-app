@@ -70,3 +70,11 @@ input:checked + .toggle-label {
 input:checked + .toggle-label::before {
   transform: translateX(30px);
 }
+
+.ellipsis-bg {
+  background-color: #e4e4e4 !important;
+}
+
+.ellipsis-hover:hover {
+  background-color: #f2f2f2;
+}
