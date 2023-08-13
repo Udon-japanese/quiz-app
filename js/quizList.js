@@ -1,9 +1,9 @@
 "use strict";
 import { cloneFromTemplate, initUploadBtn } from "./index.js";
 import { storage } from "../utils/storage.js";
-import { showToast } from "../utils/showToast.js";
 import { openModal } from "../utils/modal.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
+import { initQuizPage } from "./quiz.js";
 
 const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
@@ -52,6 +52,10 @@ qListPage.addEventListener("click", (e) => {
       });
     } else if (classList.contains("ellipsis-btn")) {
       el.classList.add("ellipsis-bg");
+    } else if (classList.contains("play-q")) {
+      const quizId = el.id.split("play-")[1];
+      const quiz = JSON.parse(storage.getItem(quizId));
+      initQuizPage(quiz);
     }
   });
 });
@@ -130,16 +134,6 @@ const humanQuiz = {
     },
   },
 };
-storage.clear();
-storage.setItem(animalQuizId, JSON.stringify(animalQuiz));
-storage.setItem(humanQuizId, JSON.stringify(humanQuiz));
-storage.setItem(crypto.randomUUID(), JSON.stringify(animalQuiz));
-// storage.setItem(crypto.randomUUID(), JSON.stringify(animalQuiz));
-// storage.setItem(crypto.randomUUID(), JSON.stringify(animalQuiz));
-// storage.setItem(crypto.randomUUID(), JSON.stringify(animalQuiz));
-// storage.setItem(crypto.randomUUID(), JSON.stringify(humanQuiz));
-// storage.setItem(crypto.randomUUID(), JSON.stringify(humanQuiz));
-// storage.setItem(crypto.randomUUID(), JSON.stringify(humanQuiz));
 displayQuizList();
 
 export function displayQuizList(obj) {

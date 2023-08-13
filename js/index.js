@@ -5,6 +5,7 @@ import { displayQuizList } from "./quizList.js";
 import { closeModal } from "../utils/modal.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
+import { initQuizPage } from "./quiz.js";
 
 const topPage = document.getElementById("top-page");
 const crtQPage = document.getElementById("crt-quiz-page");
@@ -16,11 +17,7 @@ const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page");
 const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
 const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
-
-const lastAccess = getCookie("lastAccess");
-let page = "top";
-if (lastAccess) page = lastAccess;
-navigateToPage(page);
+loadInitialPage();
 
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -57,7 +54,6 @@ document.addEventListener("click", (e) => {
       storage.removeItem(delQId);
       closeModal();
       displayQuizList();
-    } else if (classList.contains("upload-q")) {
     }
   });
 });
@@ -113,7 +109,7 @@ export function navigateToPage(pageName) {
     quizList: navToQListPBtn,
     createQuiz: navToCrtQPBtn,
   };
-  
+
   if (pageName === "quizList" || pageName === "createQuiz") {
     navbarBtns.forEach((b) => {
       const isActive = b === navbarBtnMap[pageName];
@@ -124,32 +120,36 @@ export function navigateToPage(pageName) {
       b.classList.remove("active");
     });
   }
+}
 
-  /**
-   * @description
-   * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
-   */
-  function switchToPage(pageName) {
-    const pageMap = {
-      top: topPage,
-      quiz: qPage,
-      createQuiz: crtQPage,
-      quizList: qListPage,
-    }
-    setCookie("lastAccess", pageName, 14);
-    hideOtherPages(pageMap[pageName]);
+/**
+ * @description
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
+ */
+function switchToPage(pageName) {
+  const pageMap = {
+    top: topPage,
+    quiz: qPage,
+    createQuiz: crtQPage,
+    quizList: qListPage,
+  };
+  if (pageName == "quiz") {
+    setCookie("lastAccess", `${pageName}?${document.querySelector(".has-quiz-id").id.split("quiz-")[1]}`, 14);
+  } else {
+    setCookie("lastAccess", pageName, 14);  
   }
+  hideOtherPages(pageMap[pageName]);
+}
 
-  /**
-   * @description
-   * @param {HTMLElement} showPage
-   */
-  function hideOtherPages(showPage) {
-    pages.forEach((p) => {
-      const isShowPage = p === showPage;
-      p.classList.toggle("d-none", !isShowPage);
-    });
-  }
+/**
+ * @description
+ * @param {HTMLElement} showPage
+ */
+function hideOtherPages(showPage) {
+  pages.forEach((p) => {
+    const isShowPage = p === showPage;
+    p.classList.toggle("d-none", !isShowPage);
+  });
 }
 
 /**
@@ -217,55 +217,80 @@ function isValidQuizObj(obj) {
   }
 
   return true;
+}
 
-  function isValidQuestionObj(question) {
-    const requiredKeys = ["answerType", "statement"];
-    if (
-      !requiredKeys.every(
-        (key) => key in question && typeof question[key] === "string"
-      )
-    ) {
-      return false;
-    }
-
-    const validAnswerTypes = ["select", "select-all", "type-text"];
-    if (!validAnswerTypes.includes(question.answerType)) {
-      return false;
-    }
-
-    if (
-      question.answerType === "select" ||
-      question.answerType === "select-all"
-    ) {
-      if (
-        !("choices" in question) ||
-        !(question.answerType === "select-all"
-          ? "correctAnswers" in question
-          : "correctAnswer" in question)
-      ) {
-        return false;
-      }
-      if (
-        Array.isArray(question.choices) &&
-        question.choices.length > 0 &&
-        question.choices.every((choice) => typeof choice === "string") &&
-        ((question.answerType === "select" &&
-          typeof question.correctAnswer === "string") ||
-          (question.answerType === "select-all" &&
-            Array.isArray(question.correctAnswers) &&
-            question.correctAnswers.length > 0 &&
-            question.correctAnswers.every(
-              (answer) => typeof answer === "string"
-            )))
-      ) {
-        return true;
-      }
-    } else if (question.answerType === "type-text") {
-      if (typeof question.correctAnswer === "string") {
-        return true;
-      }
-    }
-
+function isValidQuestionObj(question) {
+  const requiredKeys = ["answerType", "statement"];
+  if (
+    !requiredKeys.every(
+      (key) => key in question && typeof question[key] === "string"
+    )
+  ) {
     return false;
+  }
+
+  const validAnswerTypes = ["select", "select-all", "type-text"];
+  if (!validAnswerTypes.includes(question.answerType)) {
+    return false;
+  }
+
+  if (
+    question.answerType === "select" ||
+    question.answerType === "select-all"
+  ) {
+    if (
+      !("choices" in question) ||
+      !(question.answerType === "select-all"
+        ? "correctAnswers" in question
+        : "correctAnswer" in question)
+    ) {
+      return false;
+    }
+    if (
+      Array.isArray(question.choices) &&
+      question.choices.length > 0 &&
+      question.choices.every((choice) => typeof choice === "string") &&
+      ((question.answerType === "select" &&
+        typeof question.correctAnswer === "string") ||
+        (question.answerType === "select-all" &&
+          Array.isArray(question.correctAnswers) &&
+          question.correctAnswers.length > 0 &&
+          question.correctAnswers.every(
+            (answer) => typeof answer === "string"
+          )))
+    ) {
+      return true;
+    }
+  } else if (question.answerType === "type-text") {
+    if (typeof question.correctAnswer === "string") {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isUUID(input) {
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidPattern.test(input);
+}
+
+function loadInitialPage() {
+  const lastAccess = getCookie("lastAccess");
+  if (lastAccess) {
+    if (lastAccess.startsWith("quiz?")) {
+      const qId = lastAccess.split("quiz?")[1];
+      if (!isUUID(qId)) {
+        navigateToPage("top");
+        return;
+      }; 
+      const quiz = JSON.parse(storage.getItem(qId));
+      if (!quiz) return;
+      initQuizPage(quiz);
+    } else {
+      navigateToPage(lastAccess);
+    }
+  } else {
+    navigateToPage("top");
   }
 }

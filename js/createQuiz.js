@@ -7,7 +7,6 @@ import { replaceAttrVals } from "../utils/replaceAttrVals.js";
 import { displayQuizList } from "./quizList.js";
 
 const crtQPage = document.getElementById("crt-quiz-page");
-const qListPage = document.getElementById("quiz-list-page");
 const counterInitialState = 2;
 const isSelectAllInitialState = null;
 const answerTypeInitialState = null;
@@ -212,23 +211,6 @@ crtQPage.addEventListener("change", (e) => {
       });
     }
   });
-
-  /**
-   * @description オプションのトグルボタンが変化したときにハンドリングする
-   * @param {EventTarget} target 変化したイベントターゲット
-   * @param {string} optContCl オプションのコンテナのクラスネーム
-   * @param {string} optTextareaCl オプションの入力要素のクラスネーム
-   * @returns {void} なし
-   */
-  function toggleOnchange(target, optContCl, optTextareaCl) {
-    const ToggleParent = target.parentNode;
-    const checked = target.checked;
-    const textareaCont = ToggleParent.parentNode.querySelector(optContCl);
-    if (!checked) {
-      textareaCont.querySelector(optTextareaCl).value = "";
-    }
-    textareaCont.classList.toggle("d-none", !checked);
-  }
 });
 crtQPage.addEventListener("input", (e) => {
   const els = e.composedPath();
@@ -415,15 +397,6 @@ function createQuiz() {
   navigateToPage("quizList");
   showToast("green", "クイズが作成されました");
   displayQuizList();
-
-  /**
-   * @description 指定した要素の親要素のclassにwas-validatedを追加する関数
-   * @param {HTMLElement} e HTML要素
-   * @returns {void} なし
-   */
-  function addValidatedClass(e) {
-    e.parentNode.classList.add("was-validated");
-  }
 }
 
 /**
@@ -486,7 +459,7 @@ function createQuestion(isInit = false) {
   const elsHasAttrQN = question.querySelectorAll(
     "[id*='{num}'], [for*='{num}']"
   );
-  replaceAttrVals(elsHasAttrQN, "{num}", isInit ? 1 : counter)
+  replaceAttrVals(elsHasAttrQN, "{num}", isInit ? 1 : counter);
   question.querySelector(".q-header").innerText = `${isInit ? 1 : counter}問目`;
 
   const selectAlls = question.querySelector(".select-alls");
@@ -504,7 +477,10 @@ function createQuestion(isInit = false) {
 
   const questions = getQuestions();
   const addQBtnTxt = addQBtn.innerText;
-  addQBtn.innerHTML = addQBtnTxt.replace(isInit ? "{q-n}" : /\d+/, questions.length + 1);
+  addQBtn.innerHTML = addQBtnTxt.replace(
+    isInit ? "{q-n}" : /\d+/,
+    questions.length + 1
+  );
 
   questionsCont.appendChild(question);
 
@@ -695,4 +671,30 @@ function initQuizObject(quizObj) {
  */
 function changeStrN(str, replacement, regExp) {
   return str.replace(regExp, replacement);
+}
+
+/**
+ * @description オプションのトグルボタンが変化したときにハンドリングする
+ * @param {EventTarget} target 変化したイベントターゲット
+ * @param {string} optContCl オプションのコンテナのクラスネーム
+ * @param {string} optTextareaCl オプションの入力要素のクラスネーム
+ * @returns {void} なし
+ */
+function toggleOnchange(target, optContCl, optTextareaCl) {
+  const ToggleParent = target.parentNode;
+  const checked = target.checked;
+  const textareaCont = ToggleParent.parentNode.querySelector(optContCl);
+  if (!checked) {
+    textareaCont.querySelector(optTextareaCl).value = "";
+  }
+  textareaCont.classList.toggle("d-none", !checked);
+}
+
+/**
+ * @description 指定した要素の親要素のclassにwas-validatedを追加する関数
+ * @param {HTMLElement} e HTML要素
+ * @returns {void} なし
+ */
+function addValidatedClass(e) {
+  e.parentNode.classList.add("was-validated");
 }
