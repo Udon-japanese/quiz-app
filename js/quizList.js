@@ -184,9 +184,14 @@ function searchQuizzes(query) {
     const quiz = quizListObj[id];
     const { title, description, questions } = quiz;
     const quizLength = Object.keys(questions).length;
+
+    const lowercaseQuery = query.toLowerCase();
+    const lowercaseTitle = title.toLowerCase();
+    const lowercaseDesc = description.toLowerCase();
+
     if (
-      title.includes(query) ||
-      description.includes(query) ||
+      lowercaseTitle.includes(lowercaseQuery) ||
+      lowercaseDesc.includes(lowercaseQuery) ||
       `問題数: ${quizLength}問`.includes(query) && query !== " " ||
       `問題数:${quizLength}問`.includes(query)
     ) {
