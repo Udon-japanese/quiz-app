@@ -13,6 +13,8 @@ export function showToast(color, message) {
     document.body.insertBefore(toastClone, document.body.firstChild);
     toast = document.getElementById("toast");
   }
+  toast.classList.remove("text-bg-danger", "text-bg-warning", "text-bg-success");
+  
   let toastColor = "text-bg-";
   switch (color) {
     case "red":
