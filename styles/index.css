@@ -12,10 +12,13 @@ html, body {
   width: 100%;
 }
 
+body {
+  padding-top: 60px !important;
+}
+
 textarea {
   resize: none;
 }
-
 
 /* スクロールバー */
 @media (max-width: 575px) {
@@ -23,22 +26,6 @@ textarea {
     display: none;
   }
 }
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background-color: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #C0C0C0;
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #A9A9A9;
-}
-
 
 /* トグルボタン */
 .toggle-label {
@@ -81,4 +68,56 @@ input:checked + .toggle-label::before {
 
 .z-9999 {
   z-index: 9999;
+}
+
+.circle {
+  width: 10rem;
+  height: 10rem;
+  border: 10px solid;
+  border-color: #4bd865;
+}
+
+.x-mark {
+  width: 20rem;
+  height: 20rem;
+  position: relative;
+}
+
+.x-mark::before,
+.x-mark::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: red;
+}
+
+.x-mark::before {
+  width: 20px;
+  height: 10rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.x-mark::after {
+  width: 20px;
+  height: 10rem;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ハンバーガーメニューのボタン */
+.navbar-light .navbar-toggler {
+  box-shadow: none !important;
+  border: none;
+  outline: none;
+}
+
+.right-choice {
+  background-color: #4bd865 !important;
+  color: #f8f9fa !important;
+}
+
+.wrong-choice {
+  background-color: #ff3146 !important;
+  color: #f8f9fa !important;
 }

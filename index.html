@@ -10,24 +10,32 @@
   <title>クイズビルダー</title>
 </head>
 
-<body class="bg-warning p-0"><!-- p-0は特定のandroid版chromeでモーダル表示時に異常なパディングが入る不具合を防ぐため -->
-  <nav class="navbar navbar-expand-sm navbar-light bg-light">
+<body class="bg-warning px-0"><!-- px-0は特定のandroid版chromeでモーダル表示時に異常なパディングが入る不具合を防ぐため -->
+  <nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top">
     <div class="container-fluid">
       <a role="button" class="navbar-brand to-top-page">
         <img src="./images/icon.png" alt="クイズビルダー" width="150" height="30">
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
-        aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas"
+        aria-controls="offcanvas">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbar">
-        <div class="navbar-nav d-flex gap-3">
-          <button type="button" class="nav-link fw-semibold to-crt-q-page">
-            <i class="bi bi-pencil me-1"></i>クイズを作る
-          </button>
-          <button type="button" class="nav-link fw-semibold to-q-list-page">
-            <i class="bi bi-list-task me-1"></i>クイズ一覧
-          </button>
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas" aria-labelledby="offcanvas-label">
+        <div class="offcanvas-header">
+          <a role="button" class="navbar-brand to-top-page" id="offcanvas-label">
+            <img src="./images/icon.png" alt="クイズビルダー" width="150" height="30">
+          </a>
+          <button type="button" class="btn-close fs-5 text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav flex-grow-1">
+            <button type="button" class="text-start nav-link fw-semibold to-crt-q-page">
+              <i class="bi bi-pencil me-1"></i>クイズを作る
+            </button>
+            <button type="button" class="text-start nav-link fw-semibold to-q-list-page">
+              <i class="bi bi-list-task me-1"></i>クイズ一覧
+            </button>
+          </ul>
         </div>
       </div>
     </div>
@@ -62,13 +70,79 @@
   </div>
   <div id="quiz-page" class="d-none page">
     <div class="container">
-      <div id="quiz-${quiz-id}" class="card p-1 p-sm-3 my-4 col-lg-9 col-sm-10 col-12 has-quiz-id m-auto">
-        <div class="card-body">
+      <div id="quiz-${quiz-id}" class="card quiz-card p-1 p-sm-3 my-4 col-lg-9 col-sm-10 col-12 has-quiz-id m-auto border border-5">
+        <div id="title-screen" class="card-body d-none">
           <div class="d-flex flex-column align-items-center justify-content-center">
             <h1 id="quiz-title" class="card-title my-5">{title}</h1>
             <p id="quiz-description" class="card-text mb-4">{description}</p>
           </div>
           <button type="button" class="btn btn-primary start-q w-100">スタート</button>
+        </div>
+        <div id="countdown-screen" class="card-body d-none">
+          <div class="d-flex align-items-center justify-content-center py-4">
+            <h1 id="countdown" class="my-5">{number}</h1>
+          </div>
+        </div>
+        <div id="quiz-screen" class="card-body d-none">
+          <div id="question-section" class="d-none">
+            <div id="correct-or-wrong-group" class="d-none position-absolute top-0 start-0 w-100 h-100 rounded z-3 d-flex justify-content-center align-items-center">
+              <div id="correct" class="rounded-circle circle"></div>
+              <div id="wrong" class="x-mark"></div>
+            </div>
+            <div class="mb-5">
+              <h2 class="card-title question-index">{quesitonIndex}問目</h2>
+              <div id="timer-group" class="d-none">
+                <div class="card-text text-center fs-5" id="timer-txt">残り: {timer-val}秒</div>
+                <div class="bg-secondary-subtle rounded-4 mt-1 border border-2 border-secondary">
+                  <div id="timer-bar" class="py-2 bg-primary rounded-3"></div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-column align-items-center justify-content-center">
+              <p id="question-statement" class="card-text mb-5 fs-4">{statement}</p>
+            </div>
+            <div id="choices" class="row g-3">
+              <div class="col-lg-6 col-md-6 col-12">
+                <input type="radio" class="btn-check choice-check" id="choice1" name="choice" autocomplete="off">
+                <label class="btn btn-outline-dark w-100 choice-btn" for="choice1">{choice}</label>
+              </div>
+              <div class="col-lg-6 col-md-6 col-12">
+                <input type="radio" class="btn-check choice-check" id="choice2" name="choice" autocomplete="off">
+                <label class="btn btn-outline-dark w-100 choice-btn" for="choice2">{choice}</label>
+              </div>
+              <div class="col-lg-6 col-md-6 col-12">
+                <input type="radio" class="btn-check choice-check" id="choice3" name="choice" autocomplete="off">
+                <label class="btn btn-outline-dark w-100 choice-btn" for="choice3">{choice}</label>
+              </div>
+              <div class="col-lg-6 col-md-6 col-12">
+                <input type="radio" class="btn-check choice-check" id="choice4" name="choice" autocomplete="off">
+                <label class="btn btn-outline-dark w-100 choice-btn" for="choice4">{choice}</label>
+              </div>
+            </div>
+            <input type="text" id="type-text-input" class="form-control border-2 d-none" placeholder="回答">
+          </div>
+          <div id="explanation-section">
+            <div class="mb-4">
+              <h2 class="card-title question-index mb-4">{questionIndex}問目</h2>
+              <div class="fs-5 mb-1">
+                <span class="fw-bolder">あなたの回答: </span>
+                <span id="user-answer">{userAnswer}</span>
+              </div>
+              <div class="fs-5">
+                <span class="fw-bolder">正解: </span>
+                <span id="correct-answer">{correctAnswer}</span>
+              </div>
+            </div>
+            <h4 class="card-title">解説</h4>
+            <div id="explanation" class="fs-5">{explanation}</div>
+          </div>
+          <div class="col-12 col-md-8 col-lg-6 mx-auto mt-4">
+            <button id="decision-btn" type="button" class="btn btn-primary w-100">決定</button>
+            <button id="next-question-btn" type="button" class="btn btn-primary w-100 d-none">次の問題</button>
+          </div>
+        </div>
+        <div id="result-screen" class="card-body d-none">
+
         </div>
       </div>
     </div>

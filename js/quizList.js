@@ -94,6 +94,9 @@ const animalQuiz = {
   id: animalQuizId,
   title: "動物クイズ",
   description: "みんな大好き動物に関するクイズです！",
+  options: {
+    timer: 20,
+  },
   questions: {
     q1: {
       answerType: "select",
@@ -134,7 +137,48 @@ const humanQuiz = {
     },
   },
 };
+const comedianQuizId = crypto.randomUUID();
+const comedianQuiz = {
+  id: comedianQuizId,
+  title: "私が好きな芸人クイズ",
+  description: "主にきしたかの、ぱーてぃーちゃん、春とヒコーキについて",
+  questions: {
+    q1: {
+      answerType: "select",
+      statement: "ぱーてぃーちゃんのメンバーは何人？",
+      choices: ["1人", "2人", "3人", "4人"],
+      correctAnswer: "3人",
+    },
+    q2: {
+      answerType: "select-all",
+      statement: "首が長い動物は？",
+      choices: ["首長族", "ナマケモノ", "ゾウ", "キリン"],
+      correctAnswers: ["キリン", "首長族"],
+    },
+    q3: {
+      answerType: "type-text",
+      statement: "読み方をひらがなで答えなさい。\n岸大将",
+      correctAnswer: "ひらがな",
+    },
+    q4: {
+      answerType: "select-all",
+      statement: "パーティーちゃんのメンバー、すべて選べ",
+      choices: ["菅野直人", "金子京佳", "信子", "高野正成"],
+      correctAnswers: ["菅野直人", "金子京佳", "信子"],
+    },
+    q5: {
+      answerType: "type-text",
+      statement: "春とヒコーキ、土岡の下の名前は？ひらがなで",
+      correctAnswer: "てつろう",
+    },
+  }
+}
+// storage.clear();
+// storage.setItem(animalQuizId, JSON.stringify(animalQuiz));
+// storage.setItem(humanQuizId, JSON.stringify(humanQuiz));
+// storage.setItem(comedianQuizId, JSON.stringify(comedianQuiz));
 displayQuizList();
+
 
 export function displayQuizList(obj) {
   quizzesCont.innerHTML = "";

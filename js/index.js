@@ -98,6 +98,12 @@ document.addEventListener("change", (e) => {
   });
 });
 
+function getCurrentPage() {
+  const pages = document.querySelectorAll(".page");
+  const currentPage = Array.from(pages).filter(p => !p.classList.contains("d-none"));
+  return currentPage;
+}
+
 /**
  * @description
  * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
@@ -285,7 +291,10 @@ function loadInitialPage() {
         return;
       }; 
       const quiz = JSON.parse(storage.getItem(qId));
-      if (!quiz) return;
+      if (!quiz) {
+        navigateToPage("top");
+        return
+      };
       initQuizPage(quiz);
     } else {
       navigateToPage(lastAccess);
