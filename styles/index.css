@@ -71,15 +71,15 @@ input:checked + .toggle-label::before {
 }
 
 .circle {
-  width: 10rem;
-  height: 10rem;
-  border: 10px solid;
+  width: 12rem;
+  height: 12rem;
+  border: 20px solid;
   border-color: #4bd865;
 }
 
 .x-mark {
-  width: 20rem;
-  height: 20rem;
+  width: 30rem;
+  height: 30rem;
   position: relative;
 }
 
@@ -94,14 +94,14 @@ input:checked + .toggle-label::before {
 }
 
 .x-mark::before {
-  width: 20px;
-  height: 10rem;
+  width: 30px;
+  height: 15rem;
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .x-mark::after {
-  width: 20px;
-  height: 10rem;
+  width: 30px;
+  height: 15rem;
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 

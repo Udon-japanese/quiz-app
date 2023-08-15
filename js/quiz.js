@@ -3,7 +3,6 @@ import { navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 
 const qPage = document.getElementById("quiz-page");
-const quizCard = document.querySelector(".quiz-card");
 const titleScreen = document.getElementById("title-screen");
 const countdownScreen = document.getElementById("countdown-screen");
 const quizScreen = document.getElementById("quiz-screen");
@@ -84,6 +83,15 @@ typeTextInput.addEventListener("input", (e) => {
     decisionBtn.disabled = false;
   }
 });
+nextQuestionBtn.addEventListener("click", (e) => {
+  if (questionIndex === Object.keys(quizObj.questions).length) {
+    showScreen("result");
+    nextQuestionBtn.classList.add("d-none");
+    return;
+  }
+  questionIndex++;
+  showQuestion();
+});
 decisionBtn.addEventListener("click", async (e) => {
   clearInterval(timerInterval);
   stopAudio(audio.timer);
@@ -100,21 +108,17 @@ decisionBtn.addEventListener("click", async (e) => {
         }
       });
       const isAnswerCorrect = userAnswer === correctAnswer;
-      quizCard.classList.add(isAnswerCorrect ? "border-success" : "border-danger");
       await showCorrectOrWrong(isAnswerCorrect);
       const expl = q?.options?.explanation;
-      if (expl) {
-        quizCard.classList.remove("border-success", "border-danger");
-        questionSection.classList.add("d-none");
-        explSection.classList.remove("d-none");
-        userAnswerEl.innerHTML = `${userAnswer} ${
-          isAnswerCorrect
-            ? correctIcon
-            : wrongIcon
-        }`;
-        correctAnswerEl.innerHTML = correctAnswer;
-        explanationEl.innerText = expl;
-      }
+      questionSection.classList.add("d-none");
+      explSection.classList.remove("d-none");
+      userAnswerEl.innerHTML = `${userAnswer} ${
+        isAnswerCorrect
+          ? correctIcon
+          : wrongIcon
+      }`;
+      correctAnswerEl.innerHTML = correctAnswer;
+      explanationEl.innerText = expl || "解説なし";
       break;
     }
     case "select-all": {
@@ -129,21 +133,35 @@ decisionBtn.addEventListener("click", async (e) => {
         }
       });
       const isAnswerCorrect = areArraysEqual(userAnswers, correctAnswers);
-      quizCard.classList.add(isAnswerCorrect ? "border-success" : "border-danger");
       await showCorrectOrWrong(isAnswerCorrect);
       const expl = q?.options?.explanation;
-      if (expl) {
-        quizCard.classList.remove("border-success", "border-danger");
-        questionSection.classList.add("d-none");
-        explSection.classList.remove("d-none");
-        userAnswerEl.innerHTML = `${userAnswers.join(", ")} ${
-          isAnswerCorrect
-            ? correctIcon
-            : wrongIcon
-        }`;
-        correctAnswerEl.innerHTML = correctAnswers;
-        explanationEl.innerText = expl;
-      }
+      questionSection.classList.add("d-none");
+      explSection.classList.remove("d-none");
+      userAnswerEl.innerHTML = `${userAnswers.join(", ")} ${
+        isAnswerCorrect
+          ? correctIcon
+          : wrongIcon
+      }`;
+      correctAnswerEl.innerHTML = correctAnswers.join(", ");
+      explanationEl.innerText = expl || "解説なし";
+      break;
+    }
+    case "type-text": {
+      typeTextInput.disabled = true;
+      const { correctAnswer } = q;
+      const userAnswer = typeTextInput.value;
+      const isAnswerCorrect = userAnswer === correctAnswer;
+      await showCorrectOrWrong(isAnswerCorrect);
+      const expl = q?.options?.explanation;
+      questionSection.classList.add("d-none");
+      explSection.classList.remove("d-none");
+      userAnswerEl.innerHTML = `${userAnswer} ${
+        isAnswerCorrect
+          ? correctIcon
+          : wrongIcon
+      }`;
+      correctAnswerEl.innerHTML = correctAnswer;
+      explanationEl.innerText = expl || "解説なし";
       break;
     }
   }
@@ -156,7 +174,7 @@ async function showCorrectOrWrong(isAnswerCorrect) {
   correctOrWrongGroup.classList.remove("d-none");
   correct.classList.toggle("d-none", !isAnswerCorrect);
   wrong.classList.toggle("d-none", isAnswerCorrect);
-  await wait(2000);
+  await wait(1000);
   correctOrWrongGroup.classList.add("d-none");
 }
 
@@ -172,6 +190,8 @@ async function startQuiz() {
 }
 
 function showQuestion() {
+  nextQuestionBtn.classList.add("d-none");
+  decisionBtn.classList.remove("d-none");
   questionSection.classList.remove("d-none");
   explSection.classList.add("d-none");
   const time = parseInt(quizObj?.options?.timer);
@@ -191,6 +211,7 @@ function showQuestion() {
       typeTextInput.classList.add("d-none");
       const inputType = answerType === "select" ? "radio" : "checkbox";
       choiceChecks.forEach((c) => {
+        c.disabled = false;
         c.checked = false;
         c.setAttribute("type", inputType);
       });
@@ -201,8 +222,11 @@ function showQuestion() {
       break;
     }
     case "type-text": {
+      typeTextInput.value = "";
       choicesGroup.classList.add("d-none");
       typeTextInput.classList.remove("d-none");
+      typeTextInput.disabled = false;
+      typeTextInput.focus();
       break;
     }
   }
