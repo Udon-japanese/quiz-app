@@ -213,7 +213,7 @@ function showQuestion() {
     qI.innerText = `${questionIndex}問目`;
   });
   if (questionIndex === quizObj.quiz.length) {
-    nextQuestionBtn.innerText = "クイズ結果";
+    nextQuestionBtn.innerText = "結果を表示";
   }
   questionStatement.innerText = q.statement;
   decisionBtn.disabled = true;
@@ -258,6 +258,7 @@ function showQuestion() {
   if (isNum) {
     startTimer(time);
   }
+  questionSection.focus();
 }
 
 function startTimer(time) {

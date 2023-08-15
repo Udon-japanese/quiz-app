@@ -91,19 +91,17 @@
               <div id="correct" class="rounded-circle circle"></div>
               <div id="wrong" class="x-mark"></div>
             </div>
-            <div class="mb-5">
-              <h2 class="card-title question-index">{quesitonIndex}問目</h2>
-              <div id="timer-group" class="d-none">
-                <div class="card-text text-center fs-5" id="timer-txt">残り: {timer-val}秒</div>
-                <div class="bg-secondary-subtle rounded-4 mt-1 border border-2 border-secondary">
-                  <div id="timer-bar" class="py-2 bg-primary rounded-3"></div>
-                </div>
+            <h2 class="card-title question-index">{quesitonIndex}問目</h2>
+            <div id="timer-group" class="d-none">
+              <div class="card-text text-center fs-5" id="timer-txt">残り: {timer-val}秒</div>
+              <div class="bg-secondary-subtle rounded-4 mt-1 border border-2 border-secondary">
+                <div id="timer-bar" class="py-2 bg-primary rounded-3"></div>
               </div>
             </div>
-            <div class="d-flex flex-column align-items-center justify-content-center">
-              <p id="question-statement" class="card-text mb-5 fs-4">{statement}</p>
+            <div class="d-flex flex-column align-items-center justify-content-center my-3 my-sm-5">
+              <p id="question-statement" class="card-text fs-4">{statement}</p>
             </div>
-            <div id="choices-group" class="row g-3 justify-content-center">
+            <div id="choices-group" class="row g-2 g-sm-3 justify-content-center">
               <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice1" name="choice" autocomplete="off">
                 <label class="btn btn-outline-dark w-100 choice-btn" for="choice1">{choice}</label>
@@ -145,7 +143,7 @@
           </div>
         </div>
         <div id="result-screen" class="card-body d-none">
-          <h2 class="card-title mb-3">クイズ結果</h2>
+          <h2 class="card-title mb-3">結果</h2>
           <div class="d-flex flex-sm-row flex-column">
             <div class="d-flex justify-content-center">
               <div class="d-flex flex-column mb-3 mb-sm-0 me-0 me-sm-5">
