@@ -1,0 +1,37 @@
+{
+  "id": "4f6700d1-cd27-4a90-bc91-d8f9cc22f160",
+  "title": "テスト",
+  "description": "quiz pageのテスト(タイマーあり)",
+  "length": 4,
+  "options": { "timer": 15 },
+  "questions": {
+    "q1": {
+      "options": { "explanation": "でがわと読み方一緒" },
+      "statement": "土岡",
+      "answerType": "select",
+      "choices": ["哲郎", "英寿", "大樹", "増司"],
+      "correctAnswer": "哲郎"
+    },
+    "q2": {
+      "options": {
+        "explanation": "信子・・・苗字非公開\n直人・・・菅野直人(すがちゃん最高No.1)"
+      },
+      "statement": "金子",
+      "answerType": "select-all",
+      "choices": ["きょんちぃ", "京佳", "信子", "直人"],
+      "correctAnswers": ["きょんちぃ", "京佳"]
+    },
+    "q3": {
+      "options": { "explanation": "大将とかいて「たいすけ」" },
+      "statement": "きしたかの岸の下の名前を平仮名で答えなさい。",
+      "answerType": "type-text",
+      "correctAnswer": "たいすけ"
+    },
+    "q4": {
+      "options": {},
+      "statement": "パーティーちゃんは何人？(半角数字一ケタ)",
+      "answerType": "type-text",
+      "correctAnswer": "3"
+    }
+  }
+}

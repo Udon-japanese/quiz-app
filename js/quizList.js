@@ -9,6 +9,8 @@ const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
 const searchQInput = document.getElementById("search-q");
 const headerCont = document.getElementById("header-cont");
+
+/**@type {Object.<string, Quiz>} */
 let quizListObj = {};
 initUploadBtn(headerCont, 0, "d-sm-block d-none");
 initUploadBtn(headerCont, 100, "d-sm-none");
@@ -36,7 +38,7 @@ qListPage.addEventListener("click", (e) => {
                 <h5 class="card-title">${delQ.title}</h5>
                 <p class="card-text">${delQ.description}</p>
                 <span class="card-text text-primary">
-                  問題数: ${Object.keys(delQ.questions).length}問
+                  問題数: ${delQ.length}問
                 </span>
               </div>
             </div>
@@ -89,96 +91,7 @@ qListPage.addEventListener("hidden.bs.dropdown", (e) => {
   e.relatedTarget.classList.remove("ellipsis-bg");
 });
 
-const animalQuizId = crypto.randomUUID();
-const animalQuiz = {
-  id: animalQuizId,
-  title: "動物クイズ",
-  description: "みんな大好き動物に関するクイズです！",
-  options: {
-    timer: 20,
-  },
-  questions: {
-    q1: {
-      answerType: "select",
-      statement: "パから始まってダで終わる白黒の動物は？",
-      choices: ["パソコンだ", "パンケーキだ", "パイナップルだ", "パンダ"],
-      correctAnswer: "パンダ",
-    },
-    q2: {
-      answerType: "select-all",
-      statement: "首が長い動物は？",
-      choices: ["首長族", "ナマケモノ", "ゾウ", "キリン"],
-      correctAnswers: ["キリン", "首長族"],
-    },
-    q3: {
-      answerType: "type-text",
-      statement: "あなたが好きな動物は？",
-      correctAnswer: "サル",
-    },
-  },
-};
-const humanQuizId = crypto.randomUUID();
-const humanQuiz = {
-  id: humanQuizId,
-  title: "人間クイズ",
-  description: "人間の体に関するクイズです！",
-  questions: {
-    q1: {
-      answerType: "select",
-      statement: "人間の体を構成する骨の本数は？",
-      choices: ["約200本", "約2000本", "約20000本", "約200000本"],
-      correctAnswer: "約200本",
-    },
-    q2: {
-      answerType: "select",
-      statement: "高齢者の体に含まれる水分量は？",
-      choices: ["20%", "50%", "80%", "2%"],
-      correctAnswer: "50%",
-    },
-  },
-};
-const comedianQuizId = crypto.randomUUID();
-const comedianQuiz = {
-  id: comedianQuizId,
-  title: "私が好きな芸人クイズ",
-  description: "主にきしたかの、ぱーてぃーちゃん、春とヒコーキについて",
-  questions: {
-    q1: {
-      answerType: "select",
-      statement: "ぱーてぃーちゃんのメンバーは何人？",
-      choices: ["1人", "2人", "3人", "4人"],
-      correctAnswer: "3人",
-    },
-    q2: {
-      answerType: "select-all",
-      statement: "首が長い動物は？",
-      choices: ["首長族", "ナマケモノ", "ゾウ", "キリン"],
-      correctAnswers: ["キリン", "首長族"],
-    },
-    q3: {
-      answerType: "type-text",
-      statement: "読み方をひらがなで答えなさい。\n岸大将",
-      correctAnswer: "ひらがな",
-    },
-    q4: {
-      answerType: "select-all",
-      statement: "パーティーちゃんのメンバー、すべて選べ",
-      choices: ["菅野直人", "金子京佳", "信子", "高野正成"],
-      correctAnswers: ["菅野直人", "金子京佳", "信子"],
-    },
-    q5: {
-      answerType: "type-text",
-      statement: "春とヒコーキ、土岡の下の名前は？ひらがなで",
-      correctAnswer: "てつろう",
-    },
-  }
-}
-// storage.clear();
-// storage.setItem(animalQuizId, JSON.stringify(animalQuiz));
-// storage.setItem(humanQuizId, JSON.stringify(humanQuiz));
-// storage.setItem(comedianQuizId, JSON.stringify(comedianQuiz));
 displayQuizList();
-
 
 export function displayQuizList(obj) {
   quizzesCont.innerHTML = "";
@@ -211,7 +124,7 @@ export function displayQuizList(obj) {
     quizItem.querySelector(".q-desc").innerText = quiz.description;
     const qLengthEl = quizItem.querySelector(".q-length");
     const qLengthElTxt = qLengthEl.innerText;
-    qLengthEl.innerText = qLengthElTxt.replace("{quiz-length}", Object.keys(quiz.questions).length);
+    qLengthEl.innerText = qLengthElTxt.replace("{quiz-length}", quiz.length);
     quizzesCont.appendChild(quizItem);
   });
 }
@@ -226,8 +139,8 @@ function searchQuizzes(query) {
 
   Object.keys(quizListObj).forEach((id) => {
     const quiz = quizListObj[id];
-    const { title, description, questions } = quiz;
-    const quizLength = Object.keys(questions).length;
+    const { title, description } = quiz;
+    const quizLength = quiz.length;
 
     const lowercaseQuery = query.toLowerCase();
     const lowercaseTitle = title.toLowerCase();

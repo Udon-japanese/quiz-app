@@ -25,7 +25,8 @@
           <a role="button" class="navbar-brand to-top-page" id="offcanvas-label">
             <img src="./images/icon.png" alt="クイズビルダー" width="150" height="30">
           </a>
-          <button type="button" class="btn-close fs-5 text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          <button type="button" class="btn-close fs-5 text-reset" data-bs-dismiss="offcanvas"
+            aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
           <ul class="navbar-nav flex-grow-1">
@@ -70,13 +71,13 @@
   </div>
   <div id="quiz-page" class="d-none page">
     <div class="container">
-      <div id="quiz-${quiz-id}" class="card p-1 p-sm-3 my-4 col-lg-9 col-sm-10 col-12 has-quiz-id m-auto">
+      <div id="quiz-${quiz-id}" class="card p-1 p-sm-3 my-4 col-lg-9 col-md-10 col-12 has-quiz-id m-auto">
         <div id="title-screen" class="card-body d-none">
           <div class="d-flex flex-column align-items-center justify-content-center">
             <h1 id="quiz-title" class="card-title my-5">{title}</h1>
             <p id="quiz-description" class="card-text mb-4">{description}</p>
           </div>
-          <button type="button" class="btn btn-primary start-q w-100">スタート</button>
+          <button type="button" id="start-quiz" class="btn btn-primary w-100">スタート</button>
         </div>
         <div id="countdown-screen" class="card-body d-none">
           <div class="d-flex align-items-center justify-content-center py-4">
@@ -85,7 +86,8 @@
         </div>
         <div id="quiz-screen" class="card-body d-none">
           <div id="question-section" class="d-none">
-            <div id="correct-or-wrong-group" class="d-none position-absolute top-0 start-0 w-100 h-100 rounded z-3 d-flex justify-content-center align-items-center">
+            <div id="correct-or-wrong-group"
+              class="d-none position-absolute top-0 start-0 w-100 h-100 rounded z-3 d-flex justify-content-center align-items-center">
               <div id="correct" class="rounded-circle circle"></div>
               <div id="wrong" class="x-mark"></div>
             </div>
@@ -101,25 +103,26 @@
             <div class="d-flex flex-column align-items-center justify-content-center">
               <p id="question-statement" class="card-text mb-5 fs-4">{statement}</p>
             </div>
-            <div id="choices" class="row g-3">
-              <div class="col-lg-6 col-md-6 col-12">
+            <div id="choices-group" class="row g-3 justify-content-center">
+              <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice1" name="choice" autocomplete="off">
                 <label class="btn btn-outline-dark w-100 choice-btn" for="choice1">{choice}</label>
               </div>
-              <div class="col-lg-6 col-md-6 col-12">
+              <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice2" name="choice" autocomplete="off">
                 <label class="btn btn-outline-dark w-100 choice-btn" for="choice2">{choice}</label>
               </div>
-              <div class="col-lg-6 col-md-6 col-12">
+              <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice3" name="choice" autocomplete="off">
                 <label class="btn btn-outline-dark w-100 choice-btn" for="choice3">{choice}</label>
               </div>
-              <div class="col-lg-6 col-md-6 col-12">
+              <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice4" name="choice" autocomplete="off">
                 <label class="btn btn-outline-dark w-100 choice-btn" for="choice4">{choice}</label>
               </div>
             </div>
-            <input type="text" id="type-text-input" class="form-control border-2 d-none" placeholder="回答" autocomplete="off">
+            <input type="text" id="type-text-input" class="form-control border-2 d-none" placeholder="回答"
+              autocomplete="off">
           </div>
           <div id="explanation-section">
             <div class="mb-4">
@@ -142,12 +145,34 @@
           </div>
         </div>
         <div id="result-screen" class="card-body d-none">
-          けっかはっぴょー
+          <h2 class="card-title mb-3">クイズ結果</h2>
+          <div class="d-flex flex-sm-row flex-column">
+            <div class="d-flex justify-content-center">
+              <div class="d-flex flex-column mb-3 mb-sm-0 me-0 me-sm-5">
+                <div class="d-flex justify-content-center justify-content-sm-start">
+                  <canvas id="pieChart" width="200px" height="200px"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-column justify-content-center flex-grow-1">
+              <div class="text-center fs-5"><span id="quiz-length">{quiz-length}</span>
+                問中<span id="correct-length">{correct-length}</span>問正解！
+                <br class="d-lg-none" /><span id="result-message">{result-message}</span>
+              </div>
+              <div class="d-grid gap-3 d-lg-block d-lg-flex justify-content-lg-center mt-4 mb-3">
+                <button class="btn btn-primary w-100" id="replay-quiz" type="button">
+                  <i class="bi bi-play float-start"></i>もう一度遊ぶ
+                </button>
+                <button class="btn btn-primary to-q-list-page w-100" type="button">
+                  <i class="bi bi-list-task float-start"></i>クイズ一覧
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
   <!-- テンプレート -->
   <!-- 全体用テンプレート -->
   <template id="toast-tem">

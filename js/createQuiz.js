@@ -245,10 +245,13 @@ function createQuiz() {
   const descriptionEl = document.getElementById("description");
   const description = descriptionEl.value || "説明なし";
 
+  const questions = getQuestions();
+
   const quiz = {
     id,
     title,
     description,
+    length: questions.length,
     options: {},
     questions: {},
   };
@@ -257,10 +260,9 @@ function createQuiz() {
   const timerCheckbox = timerOption.querySelector(".timer-toggle");
   if (timerCheckbox.checked) {
     const timerVal = timerOption.querySelector("#timer").value;
-    if (timerVal) quiz.options.timer = timerVal;
+    if (timerVal) quiz.options.timer = parseInt(timerVal);
   }
-
-  const questions = getQuestions();
+  
   questions.forEach((question) => {
     const questionN = question.id.split("q")[1];
     const questionKey = `q${questionN}`;

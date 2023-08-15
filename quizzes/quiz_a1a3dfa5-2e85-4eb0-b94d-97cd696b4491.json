@@ -1,0 +1,25 @@
+{
+  "id": "a1a3dfa5-2e85-4eb0-b94d-97cd696b4491",
+  "title": "動物クイズ",
+  "description": "みんな大好き動物に関するクイズです！",
+  "length": 3,
+  "questions": {
+    "q1": {
+      "answerType": "select",
+      "statement": "パから始まってダで終わる白黒の動物は？",
+      "choices": ["パソコンだ", "パンケーキだ", "パイナップルだ", "パンダ"],
+      "correctAnswer": "パンダ"
+    },
+    "q2": {
+      "answerType": "select-all",
+      "statement": "首が長い動物は？",
+      "choices": ["首長族", "ナマケモノ", "ゾウ", "キリン"],
+      "correctAnswers": ["キリン", "首長族"]
+    },
+    "q3": {
+      "answerType": "type-text",
+      "statement": "あなたが好きな動物は？",
+      "correctAnswer": "サル"
+    }
+  }
+}

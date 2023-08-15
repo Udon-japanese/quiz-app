@@ -1,18 +1,20 @@
 "use strict";
 import { navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
+import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 
 const qPage = document.getElementById("quiz-page");
-const titleScreen = document.getElementById("title-screen");
-const countdownScreen = document.getElementById("countdown-screen");
-const quizScreen = document.getElementById("quiz-screen");
-const resultScreen = document.getElementById("result-screen");
-const screens = [titleScreen, countdownScreen, quizScreen, resultScreen];
+const screens = {
+  title: document.getElementById("title-screen"),
+  countdown: document.getElementById("countdown-screen"),
+  quiz: document.getElementById("quiz-screen"),
+  result: document.getElementById("result-screen"),
+};
 const timerGroup = document.getElementById("timer-group");
 const timerTxt = document.getElementById("timer-txt");
+const startQuizBtn = document.getElementById("start-quiz");
 const choiceChecks = document.querySelectorAll(".choice-check");
-const choiceBtns = document.querySelectorAll(".choice-btn");
-const choicesGroup = document.getElementById("choices");
+const choicesGroup = document.getElementById("choices-group");
 const typeTextInput = document.getElementById("type-text-input");
 const questionStatement = document.getElementById("question-statement");
 const questionIndexEls = document.querySelectorAll(".question-index");
@@ -28,17 +30,11 @@ const correctAnswerEl = document.getElementById("correct-answer");
 const explanationEl = document.getElementById("explanation");
 const correctIcon = '<i class="bi bi-circle text-success"></i>';
 const wrongIcon = '<i class="bi bi-x-lg text-danger"></i>';
-
-// Proxyオブジェクトを作成
-const proxy = new Proxy(
-  {},
-  {
-    set: (target, key, value) => {
-      target[key] = value;
-      return true;
-    },
-  }
-);
+const canvas = document.getElementById("pieChart");
+const replayQuizBtn = document.getElementById("replay-quiz");
+const quizLengthEl = document.getElementById("quiz-length");
+const correctLengthEl = document.getElementById("correct-length");
+const resultMessageEl = document.getElementById("result-message");
 
 const audio = {
   correct: new Audio("audios/correct.mp3"),
@@ -47,9 +43,13 @@ const audio = {
   countdown: new Audio("audios/countdown.mp3"),
 };
 
-let quizObj;
-let questionIndex = 1;
-let timerInterval = null;
+const quizObj = {
+  /**@type {Quiz} */
+  quiz: undefined,
+  questionIndex: 1,
+  timerInterval: null,
+  correctLength: 0,
+}
 
 qPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -59,9 +59,7 @@ qPage.addEventListener("click", (e) => {
     const classList = el.classList;
     if (!el.className) return;
 
-    if (classList.contains("start-q")) {
-      startQuiz();
-    } else if (classList.contains("choice-check")) {
+    if (classList.contains("choice-check")) {
       let noneChecked = true;
       choiceChecks.forEach((c) => {
         if (c.checked) {
@@ -83,17 +81,31 @@ typeTextInput.addEventListener("input", (e) => {
     decisionBtn.disabled = false;
   }
 });
+startQuizBtn.addEventListener("click", () => {
+  startQuiz();
+})
+replayQuizBtn.addEventListener("click", (e) => {
+  initQuizPage();
+});
 nextQuestionBtn.addEventListener("click", (e) => {
-  if (questionIndex === Object.keys(quizObj.questions).length) {
+  const quizLength = quizObj.quiz.length;
+  if (quizObj.questionIndex === quizLength) {
+    quizLengthEl.innerText = quizLength;
+    const correctLength = quizObj.correctLength;
+    correctLengthEl.innerText = correctLength;
+    const resultMessage = getQuizResultMessage(quizLength, correctLength);
+    resultMessageEl.innerText = resultMessage;
+    animatePieChart(0, getAccuracy(quizLength, correctLength));
     showScreen("result");
     nextQuestionBtn.classList.add("d-none");
     return;
   }
-  questionIndex++;
+  quizObj.questionIndex++;
   showQuestion();
 });
 decisionBtn.addEventListener("click", async (e) => {
-  clearInterval(timerInterval);
+  decisionBtn.disabled = true;
+  clearInterval(quizObj.timerInterval);
   stopAudio(audio.timer);
   const q = getCurrentQuestion();
   switch (q.answerType) {
@@ -108,14 +120,13 @@ decisionBtn.addEventListener("click", async (e) => {
         }
       });
       const isAnswerCorrect = userAnswer === correctAnswer;
+      if (isAnswerCorrect) quizObj.correctLength++;
       await showCorrectOrWrong(isAnswerCorrect);
       const expl = q?.options?.explanation;
       questionSection.classList.add("d-none");
       explSection.classList.remove("d-none");
       userAnswerEl.innerHTML = `${userAnswer} ${
-        isAnswerCorrect
-          ? correctIcon
-          : wrongIcon
+        isAnswerCorrect ? correctIcon : wrongIcon
       }`;
       correctAnswerEl.innerHTML = correctAnswer;
       explanationEl.innerText = expl || "解説なし";
@@ -133,14 +144,13 @@ decisionBtn.addEventListener("click", async (e) => {
         }
       });
       const isAnswerCorrect = areArraysEqual(userAnswers, correctAnswers);
+      if (isAnswerCorrect) quizObj.correctLength++;
       await showCorrectOrWrong(isAnswerCorrect);
       const expl = q?.options?.explanation;
       questionSection.classList.add("d-none");
       explSection.classList.remove("d-none");
       userAnswerEl.innerHTML = `${userAnswers.join(", ")} ${
-        isAnswerCorrect
-          ? correctIcon
-          : wrongIcon
+        isAnswerCorrect ? correctIcon : wrongIcon
       }`;
       correctAnswerEl.innerHTML = correctAnswers.join(", ");
       explanationEl.innerText = expl || "解説なし";
@@ -151,14 +161,13 @@ decisionBtn.addEventListener("click", async (e) => {
       const { correctAnswer } = q;
       const userAnswer = typeTextInput.value;
       const isAnswerCorrect = userAnswer === correctAnswer;
+      if (isAnswerCorrect) quizObj.correctLength++;
       await showCorrectOrWrong(isAnswerCorrect);
       const expl = q?.options?.explanation;
       questionSection.classList.add("d-none");
       explSection.classList.remove("d-none");
       userAnswerEl.innerHTML = `${userAnswer} ${
-        isAnswerCorrect
-          ? correctIcon
-          : wrongIcon
+        isAnswerCorrect ? correctIcon : wrongIcon
       }`;
       correctAnswerEl.innerHTML = correctAnswer;
       explanationEl.innerText = expl || "解説なし";
@@ -179,7 +188,7 @@ async function showCorrectOrWrong(isAnswerCorrect) {
 }
 
 function getCurrentQuestion() {
-  return quizObj.questions[`q${questionIndex}`];
+  return quizObj.quiz.questions[`q${quizObj.questionIndex}`];
 }
 
 async function startQuiz() {
@@ -192,15 +201,20 @@ async function startQuiz() {
 function showQuestion() {
   nextQuestionBtn.classList.add("d-none");
   decisionBtn.classList.remove("d-none");
+  decisionBtn.disabled = false;
   questionSection.classList.remove("d-none");
   explSection.classList.add("d-none");
-  const time = parseInt(quizObj?.options?.timer);
+  const time = quizObj.quiz?.options?.timer;
   const isNum = !isNaN(time);
   timerGroup.classList.toggle("d-none", !isNum);
   const q = getCurrentQuestion();
+  const questionIndex = quizObj.questionIndex;
   questionIndexEls.forEach((qI) => {
     qI.innerText = `${questionIndex}問目`;
   });
+  if (questionIndex === quizObj.quiz.length) {
+    nextQuestionBtn.innerText = "クイズ結果";
+  }
   questionStatement.innerText = q.statement;
   decisionBtn.disabled = true;
   const { answerType } = q;
@@ -209,13 +223,24 @@ function showQuestion() {
     case "select-all": {
       choicesGroup.classList.remove("d-none");
       typeTextInput.classList.add("d-none");
+      const choicesLength = q.choices.length;
+      const choices = document.querySelectorAll(".choice-cont");
+      choices.forEach((c, i) => {
+        if (i < choicesLength) {
+          c.classList.remove("d-none");
+        } else {
+          c.classList.add("d-none");
+        }
+      })
       const inputType = answerType === "select" ? "radio" : "checkbox";
-      choiceChecks.forEach((c) => {
+      choiceChecks.forEach((c, i) => {
+        if (i + 1 > choicesLength) return;
         c.disabled = false;
         c.checked = false;
         c.setAttribute("type", inputType);
       });
       const shuffledChoices = shuffleChoices(q.choices);
+      const choiceBtns = document.querySelectorAll(".choice-btn");
       choiceBtns.forEach((b, i) => {
         b.innerText = shuffledChoices[i];
       });
@@ -269,15 +294,11 @@ function startTimer(time) {
     if (remainingTime <= 0) {
       const q = getCurrentQuestion();
       const { correctAnswer } = q;
-      clearInterval(timerInterval);
+      clearInterval(quizObj.timerInterval);
       stopAudio(audio.timer);
       await showCorrectOrWrong(false);
       choiceChecks.forEach((c) => {
-        const choiceBtn = document.querySelector(`[for="${c.id}"]`);
         c.disabled = true;
-        if (choiceBtn.innerText === correctAnswer) {
-          choiceBtn.classList.add("bg-success", "text-light");
-        }
       });
       const expl = q?.options?.explanation;
       if (expl) {
@@ -304,7 +325,7 @@ function startTimer(time) {
   function startInterval() {
     startTime = Date.now();
     updateTimer();
-    timerInterval = setInterval(updateTimer, interval);
+    quizObj.timerInterval = setInterval(updateTimer, interval);
   }
 
   startInterval();
@@ -336,38 +357,43 @@ function countdown(number = 3) {
  * @param {"title" | "countdown" | "quiz" | "result"} screenName
  */
 function showScreen(screenName) {
-  const screenMap = {
-    title: titleScreen,
-    countdown: countdownScreen,
-    quiz: quizScreen,
-    result: resultScreen,
-  };
-  const screen = screenMap[screenName];
+  const screen = screens[screenName];
 
   screen.classList.remove("d-none");
-  hideOtherScreen(screen);
+  hideOtherScreen(screenName);
 }
 
-function hideOtherScreen(showScreen) {
-  screens.forEach((s) => {
-    const isShowScreen = s === showScreen;
-    s.classList.toggle("d-none", !isShowScreen);
-  });
+function hideOtherScreen(screenName) {
+  for (const screen of Object.values(screens)) {
+    screen.classList.toggle("d-none", screen !== screens[screenName]);
+  }
 }
 
-export function initQuizPage(quizData) {
-  setQuiz(quizData);
-  const { quiz } = proxy;
+export function initQuizPage(quizData = null) {
+  if (quizData) {
+    setQuiz(quizData);
+  }
+  const quiz = quizObj.quiz;
+  let toastMessage = null;
   if (!quiz) {
-    showToast("red", "クイズが見つかりませんでした");
+    toastMessage = "クイズが見つかりませんでした";
+  } else if (!isValidQuizObj(quiz)) {
+    toastMessage = "無効なクイズデータです";
+  }
+  if (toastMessage) {
+    showToast("red", toastMessage);
     navigateToPage("quizList");
     return;
   }
-  quizObj = quiz;
+  quizObj.questionIndex = 1;
+  quizObj.timerInterval = null;
+  quizObj.correctLength = 0;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
   document.getElementById("quiz-description").innerText = quiz.description;
+  nextQuestionBtn.innerText = "次の問題";
   showScreen("title");
+  questionSection.classList.remove("d-none");
   navigateToPage("quiz");
 }
 
@@ -376,7 +402,9 @@ export function initQuizPage(quizData) {
  * @param {object} quizData
  */
 function setQuiz(quizData) {
-  proxy.quiz = quizData;
+  if (quizData) {
+    quizObj.quiz = quizData;
+  }
 }
 
 /**
@@ -433,4 +461,86 @@ function areArraysEqual(arr1, arr2) {
   }
 
   return true;
+}
+
+function animatePieChart(startPercentage, endPercentage) {
+  const context = canvas.getContext("2d");
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const radius = canvas.width / 2;
+
+  function drawBackgroundCircle(color) {
+    context.beginPath();
+    context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    context.closePath();
+    context.fillStyle = color;
+    context.fill();
+  }
+
+  function drawPieSlice(startAngle, endAngle, color) {
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.arc(centerX, centerY, radius, startAngle, endAngle);
+    context.closePath();
+    context.fillStyle = color;
+    context.fill();
+  }
+
+  function drawText(percentage) {
+    context.fillStyle = "black";
+    context.font = "bold 24px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(`${percentage}%`, centerX, centerY);
+  }
+
+  function animate(startPercentage) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    let color = "";
+    if (startPercentage <= 20) {
+      color = "#ff3146"; // 赤色
+    } else if (startPercentage <= 60) {
+      color = "yellow"; // 黄色
+    } else {
+      color = "#4bd865"; // 緑色
+    }
+
+    drawBackgroundCircle("lightgray");
+    drawPieSlice(
+      -Math.PI / 2,
+      -Math.PI / 2 + (startPercentage / 100) * 2 * Math.PI,
+      color
+    );
+    drawText(startPercentage);
+
+    if (startPercentage < endPercentage) {
+      setTimeout(() => {
+        animate(startPercentage + 1);
+      }, 25);
+    }
+  }
+
+  animate(startPercentage);
+}
+
+function getQuizResultMessage(totalQuestions, totalCorrects) {
+  const percentage = (totalCorrects / totalQuestions) * 100;
+
+  if (percentage <= 20) {
+    return "がんばりましょう！😕";
+  } else if (percentage <= 40) {
+    return "まだまだこれからです！😐";
+  } else if (percentage <= 60) {
+    return "いい調子です！🙂";
+  } else if (percentage < 100) {
+    return "すばらしいです！😃";
+  } else {
+    return "おめでとうございます！🥳";
+  }
+}
+
+function getAccuracy(totalQuestions, totalCorrects) {
+  var accuracy = (totalCorrects / totalQuestions) * 100;
+  return Math.round(accuracy);
 }
