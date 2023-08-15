@@ -3,26 +3,15 @@ import { navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 
-const qPage = document.getElementById("quiz-page");
-const screens = {
-  title: document.getElementById("title-screen"),
-  countdown: document.getElementById("countdown-screen"),
-  quiz: document.getElementById("quiz-screen"),
-  result: document.getElementById("result-screen"),
-};
-const timerGroup = document.getElementById("timer-group");
-const timerTxt = document.getElementById("timer-txt");
-const startQuizBtn = document.getElementById("start-quiz");
+const answerGuide = document.getElementById("answer-guide");
 const choiceChecks = document.querySelectorAll(".choice-check");
 const choicesGroup = document.getElementById("choices-group");
 const typeTextInput = document.getElementById("type-text-input");
-const questionStatement = document.getElementById("question-statement");
-const questionIndexEls = document.querySelectorAll(".question-index");
+const startQuizBtn = document.getElementById("start-quiz");
 const decisionBtn = document.getElementById("decision-btn");
 const nextQuestionBtn = document.getElementById("next-question-btn");
+const replayQuizBtn = document.getElementById("replay-quiz");
 const correctOrWrongGroup = document.getElementById("correct-or-wrong-group");
-const correct = document.getElementById("correct");
-const wrong = document.getElementById("wrong");
 const questionSection = document.getElementById("question-section");
 const explSection = document.getElementById("explanation-section");
 const userAnswerEl = document.getElementById("user-answer");
@@ -30,26 +19,29 @@ const correctAnswerEl = document.getElementById("correct-answer");
 const explanationEl = document.getElementById("explanation");
 const correctIcon = '<i class="bi bi-circle text-success"></i>';
 const wrongIcon = '<i class="bi bi-x-lg text-danger"></i>';
-const canvas = document.getElementById("pieChart");
-const replayQuizBtn = document.getElementById("replay-quiz");
-const quizLengthEl = document.getElementById("quiz-length");
-const correctLengthEl = document.getElementById("correct-length");
-const resultMessageEl = document.getElementById("result-message");
+const qPage = document.getElementById("quiz-page");
 
+const screens = {
+  title: document.getElementById("title-screen"),
+  countdown: document.getElementById("countdown-screen"),
+  quiz: document.getElementById("quiz-screen"),
+  result: document.getElementById("result-screen"),
+};
 const audio = {
   correct: new Audio("audios/correct.mp3"),
   wrong: new Audio("audios/wrong.mp3"),
   timer: new Audio("audios/timer.mp3"),
   countdown: new Audio("audios/countdown.mp3"),
 };
-
 const quizObj = {
   /**@type {Quiz} */
-  quiz: undefined,
+  quiz: null,
   questionIndex: 1,
   timerInterval: null,
+  countdownInterval: null,
+  waitTImeout: null,
   correctLength: 0,
-}
+};
 
 qPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -83,18 +75,19 @@ typeTextInput.addEventListener("input", (e) => {
 });
 startQuizBtn.addEventListener("click", () => {
   startQuiz();
-})
+});
 replayQuizBtn.addEventListener("click", (e) => {
   initQuizPage();
 });
+
 nextQuestionBtn.addEventListener("click", (e) => {
   const quizLength = quizObj.quiz.length;
   if (quizObj.questionIndex === quizLength) {
-    quizLengthEl.innerText = quizLength;
+    document.getElementById("quiz-length").innerText = quizLength;
     const correctLength = quizObj.correctLength;
-    correctLengthEl.innerText = correctLength;
+    document.getElementById("correct-length").innerText = correctLength;
     const resultMessage = getQuizResultMessage(quizLength, correctLength);
-    resultMessageEl.innerText = resultMessage;
+    document.getElementById("result-message").innerText = resultMessage;
     animatePieChart(0, getAccuracy(quizLength, correctLength));
     showScreen("result");
     nextQuestionBtn.classList.add("d-none");
@@ -106,7 +99,7 @@ nextQuestionBtn.addEventListener("click", (e) => {
 decisionBtn.addEventListener("click", async (e) => {
   decisionBtn.disabled = true;
   clearInterval(quizObj.timerInterval);
-  stopAudio(audio.timer);
+  pauseAudio(audio.timer);
   const q = getCurrentQuestion();
   switch (q.answerType) {
     case "select": {
@@ -178,11 +171,22 @@ decisionBtn.addEventListener("click", async (e) => {
   nextQuestionBtn.classList.remove("d-none");
 });
 
+export function endQuiz() {
+  clearInterval(quizObj.countdownInterval);
+  clearInterval(quizObj.timerInterval);
+  clearTimeout(quizObj.waitTImeout);
+  Object.values(audio).forEach((a) => {
+    pauseAudio(a);
+  });
+}
+
 async function showCorrectOrWrong(isAnswerCorrect) {
   playAudio(isAnswerCorrect ? audio.correct : audio.wrong);
   correctOrWrongGroup.classList.remove("d-none");
-  correct.classList.toggle("d-none", !isAnswerCorrect);
-  wrong.classList.toggle("d-none", isAnswerCorrect);
+  document
+    .getElementById("correct")
+    .classList.toggle("d-none", !isAnswerCorrect);
+  document.getElementById("wrong").classList.toggle("d-none", isAnswerCorrect);
   await wait(1000);
   correctOrWrongGroup.classList.add("d-none");
 }
@@ -199,6 +203,7 @@ async function startQuiz() {
 }
 
 function showQuestion() {
+  correctOrWrongGroup.classList.add("d-none");
   nextQuestionBtn.classList.add("d-none");
   decisionBtn.classList.remove("d-none");
   decisionBtn.disabled = false;
@@ -206,21 +211,25 @@ function showQuestion() {
   explSection.classList.add("d-none");
   const time = quizObj.quiz?.options?.timer;
   const isNum = !isNaN(time);
-  timerGroup.classList.toggle("d-none", !isNum);
+  document.getElementById("timer-group").classList.toggle("d-none", !isNum);
   const q = getCurrentQuestion();
   const questionIndex = quizObj.questionIndex;
-  questionIndexEls.forEach((qI) => {
+  document.querySelectorAll(".question-index").forEach((qI) => {
     qI.innerText = `${questionIndex}問目`;
   });
   if (questionIndex === quizObj.quiz.length) {
     nextQuestionBtn.innerText = "結果を表示";
   }
-  questionStatement.innerText = q.statement;
+  document.getElementById("question-statement").innerText = q.statement;
   decisionBtn.disabled = true;
   const { answerType } = q;
   switch (answerType) {
     case "select":
     case "select-all": {
+      answerGuide.innerHTML =
+        answerType === "select"
+          ? "正しいと思う選択肢を一つ選んでください"
+          : '正しいと思う選択肢を<span class="fw-bolder">一つ以上</span>選んでください';
       choicesGroup.classList.remove("d-none");
       typeTextInput.classList.add("d-none");
       const choicesLength = q.choices.length;
@@ -231,10 +240,9 @@ function showQuestion() {
         } else {
           c.classList.add("d-none");
         }
-      })
+      });
       const inputType = answerType === "select" ? "radio" : "checkbox";
-      choiceChecks.forEach((c, i) => {
-        if (i + 1 > choicesLength) return;
+      choiceChecks.forEach((c) => {
         c.disabled = false;
         c.checked = false;
         c.setAttribute("type", inputType);
@@ -248,6 +256,7 @@ function showQuestion() {
     }
     case "type-text": {
       typeTextInput.value = "";
+      answerGuide.innerText = "正しいと思う答えを入力してください";
       choicesGroup.classList.add("d-none");
       typeTextInput.classList.remove("d-none");
       typeTextInput.disabled = false;
@@ -265,6 +274,7 @@ function startTimer(time) {
   if (!time) return;
 
   const timerBar = document.getElementById("timer-bar");
+  const timerTxt = document.getElementById("timer-txt");
   const interval = 10;
   let startTime = null;
   let lastLoggedSeconds = time;
@@ -296,7 +306,7 @@ function startTimer(time) {
       const q = getCurrentQuestion();
       const { correctAnswer } = q;
       clearInterval(quizObj.timerInterval);
-      stopAudio(audio.timer);
+      pauseAudio(audio.timer);
       await showCorrectOrWrong(false);
       choiceChecks.forEach((c) => {
         c.disabled = true;
@@ -340,13 +350,13 @@ function countdown(number = 3) {
     let currentNum = number;
     countdownEl.innerText = currentNum;
 
-    const countdownInterval = setInterval(() => {
+    quizObj.countdownInterval = setInterval(() => {
       currentNum--;
       if (currentNum > 0) {
         countdownEl.innerText = currentNum;
       } else {
-        clearInterval(countdownInterval);
-        stopAudio(audio.countdown);
+        clearInterval(quizObj.countdownInterval);
+        pauseAudio(audio.countdown);
         resolve();
       }
     }, 1000);
@@ -388,6 +398,8 @@ export function initQuizPage(quizData = null) {
   }
   quizObj.questionIndex = 1;
   quizObj.timerInterval = null;
+  quizObj.countdownInterval = null;
+  quizObj.waitTImeout = null;
   quizObj.correctLength = 0;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
@@ -423,7 +435,7 @@ function shuffleChoices(choices) {
 
 function wait(time) {
   return new Promise((resolve) => {
-    setTimeout(resolve, time);
+    quizObj.waitTImeout = setTimeout(resolve, time);
   });
 }
 
@@ -442,7 +454,7 @@ function playAudio(audio, isLoop = false) {
  * @description
  * @param {HTMLAudioElement} audio
  */
-function stopAudio(audio) {
+function pauseAudio(audio) {
   audio.pause();
   audio.currentTime = 0;
 }
@@ -465,6 +477,7 @@ function areArraysEqual(arr1, arr2) {
 }
 
 function animatePieChart(startPercentage, endPercentage) {
+  const canvas = document.getElementById("pieChart");
   const context = canvas.getContext("2d");
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;

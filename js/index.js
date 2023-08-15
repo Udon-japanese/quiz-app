@@ -5,14 +5,16 @@ import { displayQuizList } from "./quizList.js";
 import { closeModal } from "../utils/modal.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
-import { initQuizPage } from "./quiz.js";
+import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 
 const topPage = document.getElementById("top-page");
-const crtQPage = document.getElementById("crt-quiz-page");
-const qListPage = document.getElementById("quiz-list-page");
-const qPage = document.getElementById("quiz-page");
-const pages = [topPage, crtQPage, qListPage, qPage];
+const pages = {
+  top: topPage,
+  createQuiz: document.getElementById("crt-quiz-page"),
+  quizList: document.getElementById("quiz-list-page"),
+  quiz: document.getElementById("quiz-page"),
+};
 
 const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page");
 const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
@@ -99,10 +101,14 @@ document.addEventListener("change", (e) => {
   });
 });
 
-function getCurrentPage() {
-  const pages = document.querySelectorAll(".page");
-  const currentPage = Array.from(pages).filter(p => !p.classList.contains("d-none"));
-  return currentPage;
+function getCurrentPageName() {
+  const currentPageEl = document.querySelector(".page:not(.d-none)");
+    for (const pageName in pages) {
+    if (pages[pageName].id === currentPageEl?.id) {
+      return pageName;
+    }
+  }
+  return null;
 }
 
 /**
@@ -110,6 +116,10 @@ function getCurrentPage() {
  * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
  */
 export function navigateToPage(pageName) {
+  const currentPageName = getCurrentPageName();
+  if (currentPageName === "quiz") {
+    endQuiz();
+  }
   switchToPage(pageName);
 
   const navbarBtnMap = {
@@ -134,18 +144,12 @@ export function navigateToPage(pageName) {
  * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
  */
 function switchToPage(pageName) {
-  const pageMap = {
-    top: topPage,
-    quiz: qPage,
-    createQuiz: crtQPage,
-    quizList: qListPage,
-  };
   if (pageName == "quiz") {
     setCookie("lastAccess", `${pageName}?${document.querySelector(".has-quiz-id").id.split("quiz-")[1]}`, 14);
   } else {
     setCookie("lastAccess", pageName, 14);  
   }
-  hideOtherPages(pageMap[pageName]);
+  hideOtherPages(pages[pageName]);
 }
 
 /**
@@ -153,7 +157,7 @@ function switchToPage(pageName) {
  * @param {HTMLElement} showPage
  */
 function hideOtherPages(showPage) {
-  pages.forEach((p) => {
+  Object.values(pages).forEach(p => {
     const isShowPage = p === showPage;
     p.classList.toggle("d-none", !isShowPage);
   });

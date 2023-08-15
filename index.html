@@ -99,8 +99,9 @@
               </div>
             </div>
             <div class="d-flex flex-column align-items-center justify-content-center my-3 my-sm-5">
-              <p id="question-statement" class="card-text fs-4">{statement}</p>
+              <p id="question-statement" class="card-text fs-4 fw-semibold">{statement}</p>
             </div>
+            <div id="answer-guide" class="text-center mb-1">正しいと思うものを一つ選んでください</div>
             <div id="choices-group" class="row g-2 g-sm-3 justify-content-center">
               <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice1" name="choice" autocomplete="off">
@@ -153,8 +154,7 @@
               </div>
             </div>
             <div class="d-flex flex-column justify-content-center flex-grow-1">
-              <div class="text-center fs-5"><span id="quiz-length">{quiz-length}</span>
-                問中<span id="correct-length">{correct-length}</span>問正解！
+              <div class="text-center fs-5"><span id="quiz-length" class="fw-bold">{quiz-length}</span>問中<span id="correct-length" class="fw-bold">{correct-length}</span>問正解！
                 <br class="d-lg-none" /><span id="result-message">{result-message}</span>
               </div>
               <div class="d-grid gap-3 d-lg-block d-lg-flex justify-content-lg-center mt-4 mb-3">
