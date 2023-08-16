@@ -4,6 +4,28 @@ import { storage } from "../utils/storage.js";
 import { openModal } from "../utils/modal.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
 import { initQuizPage } from "./quiz.js";
+import commonSenseQuiz from "../quizzes/common-sense-quiz.json" assert { type: "json" };
+import commonSenseQuiz2 from "../quizzes/common-sense-quiz2.json" assert { type: "json" };
+import gameQuiz from "../quizzes/game-quiz.json" assert { type: "json" };
+import sportsQuiz from "../quizzes/sports-quiz.json" assert { type: "json" };
+import japanQuiz from "../quizzes/japan-quiz.json" assert { type: "json" };
+import wordQuiz from "../quizzes/word-quiz.json" assert { type: "json" };
+/**
+ * @type {Quiz[]}
+ */
+const defaultQuizzes = [
+  commonSenseQuiz,
+  commonSenseQuiz2,
+  gameQuiz,
+  sportsQuiz,
+  japanQuiz,
+  wordQuiz,
+];
+if (!storage.length) {
+  defaultQuizzes.forEach(q => {
+    storage.setItem(q.id, JSON.stringify(q));
+  })
+}
 
 const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
@@ -63,28 +85,28 @@ qListPage.addEventListener("click", (e) => {
 });
 
 searchQInput.addEventListener("input", (e) => {
-    const query = e.target.value;
-    if (!query) {
-      displayQuizList();
-      return;
+  const query = e.target.value;
+  if (!query) {
+    displayQuizList();
+    return;
+  }
+  const qListObj = searchQuizzes(query);
+  if (!Object.keys(qListObj).length) {
+    quizzesCont.innerHTML = "";
+    let noneResult = document.getElementById("none-result");
+    if (!noneResult) {
+      noneResult = cloneFromTemplate("none-result-tem");
+      const uploadQBtnCont = noneResult.querySelector(".btn-cont");
+      initUploadBtn(uploadQBtnCont, 100);
+      quizzesCont.appendChild(noneResult);
+      noneResult = document.getElementById("none-result");
     }
-    const qListObj = searchQuizzes(query);
-    if (!Object.keys(qListObj).length) {
-      quizzesCont.innerHTML = "";
-      let noneResult = document.getElementById("none-result");
-      if (!noneResult) {
-        noneResult = cloneFromTemplate("none-result-tem");
-        const uploadQBtnCont = noneResult.querySelector(".btn-cont");
-        initUploadBtn(uploadQBtnCont, 100);
-        quizzesCont.appendChild(noneResult);
-        noneResult = document.getElementById("none-result");
-      }
-      const noneRBody = noneResult.querySelector(".card-text");
-      const noneRTxt = noneRBody.innerText;
-      noneRBody.innerText = noneRTxt.replace("{query}", query);
-      return;
-    };
-    displayQuizList(qListObj);
+    const noneRBody = noneResult.querySelector(".card-text");
+    const noneRTxt = noneRBody.innerText;
+    noneRBody.innerText = noneRTxt.replace("{query}", query);
+    return;
+  }
+  displayQuizList(qListObj);
 });
 
 qListPage.addEventListener("hidden.bs.dropdown", (e) => {
@@ -110,7 +132,6 @@ export function displayQuizList(obj) {
     const uploadQBtnCont = noneQuiz.querySelector(".btn-cont");
     initUploadBtn(uploadQBtnCont, 100);
     quizzesCont.appendChild(noneQuiz);
-    
   }
   searchQInput.classList.toggle("d-none", noneQuiz);
 
@@ -149,7 +170,7 @@ function searchQuizzes(query) {
     if (
       lowercaseTitle.includes(lowercaseQuery) ||
       lowercaseDesc.includes(lowercaseQuery) ||
-      `問題数: ${quizLength}問`.includes(query) && query !== " " ||
+      (`問題数: ${quizLength}問`.includes(query) && query !== " ") ||
       `問題数:${quizLength}問`.includes(query)
     ) {
       resultObj[id] = quiz;

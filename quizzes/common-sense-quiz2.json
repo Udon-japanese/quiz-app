@@ -1,0 +1,52 @@
+{
+  "id": "5310381d-0d83-452c-a6a7-6e138041446b",
+  "title": "一般常識クイズ2",
+  "description": "さまざまな一般的な知識に関するクイズです。(ChatGPT作問)",
+  "length": 5,
+  "options": { "timer": 10 },
+  "questions": {
+    "q1": {
+      "options": {
+        "explanation": "水は2つの水素原子と1つの酸素原子から構成される分子で、H2Oと表記されます。"
+      },
+      "answerType": "select",
+      "statement": "水の化学的な表記は何？",
+      "choices": ["H2O", "CO2", "O2", "CH4"],
+      "correctAnswer": "H2O"
+    },
+    "q2": {
+      "options": {
+        "explanation": "古代の哲学や宗教において、四つの要素は物質の構成要素として考えられていました。これにはさまざまな文化や信念が関わっており、火、水、風、土はその象徴的な象徴です。"
+      },
+      "answerType": "select-all",
+      "statement": "地球上の4つの要素とされるものは？",
+      "choices": ["風", "火", "水", "土"],
+      "correctAnswers": ["火", "水", "風", "土"]
+    },
+    "q3": {
+      "options": {
+        "explanation": "アルファベットの第1文字は「A」です。"
+      },
+      "answerType": "type-text",
+      "statement": "アルファベットの第1文字は何？(半角英字大文字)",
+      "correctAnswer": "A"
+    },
+    "q4": {
+      "options": {
+        "explanation": "血液は酸素や栄養素を体内の細胞に運ぶ役割を果たします。"
+      },
+      "answerType": "select",
+      "statement": "人間の体内で酸素を運ぶのは何？",
+      "choices": ["血液", "尿素", "唾液", "胆汁"],
+      "correctAnswer": "血液"
+    },
+    "q5": {
+      "options": {
+        "explanation": "人間の通常の体温は摂氏37度です。"
+      },
+      "answerType": "type-text",
+      "statement": "人間の通常の体温は摂氏何度？(半角数字)",
+      "correctAnswer": "37"
+    }
+  }
+}

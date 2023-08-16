@@ -1,0 +1,52 @@
+{
+  "id": "5c9067cf-b600-436d-ac40-30bcb2436b9f",
+  "title": "ゲームクイズ",
+  "description": "さまざまなビデオゲームに関するクイズです。(ChatGPT作問)",
+  "length": 5,
+  "options": { "timer": 15 },
+  "questions": {
+    "q1": {
+      "options": {
+        "explanation": "ファイナルファンタジーVIIはRPGシリーズ「ファイナルファンタジー」の7作目です。"
+      },
+      "answerType": "select",
+      "statement": "ファイナルファンタジーシリーズの第7作目のタイトルは？",
+      "choices": ["ファイナルファンタジー VI", "ファイナルファンタジー VII", "ファイナルファンタジー VIII", "ファイナルファンタジー IX"],
+      "correctAnswer": "ファイナルファンタジー VII"
+    },
+    "q2": {
+      "options": {
+        "explanation": "「スター」はマリオカートシリーズで使われるアイテムで、無敵状態になります。"
+      },
+      "answerType": "select",
+      "statement": "マリオカートシリーズで使われているアイテム「スター」は何の効果を持つ？",
+      "choices": ["無敵", "加速", "逆走", "ジャンプ"],
+      "correctAnswer": "無敵"
+    },
+    "q3": {
+      "options": {
+        "explanation": "「Pokemon」はポケットモンスターシリーズの略称で、日本のRPGゲームです。"
+      },
+      "answerType": "type-text",
+      "statement": "「ポケモン」の英語名は何？(一文字目大文字、半角英字)",
+      "correctAnswer": "Pokemon"
+    },
+    "q4": {
+      "options": {
+        "explanation": "TESVは「The Elder Scrolls V: Skyrim」の略称です。"
+      },
+      "answerType": "select",
+      "statement": "「The Elder Scrolls V: Skyrim」の略称は？",
+      "choices": ["TESV", "Skyrim", "TES5", "ES5"],
+      "correctAnswer": "TESV"
+    },
+    "q5": {
+      "options": {
+        "explanation": "マークス・ペルソン（Notch）は「マインクラフト」の創始者で、ゲーム界で影響力のある人物です。"
+      },
+      "answerType": "type-text",
+      "statement": "人気のサンドボックスゲーム「マインクラフト」の創始者は誰？(FirstName LastNameという答え方で)",
+      "correctAnswer": "Markus Persson"
+    }
+  }
+}

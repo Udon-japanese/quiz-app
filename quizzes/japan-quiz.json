@@ -1,0 +1,53 @@
+{
+  "id": "b90eb724-60d8-4df3-943b-d063fa5139f5",
+  "title": "日本クイズ",
+  "description": "日本に関するさまざまな情報についてのクイズです。(ChatGPT作問)",
+  "length": 5,
+  "options": { "timer": 10 },
+  "questions": {
+    "q1": {
+      "options": {
+        "explanation": "日本の首都は東京で、政治・経済・文化の中心地として知られています。"
+      },
+      "answerType": "select",
+      "statement": "日本の首都はどこ？",
+      "choices": ["東京", "京都", "大阪", "名古屋"],
+      "correctAnswer": "東京"
+    },
+    "q2": {
+      "options": {
+        "explanation": "日本の国花は桜で、春に美しい花を咲かせることで知られています。"
+      },
+      "answerType": "select",
+      "statement": "日本の国花は何？",
+      "choices": ["さくらんぼ", "すみれ", "桜", "菊"],
+      "correctAnswer": "桜"
+    },
+    "q3": {
+      "options": {
+        "explanation": "日本は四季折々の美しい自然が楽しめる国として知られています。春には桜が咲き、夏には祭りが行われ、秋には紅葉が見頃を迎え、冬には雪景色が広がります。"
+      },
+      "answerType": "select-all",
+      "statement": "日本の四季を選んでください。",
+      "choices": ["春", "夏", "秋", "冬"],
+      "correctAnswers": ["春", "夏", "秋", "冬"]
+    },
+    "q4": {
+      "options": {
+        "explanation": "しんかんせんは日本の高速鉄道で、世界でも最も速い列車として知られています。"
+      },
+      "answerType": "select",
+      "statement": "日本の高速鉄道の愛称は何？",
+      "choices": ["スーパーエクスプレス", "しんかんせん", "のぞみ", "はやぶさ"],
+      "correctAnswer": "しんかんせん"
+    },
+    "q5": {
+      "options": {
+        "explanation": "京都は日本の歴史的な古都で、美しい寺院や神社が点在しています。"
+      },
+      "answerType": "type-text",
+      "statement": "日本の古都として知られる都市は？(漢字)",
+      "correctAnswer": "京都"
+    }
+  }
+}

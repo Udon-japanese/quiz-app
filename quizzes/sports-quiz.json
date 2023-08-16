@@ -1,0 +1,53 @@
+{
+  "id": "28ab2d47-209d-49cf-9da3-bb0ee036bc57",
+  "title": "スポーツクイズ",
+  "description": "さまざまなスポーツに関するクイズです。(ChatGPT作問)",
+  "length": 5,
+  "options": { "timer": 15 },
+  "questions": {
+    "q1": {
+      "options": {
+        "explanation": "サッカーワールドカップは4年ごとに開催されます。"
+      },
+      "answerType": "select",
+      "statement": "サッカーワールドカップは何年ごとに開催される？",
+      "choices": ["2年", "3年", "4年", "5年"],
+      "correctAnswer": "4年"
+    },
+    "q2": {
+      "options": {
+        "explanation": "全英オープンはゴルフの四大大会の一つではありません。"
+      },
+      "answerType": "select",
+      "statement": "テニスの4大大会でないものは？",
+      "choices": ["ウィンブルドン", "全仏オープン", "全米オープン", "全英オープン"],
+      "correctAnswer": "全英オープン"
+    },
+    "q3": {
+      "options": {
+        "explanation": "2020年に延期された夏季オリンピックの開催都市は東京です。"
+      },
+      "answerType": "type-text",
+      "statement": "2020年に延期された夏季オリンピックの開催都市は？",
+      "correctAnswer": "東京"
+    },
+    "q4": {
+      "options": {
+        "explanation": "バスケットボールの試合で1チームの選手は5人です。"
+      },
+      "answerType": "select",
+      "statement": "バスケットボールの試合で1チームの選手は何人？",
+      "choices": ["4人", "5人", "6人", "7人"],
+      "correctAnswer": "5人"
+    },
+    "q5": {
+      "options": {
+        "explanation": "サッカーにはさまざまなポジションがあります。ゴールキーパーはゴールを守る選手、フォワードは攻撃的な選手、ディフェンダーは守備的な選手を指します。一方、キャッチャーは野球のポジションです。"
+      },
+      "answerType": "select-all",
+      "statement": "サッカーのポジションを選んでください。",
+      "choices": ["ゴールキーパー", "フォワード", "ディフェンダー", "キャッチャー"],
+      "correctAnswers": ["ゴールキーパー", "フォワード", "ディフェンダー"]
+    }
+  }
+}

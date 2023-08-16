@@ -20,6 +20,8 @@ const explanationEl = document.getElementById("explanation");
 const correctIcon = '<i class="bi bi-circle text-success"></i>';
 const wrongIcon = '<i class="bi bi-x-lg text-danger"></i>';
 const qPage = document.getElementById("quiz-page");
+const toggleVolumeBtn = document.getElementById("toggle-volume");
+const audioVolumeInput = document.getElementById("audio-volume-input");
 
 const screens = {
   title: document.getElementById("title-screen"),
@@ -41,7 +43,13 @@ const quizObj = {
   countdownInterval: null,
   waitTImeout: null,
   correctLength: 0,
+  volume: audioVolumeInput.value / 100,
 };
+
+Object.values(audio).forEach(a => {
+  a.volume = quizObj.volume;
+});
+changeVolumeIcon(quizObj.volume);
 
 qPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -79,7 +87,6 @@ startQuizBtn.addEventListener("click", () => {
 replayQuizBtn.addEventListener("click", (e) => {
   initQuizPage();
 });
-
 nextQuestionBtn.addEventListener("click", (e) => {
   const quizLength = quizObj.quiz.length;
   if (quizObj.questionIndex === quizLength) {
@@ -170,6 +177,39 @@ decisionBtn.addEventListener("click", async (e) => {
   decisionBtn.classList.add("d-none");
   nextQuestionBtn.classList.remove("d-none");
 });
+toggleVolumeBtn.addEventListener("click", () => {
+  if (parseInt(audioVolumeInput.value) > 0) {
+    audioVolumeInput.value = 0;
+    Object.values(audio).forEach(a => {
+      a.volume = 0;
+    });
+    changeVolumeIcon(0);
+  } else {
+    const volume = quizObj.volume;
+    audioVolumeInput.value = volume * 100;
+    Object.values(audio).forEach(a => {
+      a.volume = volume;
+    });
+    changeVolumeIcon(volume);
+  }
+});
+audioVolumeInput.addEventListener("input", () => {
+  const volume = parseInt(audioVolumeInput.value) / 100;
+  if (volume !== 0) {
+    quizObj.volume = volume;
+  }
+  Object.values(audio).forEach(a => {
+    a.volume = volume;
+  });
+  changeVolumeIcon(volume);
+});
+
+function changeVolumeIcon(volume) {
+  document.getElementById("volume-mute-icon").classList.toggle("d-none", volume !== 0);
+  document.getElementById("volume-off-icon").classList.toggle("d-none", volume >= 0.3 || volume === 0);
+  document.getElementById("volume-down-icon").classList.toggle("d-none",volume >= 0.8 || volume < 0.3 || volume === 0);
+  document.getElementById("volume-up-icon").classList.toggle("d-none", volume < 0.8);
+}
 
 export function endQuiz() {
   clearInterval(quizObj.countdownInterval);

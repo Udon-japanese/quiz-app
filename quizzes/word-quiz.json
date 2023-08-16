@@ -1,0 +1,53 @@
+{
+  "id": "f476888e-3217-44e9-975e-9182746e68f3",
+  "title": "世界クイズ",
+  "description": "世界中の様々な事柄に関するクイズです。(ChatGPT作問)",
+  "length": 5,
+  "options": { "timer": 10 },
+  "questions": {
+    "q1": {
+      "options": {
+        "explanation": "アジアは世界最大の大陸で、多種多様な文化や地理が存在します。"
+      },
+      "answerType": "select",
+      "statement": "世界最大の大陸は何？",
+      "choices": ["アフリカ", "ヨーロッパ", "アジア", "南アメリカ"],
+      "correctAnswer": "アジア"
+    },
+    "q2": {
+      "options": {
+        "explanation": "ロシアは世界最大の国であり、広大な領土を持っています。"
+      },
+      "answerType": "select",
+      "statement": "世界で最も広い国はどこ？",
+      "choices": ["アメリカ", "カナダ", "ロシア", "中国"],
+      "correctAnswer": "ロシア"
+    },
+    "q3": {
+      "options": {
+        "explanation": "エベレストは世界最高峰の山で、多くの登山者に挑戦されています。"
+      },
+      "answerType": "type-text",
+      "statement": "世界最高峰の山は何？(カタカナ)",
+      "correctAnswer": "エベレスト"
+    },
+    "q4": {
+      "options": {
+        "explanation": "エッフェル塔はフランス・パリにあり、美しいランドマークとして知られています。"
+      },
+      "answerType": "select",
+      "statement": "エッフェル塔がある都市はどこ？",
+      "choices": ["ローマ", "パリ", "ベルリン", "ロンドン"],
+      "correctAnswer": "パリ"
+    },
+    "q5": {
+      "options": {
+        "explanation": "イギリスはヨーロッパに位置する国で、ロンドンを首都としています。イギリスは歴史的な背景や文化的な遺産を持つ国として知られています。"
+      },
+      "answerType": "select-all",
+      "statement": "以下の中でヨーロッパの国を選んでください。",
+      "choices": ["カナダ", "オーストラリア", "イギリス", "メキシコ"],
+      "correctAnswers": ["イギリス"]
+    }
+  }
+}

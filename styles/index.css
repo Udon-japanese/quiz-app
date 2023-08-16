@@ -62,8 +62,10 @@ input:checked + .toggle-label::before {
   background-color: #e4e4e4 !important;
 }
 
-.ellipsis-hover:hover {
-  background-color: #f2f2f2;
+@media (hover: hover) and (pointer: file) {
+  .ellipsis-hover:hover {
+    background-color: #f2f2f2;
+  }
 }
 
 .z-9999 {
@@ -120,4 +122,32 @@ input:checked + .toggle-label::before {
 .wrong-choice {
   background-color: #ff3146 !important;
   color: #f8f9fa !important;
+}
+
+.input-range {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  background: #0D6EFD;
+  height: 4px;
+  width: 80%;
+  border-radius: 10px;
+  outline: 0;
+}
+
+.input-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: #0D6EFD;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: 0px 3px 6px 0px rgba(0,0,0,0.15);
+}
+
+.input-range::-moz-focus-outer {
+  border: 0;
+}
+
+.input-range:active::-webkit-slider-thumb {
+  box-shadow: 0px 5px 10px -2px rgba(0,0,0,0.3);
 }
