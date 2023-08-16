@@ -151,3 +151,7 @@ input:checked + .toggle-label::before {
 .input-range:active::-webkit-slider-thumb {
   box-shadow: 0px 5px 10px -2px rgba(0,0,0,0.3);
 }
+
+canvas {
+  pointer-events: none;
+}

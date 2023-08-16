@@ -44,6 +44,7 @@ const quizObj = {
   waitTImeout: null,
   correctLength: 0,
   volume: audioVolumeInput.value / 100,
+  confettiFrameId: null,
 };
 
 Object.values(audio).forEach(a => {
@@ -95,7 +96,13 @@ nextQuestionBtn.addEventListener("click", (e) => {
     document.getElementById("correct-length").innerText = correctLength;
     const resultMessage = getQuizResultMessage(quizLength, correctLength);
     document.getElementById("result-message").innerText = resultMessage;
-    animatePieChart(0, getAccuracy(quizLength, correctLength));
+    const accuracy = getAccuracy(quizLength, correctLength);
+    animatePieChart(0, accuracy);
+    if (accuracy === 100) {
+      setTimeout(() => {
+        drawConfetti();
+      }, 2400);
+    }
     showScreen("result");
     nextQuestionBtn.classList.add("d-none");
     return;
@@ -212,6 +219,7 @@ function changeVolumeIcon(volume) {
 }
 
 export function endQuiz() {
+  stopAndClearConfetti();
   clearInterval(quizObj.countdownInterval);
   clearInterval(quizObj.timerInterval);
   clearTimeout(quizObj.waitTImeout);
@@ -231,6 +239,10 @@ async function showCorrectOrWrong(isAnswerCorrect) {
   correctOrWrongGroup.classList.add("d-none");
 }
 
+/**
+ * 
+ * @returns {Question}
+ */
 function getCurrentQuestion() {
   return quizObj.quiz.questions[`q${quizObj.questionIndex}`];
 }
@@ -352,13 +364,11 @@ function startTimer(time) {
         c.disabled = true;
       });
       const expl = q?.options?.explanation;
-      if (expl) {
-        questionSection.classList.add("d-none");
-        explSection.classList.remove("d-none");
-        userAnswerEl.innerHTML = "あなたの回答: 回答なし";
-        correctAnswerEl.innerHTML = `正解: ${correctAnswer}`;
-        explanationEl.innerText = expl;
-      }
+      questionSection.classList.add("d-none");
+      explSection.classList.remove("d-none");
+      userAnswerEl.innerHTML = `回答なし ${wrongIcon}`;
+      correctAnswerEl.innerHTML = `${correctAnswer}`;
+      explanationEl.innerText = expl || "解説なし";
       decisionBtn.classList.add("d-none");
       nextQuestionBtn.classList.remove("d-none");
     }
@@ -436,11 +446,13 @@ export function initQuizPage(quizData = null) {
     navigateToPage("quizList");
     return;
   }
+  stopAndClearConfetti();
   quizObj.questionIndex = 1;
   quizObj.timerInterval = null;
   quizObj.countdownInterval = null;
   quizObj.waitTImeout = null;
   quizObj.correctLength = 0;
+  quizObj.confettiFrameId = null;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
   document.getElementById("quiz-description").innerText = quiz.description;
@@ -597,4 +609,90 @@ function getQuizResultMessage(totalQuestions, totalCorrects) {
 function getAccuracy(totalQuestions, totalCorrects) {
   var accuracy = (totalCorrects / totalQuestions) * 100;
   return Math.round(accuracy);
+}
+
+function drawConfetti() {
+
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  ctx.globalCompositeOperation = "source-over";
+  const particles = [];
+  let particlesI = 0;
+
+  const colors = [
+    "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FF8000", "#0080FF", "#80FF00", "#FF0080",
+    "#00FF80", "#8000FF", "#FFC000", "#00C0FF", "#C0FF00", "#FF00C0", "#C000FF", "#FFB600", "#00B6FF", "#B6FF00",
+    "#FF00B6", "#B600FF", "#FFD200", "#00D2FF", "#D2FF00", "#FF00D2", "#D200FF", "#FF6E00", "#006EFF", "#6EFF00"
+  ];
+
+  function createDot(x, y, vx, vy, color) {
+    const dot = {
+      x: x,
+      y: y,
+      vx: vx,
+      vy: vy,
+      color: color,
+      id: particlesI,
+      life: 0,
+      maxlife: 600,
+      degree: getRandom(0, 360),
+      size: Math.floor(getRandom(8, 10)),
+      draw: function () {
+        this.degree += 1;
+        this.vx *= 0.99;
+        this.vy *= 0.999;
+        this.x += this.vx + Math.cos(this.degree * Math.PI / 180);
+        this.y += this.vy;
+        this.width = this.size;
+        this.height = Math.cos(this.degree * Math.PI / 45) * this.size;
+
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.x / 2, this.y + this.y / 2);
+        ctx.lineTo(this.x + this.x / 2 + this.width / 2, this.y + this.y / 2 + this.height);
+        ctx.lineTo(this.x + this.x / 2 + this.width + this.width / 2, this.y + this.y / 2 + this.height);
+        ctx.lineTo(this.x + this.x / 2 + this.width, this.y + this.y / 2);
+        ctx.closePath();
+        ctx.fill();
+        this.life++;
+        if (this.life >= this.maxlife) {
+          delete particles[this.id];
+        }
+      }
+    };
+    particles[particlesI] = dot;
+    particlesI++;
+    return dot;
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (quizObj.confettiFrameId % 3 == 0) {
+      createDot(
+        canvas.width * Math.random() - canvas.width + canvas.width / 2 * Math.random(),
+        -canvas.height / 2,
+        getRandom(1, 3),
+        getRandom(2, 4),
+        colors[Math.floor(Math.random() * colors.length)]
+      );
+    }
+    for (const i in particles) {
+      particles[i].draw();
+    }
+    quizObj.confettiFrameId = requestAnimationFrame(loop);
+  }
+
+  loop();
+
+  function getRandom(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+}
+
+function stopAndClearConfetti() {
+  window.cancelAnimationFrame(quizObj.confettiFrameId)
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Canvasをクリア
 }
