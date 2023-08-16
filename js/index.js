@@ -120,6 +120,8 @@ export function navigateToPage(pageName) {
   if (currentPageName === "quiz") {
     endQuiz();
   }
+  const offcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("offcanvas"))
+  offcanvasInstance.hide();
   switchToPage(pageName);
 
   const navbarBtnMap = {
