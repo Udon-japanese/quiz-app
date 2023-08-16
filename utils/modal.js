@@ -55,6 +55,9 @@ export function closeModal() {
  *
  * @param {Element} el
  */
+
+
+// https://hidde.blog/using-javascript-to-trap-focus-in-an-element/
 function trapFocus(el) {
   const focusableEls = el.querySelectorAll(
     `a[href]:not([disabled]):not([tabindex="-1"]),

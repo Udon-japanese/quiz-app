@@ -1,6 +1,6 @@
 "use strict";
 import { createElement } from "../utils/createElement.js";
-import { storage } from "../utils/storage.js";
+import { addQuizToStorage } from "../utils/storage.js";
 import { cloneFromTemplate, navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
@@ -375,7 +375,7 @@ function createQuiz() {
     return;
   }
 
-  storage.setItem(id, JSON.stringify(quiz));
+  addQuizToStorage(id, quiz);
 
   createQuizObj = {
     createChoiceCallLimit: 4,

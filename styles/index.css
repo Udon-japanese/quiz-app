@@ -20,10 +20,18 @@ textarea {
   resize: none;
 }
 
-/* スクロールバー */
+
 @media (max-width: 575px) {
+  /* スクロールバー */
   ::-webkit-scrollbar {
     display: none;
+  }
+
+  /* 一部のモバイル版Chromeにおいて、スクロール可能な量のcardがあり、
+  その中にdropdownがある場合、そのdropdownを画面下端付近で開くと、
+  画面が思わぬ場所にスクロールしてしまう不具合を防止 */
+  .dropdown-menu.show {
+    inset: 0px 0px auto auto !important;
   }
 }
 
@@ -62,7 +70,7 @@ input:checked + .toggle-label::before {
   background-color: #e4e4e4 !important;
 }
 
-@media (hover: hover) and (pointer: file) {
+@media (hover: hover) and (pointer: fine) {
   .ellipsis-hover:hover {
     background-color: #f2f2f2;
   }

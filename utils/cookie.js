@@ -6,7 +6,7 @@
  * @param {string} value
  * @param {number} daysToExpire
  */
-export function setCookie(name, value, daysToExpire) {
+export function setCookie(name, value, daysToExpire = 14) {
   const expires = new Date();
   expires.setDate(expires.getDate() + daysToExpire);
   const cookieValue = `${encodeURIComponent(value)}${

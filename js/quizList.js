@@ -1,6 +1,10 @@
 "use strict";
 import { cloneFromTemplate, initUploadBtn } from "./index.js";
-import { storage } from "../utils/storage.js";
+import {
+  addQuizToStorage,
+  getQuizFromStorage,
+  getQuizzesFromStorage,
+} from "../utils/storage.js";
 import { openModal } from "../utils/modal.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
 import { initQuizPage } from "./quiz.js";
@@ -21,10 +25,11 @@ const defaultQuizzes = [
   japanQuiz,
   wordQuiz,
 ];
-if (!storage.length) {
-  defaultQuizzes.forEach(q => {
-    storage.setItem(q.id, JSON.stringify(q));
-  })
+
+if (!getQuizzesFromStorage()) {
+  defaultQuizzes.forEach((defaultQuiz) => {
+    addQuizToStorage(defaultQuiz.id, defaultQuiz);
+  });
 }
 
 const qListPage = document.getElementById("quiz-list-page");
@@ -32,7 +37,7 @@ const quizzesCont = document.getElementById("quizzes");
 const searchQInput = document.getElementById("search-q");
 const headerCont = document.getElementById("header-cont");
 
-/**@type {Object.<string, Quiz>} */
+/**@type {Object<string, Quiz>} */
 let quizListObj = {};
 initUploadBtn(headerCont, 0, "d-sm-block d-none");
 initUploadBtn(headerCont, 100, "d-sm-none");
@@ -74,16 +79,25 @@ qListPage.addEventListener("click", (e) => {
           class: "del-quiz",
         },
       });
-    } else if (classList.contains("ellipsis-btn")) {
-      el.classList.add("ellipsis-bg");
     } else if (classList.contains("play-q")) {
       const quizId = el.id.split("play-")[1];
-      const quiz = JSON.parse(storage.getItem(quizId));
+      const quiz = getQuizFromStorage(quizId);
       initQuizPage(quiz);
     }
   });
 });
-
+qListPage.addEventListener("hidden.bs.dropdown", (e) => {
+  e.relatedTarget.classList.toggle(
+    "ellipsis-bg",
+    e.relatedTarget.classList.contains("show")
+  );
+});
+qListPage.addEventListener("shown.bs.dropdown", (e) => {
+  e.relatedTarget.classList.toggle(
+    "ellipsis-bg",
+    e.relatedTarget.classList.contains("show")
+  );
+});
 searchQInput.addEventListener("input", (e) => {
   const query = e.target.value;
   if (!query) {
@@ -109,20 +123,13 @@ searchQInput.addEventListener("input", (e) => {
   displayQuizList(qListObj);
 });
 
-qListPage.addEventListener("hidden.bs.dropdown", (e) => {
-  e.relatedTarget.classList.remove("ellipsis-bg");
-});
-
 displayQuizList();
 
 export function displayQuizList(obj) {
   quizzesCont.innerHTML = "";
 
   if (!obj) {
-    quizListObj = {};
-    for (const [id, quiz] of Object.entries(storage)) {
-      quizListObj[id] = JSON.parse(quiz);
-    }
+    quizListObj = getQuizzesFromStorage();
   }
 
   const qListObjToUse = obj ? obj : quizListObj;

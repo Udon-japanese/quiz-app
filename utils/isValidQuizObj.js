@@ -4,11 +4,11 @@
  * @returns {boolean}
  */
 export function isValidQuizObj(obj) {
-  const requiredKeys = ["id", "title", "description", "questions"];
+  const requiredKeys = ["id", "title", "description", "length", "questions"];
   if (
     !requiredKeys.every(
       (key) =>
-        key === "questions" || (key in obj && typeof obj[key] === "string")
+        key === "questions" || (key === "length" &&  key in obj && typeof obj[key] === "number") || (key in obj && typeof obj[key] === "string")
     )
   ) {
     return false;

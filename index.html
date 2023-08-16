@@ -111,14 +111,14 @@
             <h1 id="countdown" class="my-5">{number}</h1>
           </div>
         </div>
-        <div id="quiz-screen" class="card-body d-none">
+        <div id="quiz-screen" class="card-body d-none pt-0 pt-sm-3">
           <div id="question-section" class="d-none">
             <div id="correct-or-wrong-group"
               class="d-none position-absolute top-0 start-0 w-100 h-100 rounded z-3 d-flex justify-content-center align-items-center">
               <div id="correct" class="rounded-circle circle"></div>
               <div id="wrong" class="x-mark"></div>
             </div>
-            <h2 class="card-title question-index">{quesitonIndex}問目</h2>
+            <h2 class="card-title question-index mb-0 mb-sm-2">{quesitonIndex}問目</h2>
             <div id="timer-group" class="d-none">
               <div class="card-text text-center fs-5" id="timer-txt">残り: {timer-val}秒</div>
               <div class="bg-secondary-subtle rounded-4 mt-1 border border-2 border-secondary">
@@ -165,7 +165,7 @@
             <h4 class="card-title">解説</h4>
             <div id="explanation" class="fs-5">{explanation}</div>
           </div>
-          <div class="col-12 col-md-8 col-lg-6 mx-auto mt-4">
+          <div class="col-12 col-md-8 col-lg-6 mx-auto mt-2 mt-sm-4">
             <button id="decision-btn" type="button" class="btn btn-primary w-100">決定</button>
             <button id="next-question-btn" type="button" class="btn btn-primary w-100 d-none">次の問題</button>
           </div>
@@ -285,7 +285,7 @@
             <div class="ms-auto">
               <div class="dropdown">
                 <button class="btn rounded-circle border-0 ellipsis-hover ellipsis-btn" type="button"
-                  id="menu-{quiz-id}" data-bs-toggle="dropdown" aria-expanded="false">
+                  id="menu-{quiz-id}" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                   <i class="bi bi-three-dots-vertical fs-5"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-md-start" aria-labelledby="menu-{quiz-id}">

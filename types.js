@@ -22,5 +22,5 @@
  * @property {string} description クイズの説明
  * @property {string} length 問題数
  * @property {QuizOption} options クイズのオプション
- * @property {Object.<string, Question>} questions クイズの質問
+ * @property {Object<string, Question>} questions クイズの質問
  */

@@ -22,6 +22,7 @@ const wrongIcon = '<i class="bi bi-x-lg text-danger"></i>';
 const qPage = document.getElementById("quiz-page");
 const toggleVolumeBtn = document.getElementById("toggle-volume");
 const audioVolumeInput = document.getElementById("audio-volume-input");
+const confettiCanvas = document.getElementById("confetti");
 
 const screens = {
   title: document.getElementById("title-screen"),
@@ -611,13 +612,23 @@ function getAccuracy(totalQuestions, totalCorrects) {
   return Math.round(accuracy);
 }
 
-function drawConfetti() {
+function stopAndClearConfetti() {
+  window.cancelAnimationFrame(quizObj.confettiFrameId)
+  const ctx = confettiCanvas.getContext("2d");
+  ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); // Canvasをクリア
+}
 
-  const canvas = document.getElementById("confetti");
-  const ctx = canvas.getContext("2d");
+/**
+ * Copyright (c) 2023 by masuwa (https://codepen.io/ma_suwa/pen/oNXxQxZ)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+function drawConfetti() {
+  const ctx = confettiCanvas.getContext("2d");
   ctx.globalCompositeOperation = "source-over";
   const particles = [];
-  let particlesI = 0;
+  let confettiFrameId = 0;
 
   const colors = [
     "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FF8000", "#0080FF", "#80FF00", "#FF0080",
@@ -625,74 +636,71 @@ function drawConfetti() {
     "#FF00B6", "#B600FF", "#FFD200", "#00D2FF", "#D2FF00", "#FF00D2", "#D200FF", "#FF6E00", "#006EFF", "#6EFF00"
   ];
 
-  function createDot(x, y, vx, vy, color) {
-    const dot = {
-      x: x,
-      y: y,
-      vx: vx,
-      vy: vy,
-      color: color,
-      id: particlesI,
-      life: 0,
-      maxlife: 600,
-      degree: getRandom(0, 360),
-      size: Math.floor(getRandom(8, 10)),
-      draw: function () {
-        this.degree += 1;
-        this.vx *= 0.99;
-        this.vy *= 0.999;
-        this.x += this.vx + Math.cos(this.degree * Math.PI / 180);
-        this.y += this.vy;
-        this.width = this.size;
-        this.height = Math.cos(this.degree * Math.PI / 45) * this.size;
+  class ConfettiParticle {
+    constructor(x, y, vx, vy, color) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.vy = vy;
+      this.color = color;
+      this.life = 0;
+      this.maxLife = 600;
+      this.degree = getRandom(0, 360);
+      this.size = Math.floor(getRandom(8, 10));
+    }
+  
+    draw(ctx) {
+      this.degree += 1;
+      this.vx *= 0.99;
+      this.vy *= 0.999;
+      this.x += this.vx + Math.cos(this.degree * Math.PI / 180);
+      this.y += this.vy;
+      this.width = this.size;
+      this.height = Math.cos(this.degree * Math.PI / 45) * this.size;
+  
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.moveTo(this.x + this.x / 2, this.y + this.y / 2);
+      ctx.lineTo(this.x + this.x / 2 + this.width / 2, this.y + this.y / 2 + this.height);
+      ctx.lineTo(this.x + this.x / 2 + this.width + this.width / 2, this.y + this.y / 2 + this.height);
+      ctx.lineTo(this.x + this.x / 2 + this.width, this.y + this.y / 2);
+      ctx.closePath();
+      ctx.fill();
+      this.life++;
+  
+      return this.life >= this.maxLife;
+    }
+  }
 
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.moveTo(this.x + this.x / 2, this.y + this.y / 2);
-        ctx.lineTo(this.x + this.x / 2 + this.width / 2, this.y + this.y / 2 + this.height);
-        ctx.lineTo(this.x + this.x / 2 + this.width + this.width / 2, this.y + this.y / 2 + this.height);
-        ctx.lineTo(this.x + this.x / 2 + this.width, this.y + this.y / 2);
-        ctx.closePath();
-        ctx.fill();
-        this.life++;
-        if (this.life >= this.maxlife) {
-          delete particles[this.id];
-        }
-      }
-    };
-    particles[particlesI] = dot;
-    particlesI++;
-    return dot;
+  function createDot() {
+    const x = confettiCanvas.width * Math.random() - confettiCanvas.width + confettiCanvas.width / 2 * Math.random();
+    const y = -confettiCanvas.height / 2;
+    const vx = getRandom(1, 3);
+    const vy = getRandom(2, 4);
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    particles.push(new ConfettiParticle(x, y, vx, vy, color));
   }
 
   function loop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
 
-    if (quizObj.confettiFrameId % 3 == 0) {
-      createDot(
-        canvas.width * Math.random() - canvas.width + canvas.width / 2 * Math.random(),
-        -canvas.height / 2,
-        getRandom(1, 3),
-        getRandom(2, 4),
-        colors[Math.floor(Math.random() * colors.length)]
-      );
+    if (confettiFrameId % 3 === 0) {
+      createDot();
     }
-    for (const i in particles) {
-      particles[i].draw();
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      if (particles[i].draw(ctx)) {
+        particles.splice(i, 1);
+      }
     }
-    quizObj.confettiFrameId = requestAnimationFrame(loop);
+
+    confettiFrameId = requestAnimationFrame(loop);
   }
-
-  loop();
 
   function getRandom(min, max) {
     return Math.random() * (max - min) + min;
   }
-}
 
-function stopAndClearConfetti() {
-  window.cancelAnimationFrame(quizObj.confettiFrameId)
-  const canvas = document.getElementById("confetti");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // Canvasをクリア
+  loop();
 }

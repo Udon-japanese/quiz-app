@@ -1,5 +1,5 @@
 "use strict";
-import { storage } from "../utils/storage.js";
+import { addQuizToStorage, getQuizFromStorage, removeQuiz } from "../utils/storage.js";
 import { createElement } from "../utils/createElement.js";
 import { displayQuizList } from "./quizList.js";
 import { closeModal } from "../utils/modal.js";
@@ -22,6 +22,8 @@ const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 loadInitialPage();
 
+// ページがロードされたときに容量不足を監視
+window.addEventListener('load', monitorStorageCapacity);
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
   if (!els) return;
@@ -39,13 +41,13 @@ document.addEventListener("click", (e) => {
     } else if (classList.contains("to-q-page")) {
       navigateToPage("quiz");
     } else if (classList.contains("share-q")) {
-      const qId = el.id.split("share-")[1];
-      const quiz = storage.getItem(qId);
+      const quizId = el.id.split("share-")[1];
+      const quiz = getQuizFromStorage(quizId);
       const blob = new Blob([quiz], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const dlLink = createElement("a", {
         href: url,
-        download: `quiz_${qId}.json`,
+        download: `quiz_${quizId}.json`,
         class: "d-none",
       });
       dlLink.click();
@@ -54,7 +56,7 @@ document.addEventListener("click", (e) => {
       navigateToPage("quizList");
     } else if (classList.contains("del-quiz")) {
       const delQId = el.id.split("del-")[1];
-      storage.removeItem(delQId);
+      removeQuiz(delQId);
       closeModal();
       displayQuizList();
     }
@@ -84,7 +86,7 @@ document.addEventListener("change", (e) => {
           const obj = JSON.parse(jsonContent);
 
           if (isValidQuizObj(obj)) {
-            storage.setItem(obj.id, JSON.stringify(obj));
+            addQuizToStorage(obj.id, obj);
             showToast("green", "クイズが保存されました");
             navigateToPage("quizList");
           } else {
@@ -147,7 +149,7 @@ export function navigateToPage(pageName) {
  */
 function switchToPage(pageName) {
   if (pageName == "quiz") {
-    setCookie("lastAccess", `${pageName}?${document.querySelector(".has-quiz-id").id.split("quiz-")[1]}`, 14);
+    setCookie("lastAccess", `${pageName}?${document.querySelector(".has-quiz-id").id.split("quiz-")[1]}`);
   } else {
     setCookie("lastAccess", pageName, 14);  
   }
@@ -215,7 +217,7 @@ function loadInitialPage() {
         navigateToPage("top");
         return;
       }; 
-      const quiz = JSON.parse(storage.getItem(qId));
+      const quiz = getQuizFromStorage(qId);
       if (!quiz) {
         navigateToPage("top");
         return
@@ -226,5 +228,14 @@ function loadInitialPage() {
     }
   } else {
     navigateToPage("top");
+  }
+}
+
+function monitorStorageCapacity() {
+  const maxLocalStorageSize = 5 * 1000 * 1000; // 5MB
+  const usedLocalStorageSpace = JSON.stringify(localStorage).length;
+
+  if (usedLocalStorageSpace >= maxLocalStorageSize) {
+    showToast("yellow", "データをこれ以上保存できません。新しくクイズを保存したい場合は、不要なクイズを削除してください");
   }
 }
