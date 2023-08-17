@@ -7,6 +7,7 @@ import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
+import { saveQuizDraft } from "./createQuiz.js";
 
 const topPage = document.getElementById("top-page");
 const pages = {
@@ -103,6 +104,10 @@ document.addEventListener("change", (e) => {
   });
 });
 
+/**
+ * 
+ * @returns {"quizList" | "createQuiz" | "top" | "quiz"}
+ */
 function getCurrentPageName() {
   const currentPageEl = document.querySelector(".page:not(.d-none)");
     for (const pageName in pages) {
@@ -121,6 +126,8 @@ export function navigateToPage(pageName) {
   const currentPageName = getCurrentPageName();
   if (currentPageName === "quiz") {
     endQuiz();
+  } else if (currentPageName === "createQuiz") {
+    saveQuizDraft();
   }
   const offcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("offcanvas"))
   offcanvasInstance.hide();
@@ -181,10 +188,10 @@ export function cloneFromTemplate(id) {
 /**
  * @description
  * @param {HTMLElement} btnCont
- * @param {25 | 50 | 75 | 100} width
+ * @param {0 | 25 | 50 | 75 | 100} width
  * @param {string} className
  */
-export function initUploadBtn(btnCont, width = 0, className = "") {
+export function initUploadBtn(btnCont, width, className = "") {
   const uploadQBtn = cloneFromTemplate("upload-quiz-tem");
   btnCont.appendChild(uploadQBtn);
   const uploadQBtnEls = btnCont.querySelectorAll(".upload-q-btn");

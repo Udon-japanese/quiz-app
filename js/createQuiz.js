@@ -1,32 +1,20 @@
 "use strict";
 import { createElement } from "../utils/createElement.js";
-import { addQuizToStorage } from "../utils/storage.js";
+import { addQuizToStorage, saveQuizDraftToStorage } from "../utils/storage.js";
 import { cloneFromTemplate, navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
 import { displayQuizList } from "./quizList.js";
 
 const crtQPage = document.getElementById("crt-quiz-page");
+let addQBtn = document.querySelector(".add-question");
+let questionsCont = document.getElementById("questions");
+
 const counterInitialState = 2;
 const isSelectAllInitialState = null;
 const answerTypeInitialState = null;
-let createQuizObj = {
-  createChoiceCallLimit: 4,
-  createQuestionCallLimit: 10,
-  selectCounter: {},
-  selectAllCounter: {},
-  questionCounter: counterInitialState,
-  isSelectAll: {},
-  answerType: {},
-};
-const crtQPageClone = cloneFromTemplate("crt-q-page-tem");
-crtQPage.appendChild(crtQPageClone);
-let addQBtn = document.querySelector(".add-question");
-let questionsCont = document.getElementById("questions");
-initQuizObject(createQuizObj);
-createQuestion(true);
-toggleAnswerType(1);
-checkQuestionsState();
+const createQuizObj = {};
+initCrtQuizPage();
 
 crtQPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -260,9 +248,9 @@ function createQuiz() {
   const timerCheckbox = timerOption.querySelector(".timer-toggle");
   if (timerCheckbox.checked) {
     const timerVal = timerOption.querySelector("#timer").value;
-    if (timerVal) quiz.options.timer = parseInt(timerVal);
+    if (timerVal) quiz.options.timer = parseFloat(timerVal);
   }
-  
+
   questions.forEach((question) => {
     const questionN = question.id.split("q")[1];
     const questionKey = `q${questionN}`;
@@ -281,7 +269,7 @@ function createQuiz() {
     quiz.questions[questionKey].answerType = answerType;
 
     switch (answerType) {
-      case "type-text":
+      case "type-text": {
         const correctAnswerEl = question.querySelector(
           `#q${questionN}-type-txt-correct`
         );
@@ -292,12 +280,13 @@ function createQuiz() {
         }
         quiz.questions[questionKey].correctAnswer = correctAnswer;
         break;
-      case "select":
+      }
+      case "select": {
         quiz.questions[questionKey].choices = [];
-        const selectChoices = getChoices(questionN, false);
-        let noneSelChecked = true;
+        const choices = getChoices(questionN, false);
+        let noneChecked = true;
         const setCorrects = [];
-        selectChoices.forEach((choice, i) => {
+        choices.forEach((choice, i) => {
           const cEl = choice.querySelector(".type-choice");
           const c = cEl.value;
           if (!c) {
@@ -312,10 +301,10 @@ function createQuiz() {
           setCorrects.push(correctAnswerEl);
           const isCorrectAnswer = correctAnswerEl.checked;
           if (isCorrectAnswer) {
-            noneSelChecked = false;
+            noneChecked = false;
             quiz.questions[questionKey].correctAnswer = c;
           }
-          if (i + 1 === selectChoices.length && noneSelChecked) {
+          if (i + 1 === choices.length && noneChecked) {
             if (!invalidForm) invalidForm = choice;
             setCorrects.forEach((c) => {
               addValidatedClass(c.parentNode);
@@ -323,13 +312,14 @@ function createQuiz() {
           }
         });
         break;
-      case "select-all":
+      }
+      case "select-all": {
         quiz.questions[questionKey].choices = [];
         quiz.questions[questionKey].correctAnswers = [];
-        const selectAllChoices = getChoices(questionN, true);
-        let noneSelAllChecked = true;
-        const setCorrectAlls = [];
-        selectAllChoices.forEach((choice, i) => {
+        const choices = getChoices(questionN, true);
+        let noneChecked = true;
+        const setCorrects = [];
+        choices.forEach((choice, i) => {
           const cEl = choice.querySelector(".type-choice");
           const c = cEl.value;
           if (!c) {
@@ -341,18 +331,18 @@ function createQuiz() {
             c,
           ];
           const correctAnswerEl = choice.querySelector(".set-correct");
-          setCorrectAlls.push(correctAnswerEl);
+          setCorrects.push(correctAnswerEl);
           const isCorrectAnswer = correctAnswerEl.checked;
           if (isCorrectAnswer) {
-            noneSelAllChecked = false;
+            noneChecked = false;
             quiz.questions[questionKey].correctAnswers = [
               ...quiz.questions[questionKey].correctAnswers,
               c,
             ];
           }
-          if (i + 1 === selectAllChoices.length && noneSelAllChecked) {
+          if (i + 1 === choices.length && noneChecked) {
             if (!invalidForm) invalidForm = choice;
-            setCorrectAlls.forEach((c) => {
+            setCorrects.forEach((c) => {
               addValidatedClass(c.parentNode);
               c.required = true;
               c.classList.add("validated-checkbox");
@@ -360,6 +350,7 @@ function createQuiz() {
           }
         });
         break;
+      }
     }
     const explOption = question.querySelector(`#q${questionN}-option-expl`);
     const explToggle = explOption.querySelector(".expl-toggle");
@@ -377,25 +368,7 @@ function createQuiz() {
 
   addQuizToStorage(id, quiz);
 
-  createQuizObj = {
-    createChoiceCallLimit: 4,
-    createQuestionCallLimit: 10,
-    selectCounter: {},
-    selectAllCounter: {},
-    questionCounter: counterInitialState,
-    isSelectAll: {},
-    answerType: {},
-  };
-  crtQPage.innerHTML = "";
-  const crtQPageClone = cloneFromTemplate("crt-q-page-tem");
-  crtQPage.appendChild(crtQPageClone);
-  addQBtn = document.querySelector(".add-question");
-  questionsCont = document.getElementById("questions");
-  initQuizObject(createQuizObj);
-  createQuestion(true);
-  toggleAnswerType(1);
-  checkQuestionsState();
-
+  initCrtQuizPage();
   navigateToPage("quizList");
   showToast("green", "クイズが作成されました");
   displayQuizList();
@@ -699,4 +672,123 @@ function toggleOnchange(target, optContCl, optTextareaCl) {
  */
 function addValidatedClass(e) {
   e.parentNode.classList.add("was-validated");
+}
+
+export function saveQuizDraft() {
+  const id = crypto.randomUUID();
+  const title = document.getElementById("title").value;
+  const descriptionEl = document.getElementById("description");
+  const description = descriptionEl.value || "説明なし";
+
+  const questions = getQuestions();
+
+  /**
+   * @type {Quiz}
+   */
+  const quizDraft = {
+    id,
+    title,
+    description,
+    length: questions.length,
+    options: {},
+    questions: {},
+  };
+
+  const timerOption = document.querySelector("#option-timer");
+  const timerCheckbox = timerOption.querySelector(".timer-toggle");
+  if (timerCheckbox.checked) {
+    const timerVal = timerOption.querySelector("#timer").value;
+    if (timerVal) quizDraft.options.timer = parseFloat(timerVal);
+  }
+
+  questions.forEach((question) => {
+    const questionN = question.id.split("q")[1];
+    const questionKey = `q${questionN}`;
+
+    const statement = question.querySelector(`#q${questionN}-statement`).value;
+
+    quizDraft.questions[questionKey] = {};
+    quizDraft.questions[questionKey].options = {};
+    quizDraft.questions[questionKey].statement = statement;
+
+    const answerType = createQuizObj.answerType[questionN];
+    quizDraft.questions[questionKey].answerType = answerType;
+
+    switch (answerType) {
+      case "type-text": {
+        const correctAnswer = question.querySelector(
+          `#q${questionN}-type-txt-correct`
+        ).value;
+        quizDraft.questions[questionKey].correctAnswer = correctAnswer;
+        break;
+      }
+      case "select": {
+        quizDraft.questions[questionKey].choices = [];
+        const choices = getChoices(questionN, false);
+        choices.forEach((choice) => {
+          const c = choice.querySelector(".type-choice").value;
+          quizDraft.questions[questionKey].choices = [
+            ...quizDraft.questions[questionKey].choices,
+            c,
+          ];
+          const isCorrectAnswer = choice.querySelector(".set-correct").checked;
+          if (isCorrectAnswer) {
+            quizDraft.questions[questionKey].correctAnswer = c;
+          }
+        });
+        break;
+      }
+      case "select-all": {
+        quizDraft.questions[questionKey].choices = [];
+        quizDraft.questions[questionKey].correctAnswers = [];
+        const choices = getChoices(questionN, true);
+        choices.forEach((choice) => {
+          const c = choice.querySelector(".type-choice").value;
+          quizDraft.questions[questionKey].choices = [
+            ...quizDraft.questions[questionKey].choices,
+            c,
+          ];
+          const isCorrectAnswer = choice.querySelector(".set-correct").checked;
+          if (isCorrectAnswer) {
+            quizDraft.questions[questionKey].correctAnswers = [
+              ...quizDraft.questions[questionKey].correctAnswers,
+              c,
+            ];
+          }
+        });
+        break;
+      }
+    }
+    const explOption = question.querySelector(`#q${questionN}-option-expl`);
+    const explToggle = explOption.querySelector(".expl-toggle");
+    if (explToggle.checked) {
+      const explTextarea = explOption.querySelector(".expl-textarea");
+      const expl = explTextarea.value;
+      if (expl) quizDraft.questions[questionKey].options.explanation = expl;
+    }
+  });
+
+  saveQuizDraftToStorage(quizDraft);
+
+  initCrtQuizPage();
+}
+
+function initCrtQuizPage() {
+  createQuizObj.createChoiceCallLimit = 4;
+  createQuizObj.createQuestionCallLimit = 10;
+  createQuizObj.selectCounter = {};
+  createQuizObj.selectAllCounter = {};
+  createQuizObj.questionCounter = counterInitialState;
+  createQuizObj.isSelectAll = {};
+  createQuizObj.answerType = {};
+
+  crtQPage.innerHTML = "";
+  const crtQPageClone = cloneFromTemplate("crt-q-page-tem");
+  crtQPage.appendChild(crtQPageClone);
+  addQBtn = document.querySelector(".add-question");
+  questionsCont = document.getElementById("questions");
+  initQuizObject(createQuizObj);
+  createQuestion(true);
+  toggleAnswerType(1);
+  checkQuestionsState();
 }

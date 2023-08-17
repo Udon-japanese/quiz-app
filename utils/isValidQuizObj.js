@@ -1,3 +1,4 @@
+"use strict";
 /**
  *
  * @param {object} obj
@@ -12,6 +13,12 @@ export function isValidQuizObj(obj) {
     )
   ) {
     return false;
+  }
+
+  if (obj?.options) {
+    if (!obj?.options?.timer || typeof obj?.options?.timer !== "number") {
+      return false;
+    }
   }
 
   const { questions } = obj;
@@ -37,6 +44,12 @@ function isValidQuestionObj(question) {
     )
   ) {
     return false;
+  }
+
+  if (question?.options) {
+    if (!question?.options?.explanation || typeof question?.options?.explanation !== "string") {
+      return false;
+    }
   }
 
   const validAnswerTypes = ["select", "select-all", "type-text"];

@@ -27,6 +27,10 @@ textarea {
     display: none;
   }
 
+  /* 文字の大きさ */
+  body {
+    font-size: 85% !important;
+  }
   /* 一部のモバイル版Chromeにおいて、スクロール可能な量のcardがあり、
   その中にdropdownがある場合、そのdropdownを画面下端付近で開くと、
   画面が思わぬ場所にスクロールしてしまう不具合を防止 */

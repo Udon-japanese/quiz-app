@@ -26,21 +26,25 @@ const defaultQuizzes = [
   wordQuiz,
 ];
 
-if (!getQuizzesFromStorage()) {
-  defaultQuizzes.forEach((defaultQuiz) => {
-    addQuizToStorage(defaultQuiz.id, defaultQuiz);
-  });
-}
+// if (!getQuizzesFromStorage()) {
+//   defaultQuizzes.forEach((defaultQuiz) => {
+//     addQuizToStorage(defaultQuiz.id, defaultQuiz);
+//   });
+// }
 
 const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
 const searchQInput = document.getElementById("search-q");
-const headerCont = document.getElementById("header-cont");
+const headerBtnCont = document.getElementById("header-btn-cont");
+const noneQuizEl = document.getElementById("none-quiz");
+const noneQuizTxtEl = document.getElementById("none-quiz-txt");
 
 /**@type {Object<string, Quiz>} */
 let quizListObj = {};
-initUploadBtn(headerCont, 0, "d-sm-block d-none");
-initUploadBtn(headerCont, 100, "d-sm-none");
+initUploadBtn(headerBtnCont, 0, "d-none d-sm-inline-block");
+initUploadBtn(headerBtnCont, 100, "d-sm-none");
+const noneQuizBtnCont = noneQuizEl.querySelector(".btn-cont");
+initUploadBtn(noneQuizBtnCont, 100);
 
 qListPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -105,19 +109,14 @@ searchQInput.addEventListener("input", (e) => {
     return;
   }
   const qListObj = searchQuizzes(query);
-  if (!Object.keys(qListObj).length) {
+  const noneResult = !Object.keys(qListObj).length;
+  noneQuizEl.classList.toggle("d-none", !noneResult);
+  if (noneResult) {
+    noneQuizTxtEl.innerHTML = `<div class="mb-2 mb-sm-0">「${query}」に当てはまるクイズは見つかりませんでした</div>
+    他のキーワードで検索するか、自分でクイズを作成、
+    <div class="d-sm-inline-block">または他の人のクイズで遊んでみましょう！</div>`
+    headerBtnCont.classList.toggle("d-none", noneResult);
     quizzesCont.innerHTML = "";
-    let noneResult = document.getElementById("none-result");
-    if (!noneResult) {
-      noneResult = cloneFromTemplate("none-result-tem");
-      const uploadQBtnCont = noneResult.querySelector(".btn-cont");
-      initUploadBtn(uploadQBtnCont, 100);
-      quizzesCont.appendChild(noneResult);
-      noneResult = document.getElementById("none-result");
-    }
-    const noneRBody = noneResult.querySelector(".card-text");
-    const noneRTxt = noneRBody.innerText;
-    noneRBody.innerText = noneRTxt.replace("{query}", query);
     return;
   }
   displayQuizList(qListObj);
@@ -125,7 +124,7 @@ searchQInput.addEventListener("input", (e) => {
 
 displayQuizList();
 
-export function displayQuizList(obj) {
+export function displayQuizList(obj = null) {
   quizzesCont.innerHTML = "";
 
   if (!obj) {
@@ -135,12 +134,13 @@ export function displayQuizList(obj) {
   const qListObjToUse = obj ? obj : quizListObj;
   const noneQuiz = !Object.keys(qListObjToUse).length;
   if (noneQuiz) {
-    const noneQuiz = cloneFromTemplate("none-quiz-tem");
-    const uploadQBtnCont = noneQuiz.querySelector(".btn-cont");
-    initUploadBtn(uploadQBtnCont, 100);
-    quizzesCont.appendChild(noneQuiz);
+    noneQuizTxtEl.innerHTML = `<div class="mb-2 mb-sm-0">まだクイズがありません</div>
+    自分でクイズを作成するか、
+    <div class="d-sm-inline-block">他の人のクイズで遊んでみましょう！</div>`;
   }
+  noneQuizEl.classList.toggle("d-none", !noneQuiz);
   searchQInput.classList.toggle("d-none", noneQuiz);
+  headerBtnCont.classList.toggle("d-none", noneQuiz);
 
   Object.entries(qListObjToUse).forEach(([id, quiz]) => {
     const quizItem = cloneFromTemplate("quiz-item-tem");

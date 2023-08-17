@@ -37,11 +37,31 @@ export function removeQuizzes() {
   storage.removeItem("quizzes");
 }
 
-function updateQuizToStorage(id, updatedQuiz) {
+export function updateQuizToStorage(id, updatedQuiz) {
   const quizzes = getQuizzesFromStorage();
   
   if (quizzes.hasOwnProperty(id)) {
     quizzes[id] = updatedQuiz;
     saveQuizzesToStorage(quizzes);
   }
+}
+
+export function getVolumeFromStorage() {
+  return parseFloat(storage.getItem("volume"));
+}
+
+/**
+ * 
+ * @param {number} volume 0~1までの数字
+ */
+export function setVolumeToStorage(volume) {
+  storage.setItem("volume", volume.toString());
+}
+
+export function saveQuizDraftToStorage(quizDraft) {
+  storage.setItem("quiz-draft", JSON.stringify(quizDraft));
+}
+
+export function getQuizDraftFromStorage() {
+  storage.getItem("quiz-draft");
 }

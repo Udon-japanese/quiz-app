@@ -2,6 +2,7 @@
 import { navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
+import { getVolumeFromStorage, setVolumeToStorage } from "../utils/storage.js";
 
 const answerGuide = document.getElementById("answer-guide");
 const choiceChecks = document.querySelectorAll(".choice-check");
@@ -35,6 +36,8 @@ const audio = {
   wrong: new Audio("audios/wrong.mp3"),
   timer: new Audio("audios/timer.mp3"),
   countdown: new Audio("audios/countdown.mp3"),
+  drumroll: new Audio("audios/drumroll.mp3"),
+  cymbal: new Audio("audios/cymbal.mp3"),
 };
 const quizObj = {
   /**@type {Quiz} */
@@ -44,11 +47,12 @@ const quizObj = {
   countdownInterval: null,
   waitTImeout: null,
   correctLength: 0,
-  volume: audioVolumeInput.value / 100,
-  confettiFrameId: null,
+  volume: getVolumeFromStorage() ?? audioVolumeInput.value / 100,
+  confettiFrameId: 0,
+  confettiTimeout: null,
 };
-
-Object.values(audio).forEach(a => {
+audioVolumeInput.value = quizObj.volume * 100;
+Object.values(audio).forEach((a) => {
   a.volume = quizObj.volume;
 });
 changeVolumeIcon(quizObj.volume);
@@ -98,9 +102,9 @@ nextQuestionBtn.addEventListener("click", (e) => {
     const resultMessage = getQuizResultMessage(quizLength, correctLength);
     document.getElementById("result-message").innerText = resultMessage;
     const accuracy = getAccuracy(quizLength, correctLength);
-    animatePieChart(0, accuracy);
+    drawPieChart(0, accuracy);
     if (accuracy === 100) {
-      setTimeout(() => {
+      quizObj.confettiTimeout = setTimeout(() => {
         drawConfetti();
       }, 2400);
     }
@@ -188,15 +192,17 @@ decisionBtn.addEventListener("click", async (e) => {
 toggleVolumeBtn.addEventListener("click", () => {
   if (parseInt(audioVolumeInput.value) > 0) {
     audioVolumeInput.value = 0;
-    Object.values(audio).forEach(a => {
+    Object.values(audio).forEach((a) => {
       a.volume = 0;
+      setVolumeToStorage(0);
     });
     changeVolumeIcon(0);
   } else {
-    const volume = quizObj.volume;
+    const volume = quizObj.volume || 1;// 1 はローカルストレージにvolumeが0で保存されている時のため
     audioVolumeInput.value = volume * 100;
-    Object.values(audio).forEach(a => {
+    Object.values(audio).forEach((a) => {
       a.volume = volume;
+      setVolumeToStorage(volume);
     });
     changeVolumeIcon(volume);
   }
@@ -206,24 +212,34 @@ audioVolumeInput.addEventListener("input", () => {
   if (volume !== 0) {
     quizObj.volume = volume;
   }
-  Object.values(audio).forEach(a => {
+  Object.values(audio).forEach((a) => {
     a.volume = volume;
+    setVolumeToStorage(volume);
   });
   changeVolumeIcon(volume);
 });
 
 function changeVolumeIcon(volume) {
-  document.getElementById("volume-mute-icon").classList.toggle("d-none", volume !== 0);
-  document.getElementById("volume-off-icon").classList.toggle("d-none", volume >= 0.3 || volume === 0);
-  document.getElementById("volume-down-icon").classList.toggle("d-none",volume >= 0.8 || volume < 0.3 || volume === 0);
-  document.getElementById("volume-up-icon").classList.toggle("d-none", volume < 0.8);
+  document
+    .getElementById("volume-mute-icon")
+    .classList.toggle("d-none", volume !== 0);
+  document
+    .getElementById("volume-off-icon")
+    .classList.toggle("d-none", volume >= 0.3 || volume === 0);
+  document
+    .getElementById("volume-down-icon")
+    .classList.toggle("d-none", volume >= 0.8 || volume < 0.3 || volume === 0);
+  document
+    .getElementById("volume-up-icon")
+    .classList.toggle("d-none", volume < 0.8);
 }
 
 export function endQuiz() {
-  stopAndClearConfetti();
   clearInterval(quizObj.countdownInterval);
   clearInterval(quizObj.timerInterval);
   clearTimeout(quizObj.waitTImeout);
+  clearTimeout(quizObj.confettiTimeout);
+  stopAndClearConfetti();
   Object.values(audio).forEach((a) => {
     pauseAudio(a);
   });
@@ -241,7 +257,7 @@ async function showCorrectOrWrong(isAnswerCorrect) {
 }
 
 /**
- * 
+ *
  * @returns {Question}
  */
 function getCurrentQuestion() {
@@ -356,19 +372,18 @@ function startTimer(time) {
     }
 
     if (remainingTime <= 0) {
-      const q = getCurrentQuestion();
-      const { correctAnswer } = q;
       clearInterval(quizObj.timerInterval);
       pauseAudio(audio.timer);
       await showCorrectOrWrong(false);
-      choiceChecks.forEach((c) => {
-        c.disabled = true;
-      });
+      const q = getCurrentQuestion();
+      const { correctAnswer, correctAnswers } = q;
       const expl = q?.options?.explanation;
       questionSection.classList.add("d-none");
       explSection.classList.remove("d-none");
       userAnswerEl.innerHTML = `回答なし ${wrongIcon}`;
-      correctAnswerEl.innerHTML = `${correctAnswer}`;
+      correctAnswerEl.innerHTML = `${
+        correctAnswer || correctAnswers.join(", ")
+      }`;
       explanationEl.innerText = expl || "解説なし";
       decisionBtn.classList.add("d-none");
       nextQuestionBtn.classList.remove("d-none");
@@ -453,7 +468,8 @@ export function initQuizPage(quizData = null) {
   quizObj.countdownInterval = null;
   quizObj.waitTImeout = null;
   quizObj.correctLength = 0;
-  quizObj.confettiFrameId = null;
+  quizObj.confettiFrameId = 0;
+  quizObj.confettiTimeout = null;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
   document.getElementById("quiz-description").innerText = quiz.description;
@@ -529,7 +545,7 @@ function areArraysEqual(arr1, arr2) {
   return true;
 }
 
-function animatePieChart(startPercentage, endPercentage) {
+function drawPieChart(startPercentage, endPercentage) {
   const canvas = document.getElementById("pieChart");
   const context = canvas.getContext("2d");
   const centerX = canvas.width / 2;
@@ -561,6 +577,10 @@ function animatePieChart(startPercentage, endPercentage) {
     context.fillText(`${percentage}%`, centerX, centerY);
   }
 
+  if (endPercentage !== 0) {// 正答率が0%の時は音を流さない
+    playAudio(audio.drumroll);
+  }
+
   function animate(startPercentage) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -585,6 +605,11 @@ function animatePieChart(startPercentage, endPercentage) {
       setTimeout(() => {
         animate(startPercentage + 1);
       }, 25);
+    } else {
+      if (endPercentage !== 0) {// 正答率が0%の時は音を流さない
+        pauseAudio(audio.drumroll);
+        playAudio(audio.cymbal);
+      }
     }
   }
 
@@ -613,7 +638,7 @@ function getAccuracy(totalQuestions, totalCorrects) {
 }
 
 function stopAndClearConfetti() {
-  window.cancelAnimationFrame(quizObj.confettiFrameId)
+  window.cancelAnimationFrame(quizObj.confettiFrameId);
   const ctx = confettiCanvas.getContext("2d");
   ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); // Canvasをクリア
 }
@@ -628,15 +653,41 @@ function drawConfetti() {
   const ctx = confettiCanvas.getContext("2d");
   ctx.globalCompositeOperation = "source-over";
   const particles = [];
-  let confettiFrameId = 0;
 
   const colors = [
-    "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FF8000", "#0080FF", "#80FF00", "#FF0080",
-    "#00FF80", "#8000FF", "#FFC000", "#00C0FF", "#C0FF00", "#FF00C0", "#C000FF", "#FFB600", "#00B6FF", "#B6FF00",
-    "#FF00B6", "#B600FF", "#FFD200", "#00D2FF", "#D2FF00", "#FF00D2", "#D200FF", "#FF6E00", "#006EFF", "#6EFF00"
+    "#FF0000",
+    "#00FF00",
+    "#0000FF",
+    "#FFFF00",
+    "#FF00FF",
+    "#00FFFF",
+    "#FF8000",
+    "#0080FF",
+    "#80FF00",
+    "#FF0080",
+    "#00FF80",
+    "#8000FF",
+    "#FFC000",
+    "#00C0FF",
+    "#C0FF00",
+    "#FF00C0",
+    "#C000FF",
+    "#FFB600",
+    "#00B6FF",
+    "#B6FF00",
+    "#FF00B6",
+    "#B600FF",
+    "#FFD200",
+    "#00D2FF",
+    "#D2FF00",
+    "#FF00D2",
+    "#D200FF",
+    "#FF6E00",
+    "#006EFF",
+    "#6EFF00",
   ];
 
-  class ConfettiParticle {
+  class Dot {
     constructor(x, y, vx, vy, color) {
       this.x = x;
       this.y = y;
@@ -648,44 +699,53 @@ function drawConfetti() {
       this.degree = getRandom(0, 360);
       this.size = Math.floor(getRandom(8, 10));
     }
-  
+
     draw(ctx) {
       this.degree += 1;
       this.vx *= 0.99;
       this.vy *= 0.999;
-      this.x += this.vx + Math.cos(this.degree * Math.PI / 180);
+      this.x += this.vx + Math.cos((this.degree * Math.PI) / 180);
       this.y += this.vy;
       this.width = this.size;
-      this.height = Math.cos(this.degree * Math.PI / 45) * this.size;
-  
+      this.height = Math.cos((this.degree * Math.PI) / 45) * this.size;
+
       ctx.fillStyle = this.color;
       ctx.beginPath();
       ctx.moveTo(this.x + this.x / 2, this.y + this.y / 2);
-      ctx.lineTo(this.x + this.x / 2 + this.width / 2, this.y + this.y / 2 + this.height);
-      ctx.lineTo(this.x + this.x / 2 + this.width + this.width / 2, this.y + this.y / 2 + this.height);
+      ctx.lineTo(
+        this.x + this.x / 2 + this.width / 2,
+        this.y + this.y / 2 + this.height
+      );
+      ctx.lineTo(
+        this.x + this.x / 2 + this.width + this.width / 2,
+        this.y + this.y / 2 + this.height
+      );
       ctx.lineTo(this.x + this.x / 2 + this.width, this.y + this.y / 2);
       ctx.closePath();
       ctx.fill();
       this.life++;
-  
+
       return this.life >= this.maxLife;
     }
   }
 
   function createDot() {
-    const x = confettiCanvas.width * Math.random() - confettiCanvas.width + confettiCanvas.width / 2 * Math.random();
+    const x =
+      confettiCanvas.width * Math.random() -
+      confettiCanvas.width +
+      (confettiCanvas.width / 2) * Math.random();
     const y = -confettiCanvas.height / 2;
     const vx = getRandom(1, 3);
     const vy = getRandom(2, 4);
     const color = colors[Math.floor(Math.random() * colors.length)];
 
-    particles.push(new ConfettiParticle(x, y, vx, vy, color));
+    particles.push(new Dot(x, y, vx, vy, color));
   }
 
   function loop() {
     ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
 
-    if (confettiFrameId % 3 === 0) {
+    if (quizObj.confettiFrameId % 3 === 0) {
       createDot();
     }
 
@@ -695,7 +755,7 @@ function drawConfetti() {
       }
     }
 
-    confettiFrameId = requestAnimationFrame(loop);
+    quizObj.confettiFrameId = requestAnimationFrame(loop);
   }
 
   function getRandom(min, max) {
