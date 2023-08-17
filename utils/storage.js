@@ -47,7 +47,12 @@ export function updateQuizToStorage(id, updatedQuiz) {
 }
 
 export function getVolumeFromStorage() {
-  return parseFloat(storage.getItem("volume"));
+  const volume = storage.getItem("volume");
+  if (volume) {
+    return parseFloat(volume);
+  } else {
+    return null;
+  }
 }
 
 /**
