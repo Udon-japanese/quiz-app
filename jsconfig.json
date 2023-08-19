@@ -1,4 +1,4 @@
-{
+{// 型情報をファイルをまたいで共有するため
   "compilerOptions": {
     "target": "es6"
   },

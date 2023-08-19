@@ -24,6 +24,7 @@ const qPage = document.getElementById("quiz-page");
 const toggleVolumeBtn = document.getElementById("toggle-volume");
 const audioVolumeInput = document.getElementById("audio-volume-input");
 const confettiCanvas = document.getElementById("confetti");
+const resultMessageCont = document.getElementById("result-message-cont");
 
 const screens = {
   title: document.getElementById("title-screen"),
@@ -62,9 +63,9 @@ qPage.addEventListener("click", (e) => {
   if (!els) return;
 
   Array.from(els).forEach((el) => {
-    const classList = el.classList;
     if (!el.className) return;
-
+    const classList = el.classList;
+    
     if (classList.contains("choice-check")) {
       let noneChecked = true;
       choiceChecks.forEach((c) => {
@@ -198,7 +199,7 @@ toggleVolumeBtn.addEventListener("click", () => {
     });
     changeVolumeIcon(0);
   } else {
-    const volume = quizObj.volume || 1;// 1 はローカルストレージにvolumeが0で保存されている時のため
+    const volume = quizObj.volume || 1; // 1 はローカルストレージにvolumeが0で保存されている時のため
     audioVolumeInput.value = volume * 100;
     Object.values(audio).forEach((a) => {
       a.volume = volume;
@@ -239,6 +240,7 @@ export function endQuiz() {
   clearInterval(quizObj.timerInterval);
   clearTimeout(quizObj.waitTImeout);
   clearTimeout(quizObj.confettiTimeout);
+  clearTimeout(quizObj.pieChartTimeout);
   stopAndClearConfetti();
   Object.values(audio).forEach((a) => {
     pauseAudio(a);
@@ -462,7 +464,12 @@ export function initQuizPage(quizData = null) {
     navigateToPage("quizList");
     return;
   }
+  Object.values(audio).forEach((a) => {
+    pauseAudio(a);
+  });
   stopAndClearConfetti();
+  clearInterval(quizObj.pieChartTimeout);
+  clearInterval(quizObj.confettiTimeout);
   quizObj.questionIndex = 1;
   quizObj.timerInterval = null;
   quizObj.countdownInterval = null;
@@ -470,6 +477,7 @@ export function initQuizPage(quizData = null) {
   quizObj.correctLength = 0;
   quizObj.confettiFrameId = 0;
   quizObj.confettiTimeout = null;
+  quizObj.pieChartTimeout = null;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
   document.getElementById("quiz-description").innerText = quiz.description;
@@ -552,6 +560,8 @@ function drawPieChart(startPercentage, endPercentage) {
   const centerY = canvas.height / 2;
   const radius = canvas.width / 2;
 
+  resultMessageCont.classList.add("d-none");
+
   function drawBackgroundCircle(color) {
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
@@ -577,7 +587,8 @@ function drawPieChart(startPercentage, endPercentage) {
     context.fillText(`${percentage}%`, centerX, centerY);
   }
 
-  if (endPercentage !== 0) {// 正答率が0%の時は音を流さない
+  if (endPercentage !== 0) {
+    // 正答率が0%の時は音を流さない
     playAudio(audio.drumroll);
   }
 
@@ -602,14 +613,16 @@ function drawPieChart(startPercentage, endPercentage) {
     drawText(startPercentage);
 
     if (startPercentage < endPercentage) {
-      setTimeout(() => {
+      quizObj.pieChartTimeout = setTimeout(() => {
         animate(startPercentage + 1);
       }, 25);
     } else {
-      if (endPercentage !== 0) {// 正答率が0%の時は音を流さない
+      if (endPercentage !== 0) {
+        // 正答率が0%の時は音を流さない
         pauseAudio(audio.drumroll);
         playAudio(audio.cymbal);
       }
+      resultMessageCont.classList.remove("d-none");
     }
   }
 
@@ -697,7 +710,7 @@ function drawConfetti() {
       this.life = 0;
       this.maxLife = 600;
       this.degree = getRandom(0, 360);
-      this.size = Math.floor(getRandom(8, 10));
+      this.size = Math.floor(getRandom(8, 15));
     }
 
     draw(ctx) {

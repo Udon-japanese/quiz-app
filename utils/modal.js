@@ -2,10 +2,10 @@
 import { cloneFromTemplate } from "../js/index.js";
 /**
  *
- * @param {{title: string; body: string; colorClass: string; actionBtn: {text: string; id: string; class: string; color: "red" | "green" | "blue";} }} option オプション
+ * @param {{title: string; body: string; colorClass: string; modalCont: HTMLElement actionBtn: {text: string; id: string; class: string; color: "red" | "green" | "blue";} }} option オプション
  */
 export function openModal(option) {
-  const { title, body, colorClass, actionBtn } = option;
+  const { title, body, colorClass, modalCont, actionBtn } = option;
   const modalClone = cloneFromTemplate("modal-tem");
   modalClone.querySelector(".modal-title").innerText = title;
   modalClone.querySelector(".modal-body").innerHTML = body;
@@ -33,7 +33,7 @@ export function openModal(option) {
     actionBtnEl.classList.add(c);
   });
   actionBtnEl.innerText = actionBtn.text;
-  document.body.appendChild(modalClone);
+  modalCont.appendChild(modalClone);
 
   const modalEl = document.querySelector(".modal");
   trapFocus(modalEl);

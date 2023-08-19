@@ -120,10 +120,26 @@ input:checked + .toggle-label::before {
 }
 
 /* ハンバーガーメニューのボタン */
-.navbar-light .navbar-toggler {
+.navbar .navbar-toggler {
   box-shadow: none !important;
   border: none;
   outline: none;
+}
+
+.navbar {
+  z-index: 1000;/* tooltip の z-500より上に */
+}
+
+.tooltip {
+  z-index: 500;
+}
+
+.toast {
+  z-index: 5000;
+}
+
+.modal {
+  z-index: 9999;
 }
 
 .right-choice {

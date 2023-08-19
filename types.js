@@ -17,7 +17,7 @@
  */
 /**
  * @typedef {Object} Quiz
- * @property {string} id クイズのid
+ * @property {`${string}-${string}-${string}-${string}-${string}`} id クイズのid
  * @property {string} title クイズのタイトル
  * @property {string} description クイズの説明
  * @property {string} length 問題数

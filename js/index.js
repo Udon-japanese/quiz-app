@@ -1,13 +1,16 @@
 "use strict";
-import { addQuizToStorage, getQuizFromStorage, removeQuiz } from "../utils/storage.js";
+import {
+  addQuizToStorage,
+  getQuizFromStorage,
+} from "../utils/storage.js";
 import { createElement } from "../utils/createElement.js";
 import { displayQuizList } from "./quizList.js";
-import { closeModal } from "../utils/modal.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft } from "./createQuiz.js";
+import { isUUID } from "../utils/isUUID.js";
 
 const topPage = document.getElementById("top-page");
 const pages = {
@@ -24,14 +27,14 @@ initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 loadInitialPage();
 
 // ページがロードされたときに容量不足を監視
-window.addEventListener('load', monitorStorageCapacity);
+window.addEventListener("load", monitorStorageCapacity);
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
   if (!els) return;
 
   Array.from(els).forEach((el) => {
-    const classList = el.classList;
     if (!el.className) return;
+    const classList = el.classList;
 
     if (classList.contains("to-top-page")) {
       navigateToPage("top");
@@ -44,7 +47,7 @@ document.addEventListener("click", (e) => {
     } else if (classList.contains("share-q")) {
       const quizId = el.id.split("share-")[1];
       const quiz = getQuizFromStorage(quizId);
-      const blob = new Blob([quiz], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(quiz)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const dlLink = createElement("a", {
         href: url,
@@ -55,11 +58,6 @@ document.addEventListener("click", (e) => {
       dlLink.remove();
       URL.revokeObjectURL(url);
       navigateToPage("quizList");
-    } else if (classList.contains("del-quiz")) {
-      const delQId = el.id.split("del-")[1];
-      removeQuiz(delQId);
-      closeModal();
-      displayQuizList();
     }
   });
 });
@@ -68,8 +66,8 @@ document.addEventListener("change", (e) => {
   if (!els) return;
 
   Array.from(els).forEach((el) => {
-    const classList = el.classList;
     if (!el.className) return;
+    const classList = el.classList;
 
     if (classList.contains("upload-q")) {
       const file = el.files[0];
@@ -105,12 +103,12 @@ document.addEventListener("change", (e) => {
 });
 
 /**
- * 
+ *
  * @returns {"quizList" | "createQuiz" | "top" | "quiz"}
  */
 function getCurrentPageName() {
   const currentPageEl = document.querySelector(".page:not(.d-none)");
-    for (const pageName in pages) {
+  for (const pageName in pages) {
     if (pages[pageName].id === currentPageEl?.id) {
       return pageName;
     }
@@ -129,8 +127,12 @@ export function navigateToPage(pageName) {
   } else if (currentPageName === "createQuiz") {
     saveQuizDraft();
   }
-  const offcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("offcanvas"))
+
+  const offcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(
+    document.getElementById("offcanvas")
+  );
   offcanvasInstance.hide();
+
   switchToPage(pageName);
 
   const navbarBtnMap = {
@@ -156,9 +158,14 @@ export function navigateToPage(pageName) {
  */
 function switchToPage(pageName) {
   if (pageName == "quiz") {
-    setCookie("lastAccess", `${pageName}?${document.querySelector(".has-quiz-id").id.split("quiz-")[1]}`);
+    setCookie(
+      "lastAccess",
+      `${pageName}?${
+        document.querySelector(".has-quiz-id").id.split("quiz-")[1]
+      }`
+    );
   } else {
-    setCookie("lastAccess", pageName, 14);  
+    setCookie("lastAccess", pageName, 14);
   }
   hideOtherPages(pages[pageName]);
 }
@@ -168,7 +175,7 @@ function switchToPage(pageName) {
  * @param {HTMLElement} showPage
  */
 function hideOtherPages(showPage) {
-  Object.values(pages).forEach(p => {
+  Object.values(pages).forEach((p) => {
     const isShowPage = p === showPage;
     p.classList.toggle("d-none", !isShowPage);
   });
@@ -210,11 +217,6 @@ export function initUploadBtn(btnCont, width, className = "") {
   });
 }
 
-function isUUID(input) {
-  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidPattern.test(input);
-}
-
 function loadInitialPage() {
   const lastAccess = getCookie("lastAccess");
   if (lastAccess) {
@@ -223,12 +225,12 @@ function loadInitialPage() {
       if (!isUUID(qId)) {
         navigateToPage("top");
         return;
-      }; 
+      }
       const quiz = getQuizFromStorage(qId);
       if (!quiz) {
         navigateToPage("top");
-        return
-      };
+        return;
+      }
       initQuizPage(quiz);
     } else {
       navigateToPage(lastAccess);
@@ -243,6 +245,9 @@ function monitorStorageCapacity() {
   const usedLocalStorageSpace = JSON.stringify(localStorage).length;
 
   if (usedLocalStorageSpace >= maxLocalStorageSize) {
-    showToast("yellow", "データをこれ以上保存できません。新しくクイズを保存したい場合は、不要なクイズを削除してください");
+    showToast(
+      "yellow",
+      "データをこれ以上保存できません。新しくクイズを保存したい場合は、不要なクイズを削除してください"
+    );
   }
 }
