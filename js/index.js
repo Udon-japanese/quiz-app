@@ -227,7 +227,7 @@ function loadInitialPage() {
         return;
       }
       const quiz = getQuizFromStorage(qId);
-      if (!quiz) {
+      if (!Object.keys(quiz).length) {
         navigateToPage("top");
         return;
       }

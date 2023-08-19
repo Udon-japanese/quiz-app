@@ -151,7 +151,7 @@ export function displayQuizList(obj = null, highlight = "") {
   quizzesCont.innerHTML = "";
 
   if (!obj) {
-    quizListObj = getQuizzesFromStorage() || {};
+    quizListObj = getQuizzesFromStorage();
   }
 
   let highlightRegExp, highLightReplacement;
