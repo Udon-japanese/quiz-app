@@ -1,6 +1,7 @@
 /**
  * @typedef {Object} QuizOption
  * @property {number} [timer] クイズのタイマー設定（秒）
+ * @property {string[]} [tf] マルバツクイズの選択肢
  */
 /**
  * @typedef {Object} QuestionOption

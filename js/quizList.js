@@ -30,7 +30,7 @@ const defaultQuizzes = [
   wordQuiz,
 ];
 
-if (!Object.keys(getQuizzesFromStorage()).length) {
+if (!getQuizzesFromStorage()) {
   defaultQuizzes.forEach((defaultQuiz) => {
     addQuizToStorage(defaultQuiz.id, defaultQuiz);
   });
@@ -151,7 +151,7 @@ export function displayQuizList(obj = null, highlight = "") {
   quizzesCont.innerHTML = "";
 
   if (!obj) {
-    quizListObj = getQuizzesFromStorage();
+    quizListObj = getQuizzesFromStorage() || {};
   }
 
   let highlightRegExp, highLightReplacement;

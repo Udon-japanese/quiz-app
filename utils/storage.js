@@ -10,11 +10,11 @@ export function saveQuizzesToStorage(quizzes) {
 
 /**
  *
- * @returns {Object<string, Quiz> | {}} クイズのオブジェクト(見つからなかった場合はnull)
+ * @returns {Object<string, Quiz> | null} クイズのオブジェクト(見つからなかった場合はnull)
  */
 export function getQuizzesFromStorage() {
   const quizzesJson = storage.getItem(QUIZZES_KEY);
-  return JSON.parse(quizzesJson) || {};
+  return JSON.parse(quizzesJson) || null;
 }
 
 export function removeQuizzes() {
@@ -23,7 +23,7 @@ export function removeQuizzes() {
 
 /**
  *
- * @returns {Quiz | null}
+ * @returns {Quiz | {}}
  */
 export function getQuizFromStorage(id) {
   const quizzes = getQuizzesFromStorage();
@@ -83,11 +83,11 @@ export function saveQuizDraftsToStorage(quizDrafts) {
 
 /**
  *
- * @returns {Object<string, Quiz> | {}}
+ * @returns {Object<string, Quiz> | null}
  */
 export function getQuizDraftsFromStorage() {
   const quizDrafts = storage.getItem(QUIZ_DRAFTS_KEY);
-  return JSON.parse(quizDrafts) || {};
+  return JSON.parse(quizDrafts) || null;
 }
 
 export function removeQuizDraftsFromStorage() {

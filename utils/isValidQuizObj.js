@@ -14,14 +14,19 @@ export function isValidQuizObj(obj, isDraft = false) {
   const requiredKeys = ["id", "title", "description", "length", "questions"];
   const { questions } = obj;
 
-  if (typeof questions !== "object") {
-    return false;
-  }
+  if (typeof questions !== "object") return false;
 
   const optionTimer = obj?.options?.timer;
   if (optionTimer) {
-    if (typeof optionTimer !== "number") {
-      return false;
+    if (typeof optionTimer !== "number") return false;
+  }
+
+  const optionTF = obj?.options?.tf;
+  if (optionTF) {
+    if (!Array.isArray(optionTF)) return false;
+
+    for (const choice of optionTF) {
+      if (typeof choice !== "string") return false;
     }
   }
 

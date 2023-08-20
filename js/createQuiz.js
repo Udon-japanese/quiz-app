@@ -19,7 +19,12 @@ import { initTooltips } from "../utils/initTooltips.js";
 import { closeModal, openModal } from "../utils/modal.js";
 
 const crtQPage = document.getElementById("crt-quiz-page");
-let addQBtn, questionsCont, crtQuizBtn, searchQDInput, quizDraftSection, crtQuizSection;
+let addQBtn,
+  questionsCont,
+  crtQuizBtn,
+  searchQDInput,
+  quizDraftSection,
+  crtQuizSection;
 
 const counterInitialState = 2;
 const answerTypeInitialState = null;
@@ -34,14 +39,14 @@ crtQPage.addEventListener("click", (e) => {
   Array.from(els).forEach((el) => {
     if (!el.className) return;
     const classList = el.classList;
-    
+
     if (classList.contains("toggle-label")) {
       const input = el.parentNode.querySelector(
         "input[type='checkbox'], input[type='radio']"
       );
       input.click();
     } else if (classList.contains("del-choice")) {
-      const delChoice = el.parentNode; // 選択肢
+      const delChoice = el.closest(".choice");
       const delChoiceId = delChoice.id;
       const questionN = parseInt(delChoiceId.match(/q(\d+)/)[1]);
       const delChoiceN = parseInt(delChoiceId.match(/c(\d+)/)[1]);
@@ -108,14 +113,14 @@ crtQPage.addEventListener("click", (e) => {
       createQuestion();
       checkQuestionsState();
     } else if (classList.contains("crt-choice")) {
-      const choicesContCont = el.parentNode.parentNode.parentNode; // 問題(#q{id}を持つ要素)
-      const questionN = parseInt(choicesContCont.id.match(/q(\d+)/)[1]);
+      const question = el.closest(".question");
+      const questionN = parseInt(question.id.match(/q(\d+)/)[1]);
       createChoice(questionN);
     } else if (classList.contains("del-q")) {
       const prevQuestions = getQuestions();
       if (prevQuestions.length === 1) return;
 
-      const delQ = el.parentNode.parentNode.parentNode; // 問題
+      const delQ = el.closest(".question");
       delQ.remove();
 
       const currentQuestions = getQuestions();
@@ -241,9 +246,13 @@ crtQPage.addEventListener("change", (e) => {
     const classList = el.classList;
 
     if (classList.contains("expl-toggle")) {
-      toggleOnchange(el, ".type-expl-cont", ".expl-textarea");
+      toggleOnchange(el, "type-expl-cont", "expl-textarea");
     } else if (classList.contains("timer-toggle")) {
-      toggleOnchange(el, ".type-timer-cont", ".timer-input");
+      toggleOnchange(el, "type-timer-cont", "timer-input");
+    } else if (classList.contains("tf-toggle")) {
+      toggleOnchange(el, "type-tf-cont", "t-input f-input", "\u3007 \u2715");
+      setTFChoiceVals();
+      toggleQuizCont();
     } else if (classList.contains("answer-type")) {
       const questionN = parseInt(el.id.match(/q(\d+)/)[1]);
       toggleAnswerType(questionN);
@@ -278,14 +287,45 @@ crtQPage.addEventListener("input", (e) => {
       } else if (el.value > 600) {
         el.value = 600;
       }
+    } else if (classList.contains("t-input")) {
+      setTFChoiceVals();
+    } else if (classList.contains("f-input")) {
+      setTFChoiceVals();
     }
   });
 });
 
 /**
+ * @description マルバツクイズとノーマルなクイズのコンテナの表示非表示を切り替える
+ */
+function toggleQuizCont() {
+  const isTFQuiz = document.getElementById("tf-toggle").checked;
+
+  document.querySelectorAll(".normal-cont").forEach((normalCont) => {
+    normalCont.classList.toggle("d-none", isTFQuiz);
+  });
+  document.querySelectorAll(".tf-cont").forEach((tfCont) => {
+    tfCont.classList.toggle("d-none", !isTFQuiz);
+  });
+}
+
+function setTFChoiceVals() {
+  const tVal = document.getElementById("t").value;
+  const fVal = document.getElementById("f").value;
+  const tChoices = document.querySelectorAll("[id$='t-type-choice']");
+  tChoices.forEach((tChoice) => {
+    tChoice.value = tVal;
+  });
+  const fChoices = document.querySelectorAll("[id$='f-type-choice']");
+  fChoices.forEach((fChoice) => {
+    fChoice.value = fVal;
+  });
+}
+
+/**
  * @description 入力された内容をもとに、クイズを作成、ローカルストレージに保存する
  * @param {`${string}-${string}-${string}-${string}-${string}`} existsId 既に存在するid名(下書き、編集時)
- * @param {"new" | "edit" | "draft"} [quizType="new"] 
+ * @param {"new" | "edit" | "draft"} [quizType="new"]
  * @returns {void} なし
  */
 function createQuiz(existsId, quizType = "new") {
@@ -303,6 +343,9 @@ function createQuiz(existsId, quizType = "new") {
 
   const questions = getQuestions();
 
+  /**
+   * @type {Quiz}
+   */
   const quiz = {
     id,
     title,
@@ -312,11 +355,31 @@ function createQuiz(existsId, quizType = "new") {
     questions: {},
   };
 
-  const timerOption = document.querySelector("#option-timer");
-  const timerCheckbox = timerOption.querySelector(".timer-toggle");
+  const timerOption = document.getElementById("option-timer");
+  const timerCheckbox = timerOption.querySelector("#timer-toggle");
   if (timerCheckbox.checked) {
     const timerVal = timerOption.querySelector("#timer").value;
     if (timerVal) quiz.options.timer = parseFloat(timerVal);
+  }
+
+  const tfQuizOption = document.getElementById("option-tf");
+  const tfCheckbox = tfQuizOption.querySelector("#tf-toggle");
+  const isTFQuiz = tfCheckbox.checked;
+  if (isTFQuiz) {
+    const trueInput = tfQuizOption.querySelector("#t");
+    const trueVal = trueInput.value;
+    const falseInput = tfQuizOption.querySelector("#f");
+    const falseVal = falseInput.value;
+    if (!(trueVal && falseVal)) {
+      if (!trueVal) {
+        addValidatedClass(trueInput);
+      } else if (!falseVal) {
+        addValidatedClass(falseInput);
+      }
+      invalidForm = crtQuizHeader;
+    } else {
+      quiz.options.tf = [trueVal, falseVal];
+    }
   }
 
   questions.forEach((question) => {
@@ -329,11 +392,11 @@ function createQuiz(existsId, quizType = "new") {
       addValidatedClass(statementEl);
       if (!invalidForm) invalidForm = question;
     }
+
+    const answerType = isTFQuiz ? "select" : crtQuizObj.answerType[questionN];
     quiz.questions[questionKey] = {};
     quiz.questions[questionKey].options = {};
     quiz.questions[questionKey].statement = statement;
-
-    const answerType = crtQuizObj.answerType[questionN];
     quiz.questions[questionKey].answerType = answerType;
 
     switch (answerType) {
@@ -351,34 +414,55 @@ function createQuiz(existsId, quizType = "new") {
       }
       case "select": {
         quiz.questions[questionKey].choices = [];
-        const { selectChoices: choices } = getChoices(questionN);
-        let noneChecked = true;
-        const setCorrects = [];
-        choices.forEach((choice, i) => {
-          const cEl = choice.querySelector(`.type-choice`);
-          const c = cEl.value;
-          if (!c) {
-            addValidatedClass(cEl);
-            if (!invalidForm) invalidForm = question;
-          }
-          quiz.questions[questionKey].choices = [
-            ...quiz.questions[questionKey].choices,
-            c,
-          ];
-          const correctAnswerEl = choice.querySelector(".set-correct");
-          setCorrects.push(correctAnswerEl);
-          const isCorrectAnswer = correctAnswerEl.checked;
-          if (isCorrectAnswer) {
-            noneChecked = false;
-            quiz.questions[questionKey].correctAnswer = c;
-          }
-          if (i + 1 === choices.length && noneChecked) {
-            if (!invalidForm) invalidForm = question;
-            setCorrects.forEach((c) => {
-              addValidatedClass(c.parentNode);
-            });
-          }
-        });
+        if (isTFQuiz) {
+          quiz.questions[questionKey].choices = quiz.options?.tf;
+          let noneChecked = true;
+          const setCorrects = [];
+          const choices = question.querySelectorAll(".tf-choice");
+          choices.forEach((choice, i) => {
+            const correctAnswerEl = choice.querySelector(".set-correct");
+            setCorrects.push(correctAnswerEl);
+            const isCorrectAnswer = correctAnswerEl.checked;
+            if (isCorrectAnswer) {
+              noneChecked = false;
+              const c = choice.querySelector(".type-choice").value;
+              quiz.questions[questionKey].correctAnswer = c;
+            }
+            if (i + 1 === choices.length && noneChecked) {
+              if (!invalidForm) invalidForm = question;
+              setCorrects.forEach((c) => {
+                addValidatedClass(c.parentNode);
+              });
+            }
+          });
+        } else {
+          const { selectChoices: choices } = getChoices(questionN);
+          let noneChecked = true;
+          const setCorrects = [];
+          choices.forEach((choice, i) => {
+            const cEl = choice.querySelector(".type-choice");
+            const c = cEl.value;
+            if (!c) {
+              addValidatedClass(cEl);
+              if (!invalidForm) invalidForm = question;
+            }
+            quiz.questions[questionKey].choices.push(c);
+
+            const correctAnswerEl = choice.querySelector(".set-correct");
+            setCorrects.push(correctAnswerEl);
+            const isCorrectAnswer = correctAnswerEl.checked;
+            if (isCorrectAnswer) {
+              noneChecked = false;
+              quiz.questions[questionKey].correctAnswer = c;
+            }
+            if (i + 1 === choices.length && noneChecked) {
+              if (!invalidForm) invalidForm = question;
+              setCorrects.forEach((c) => {
+                addValidatedClass(c.parentNode);
+              });
+            }
+          });
+        }
         break;
       }
       case "select-all": {
@@ -394,19 +478,13 @@ function createQuiz(existsId, quizType = "new") {
             addValidatedClass(cEl);
             if (!invalidForm) invalidForm = question;
           }
-          quiz.questions[questionKey].choices = [
-            ...quiz.questions[questionKey].choices,
-            c,
-          ];
+          quiz.questions[questionKey].choices.push(c);
           const correctAnswerEl = choice.querySelector(".set-correct");
           setCorrects.push(correctAnswerEl);
           const isCorrectAnswer = correctAnswerEl.checked;
           if (isCorrectAnswer) {
             noneChecked = false;
-            quiz.questions[questionKey].correctAnswers = [
-              ...quiz.questions[questionKey].correctAnswers,
-              c,
-            ];
+            quiz.questions[questionKey].correctAnswers.push(c);
           }
           if (i + 1 === choices.length && noneChecked) {
             if (!invalidForm) invalidForm = question;
@@ -547,6 +625,8 @@ function createQuestion(isInit = false, isScroll = true) {
   crtQuizObj.questionCounter++;
 
   toggleAnswerType(questionN);
+  setTFChoiceVals();
+  toggleQuizCont();
 }
 
 /**
@@ -577,6 +657,13 @@ function toggleAnswerType(questionN) {
     .querySelector(`#q${questionN}-select-all-cont`)
     .classList.toggle("d-none", answerTypeObjVal !== selectAll);
 
+  const btn = question.querySelector(".crt-choice");
+  btn.parentNode.classList.toggle("d-none", answerTypeObjVal === typeText);
+  btn.parentNode.classList.toggle(
+    "d-sm-inline-block",
+    answerTypeObjVal !== typeText
+  );
+
   const selectChoices = question
     .querySelector(".selects")
     .querySelectorAll(".choice");
@@ -586,7 +673,6 @@ function toggleAnswerType(questionN) {
   const typeTextInput = question.querySelector(
     `#q${questionN}-type-txt-correct`
   );
-
   switch (prevAnswerType) {
     case "select": {
       Array.from(selectChoices).forEach((selectChoice, i) => {
@@ -627,7 +713,6 @@ function toggleAnswerType(questionN) {
     }
   }
 
-  const btn = question.querySelector(".crt-choice");
   checkChoicesState(strQN, btn);
 }
 
@@ -635,7 +720,6 @@ function toggleAnswerType(questionN) {
  * @description 問題ごとの選択肢の状態を確認し、選択肢の数に応じて処理を行う
  * @param {string} strQN 問題の番号
  * @param {HTMLElement} btn 選択肢追加ボタン
- * @param {ParentNode} parent 選択肢追加ボタンの親ノード
  * @returns {void} なし
  */
 function checkChoicesState(strQN, btn) {
@@ -768,17 +852,23 @@ function changeStrN(str, replacement, regExp) {
  * @description オプションのトグルボタンが変化したときにハンドリングする
  * @param {EventTarget} target 変化したイベントターゲット
  * @param {string} optContCl オプションのコンテナのクラスネーム
- * @param {string} optTextareaCl オプションの入力要素のクラスネーム
+ * @param {string} optInputCl オプションの入力要素のクラスネーム
+ * @param {string} [defaultInputVal=""] inputにデフォルトで設定しておきたい値
  * @returns {void} なし
  */
-function toggleOnchange(target, optContCl, optTextareaCl) {
+function toggleOnchange(target, optContCl, optInputCl, defaultInputVal = "") {
   const ToggleParent = target.parentNode;
   const checked = target.checked;
-  const textareaCont = ToggleParent.parentNode.querySelector(optContCl);
+  const optCont = ToggleParent.parentNode.querySelector(`.${optContCl}`);
   if (!checked) {
-    textareaCont.querySelector(optTextareaCl).value = "";
+    const inputClasses = optInputCl.split(" ");
+    inputClasses.forEach((inputClass, i) => {
+      const input = optCont.querySelector(`.${inputClass}`);
+      const defaultVals = defaultInputVal.split(" ");
+      input.value = defaultVals[i];
+    });
   }
-  textareaCont.classList.toggle("d-none", !checked);
+  optCont.classList.toggle("d-none", !checked);
 }
 
 /**
@@ -830,17 +920,36 @@ export function saveQuizDraft() {
     }
   }
 
+  const tfQuizOption = document.getElementById("option-tf");
+  const tfCheckbox = tfQuizOption.querySelector("#tf-toggle");
+  const isTFQuiz = tfCheckbox.checked;
+  if (isTFQuiz) {
+    const trueInput = tfQuizOption.querySelector("#t");
+    const trueVal = trueInput.value;
+    const falseInput = tfQuizOption.querySelector("#f");
+    const falseVal = falseInput.value;
+    if (!(trueVal && falseVal)) {
+      if (!trueVal) {
+        addValidatedClass(trueInput);
+      } else if (!falseVal) {
+        addValidatedClass(falseInput);
+      }
+      invalidForm = crtQuizHeader;
+    } else {
+      quizDraft.options.tf = [trueVal, falseVal];
+    }
+  }
+
   questions.forEach((question) => {
     const questionN = question.id.split("q")[1];
     const questionKey = `q${questionN}`;
 
     const statement = question.querySelector(`#q${questionN}-statement`).value;
+    const answerType = isTFQuiz ? "select" : crtQuizObj.answerType[questionN];
 
     quizDraft.questions[questionKey] = {};
     quizDraft.questions[questionKey].options = {};
     quizDraft.questions[questionKey].statement = statement;
-
-    const answerType = crtQuizObj.answerType[questionN];
     quizDraft.questions[questionKey].answerType = answerType;
     if (statement) isEmptyQuiz = false;
 
@@ -855,22 +964,33 @@ export function saveQuizDraft() {
         break;
       }
       case "select": {
-        quizDraft.questions[questionKey].correctAnswer = "";
-        quizDraft.questions[questionKey].choices = [];
-        const { selectChoices: choices } = getChoices(questionN);
-        choices.forEach((choice) => {
-          const c = choice.querySelector(".type-choice").value;
-          quizDraft.questions[questionKey].choices = [
-            ...quizDraft.questions[questionKey].choices,
-            c,
-          ];
-          if (c) isEmptyQuiz = false;
-          const isCorrectAnswer = choice.querySelector(".set-correct").checked;
-          if (isCorrectAnswer) {
-            quizDraft.questions[questionKey].correctAnswer = c;
-            isEmptyQuiz = false;
-          }
-        });
+        if (isTFQuiz) {
+          quizDraft.questions[questionKey].choices = quizDraft.options.tf;
+          const choices = question.querySelectorAll(".tf-choice");
+          choices.forEach((choice) => {
+            const c = choice.querySelector(".type-choice").value;
+            if (c) isEmptyQuiz = false;
+            const isCorrectAnswer = choice.querySelector(".set-correct").checked;
+            if (isCorrectAnswer) {
+              quizDraft.questions[questionKey].correctAnswer = c;
+              isEmptyQuiz = false;
+            }
+          });
+        } else {
+          quizDraft.questions[questionKey].correctAnswer = "";
+          quizDraft.questions[questionKey].choices = [];
+          const { selectChoices: choices } = getChoices(questionN);
+          choices.forEach((choice) => {
+            const c = choice.querySelector(".type-choice").value;
+            quizDraft.questions[questionKey].choices.push(c);
+            if (c) isEmptyQuiz = false;
+            const isCorrectAnswer = choice.querySelector(".set-correct").checked;
+            if (isCorrectAnswer) {
+              quizDraft.questions[questionKey].correctAnswer = c;
+              isEmptyQuiz = false;
+            }
+          });
+        }
         break;
       }
       case "select-all": {
@@ -879,17 +999,11 @@ export function saveQuizDraft() {
         const { selectAllChoices: choices } = getChoices(questionN);
         choices.forEach((choice) => {
           const c = choice.querySelector(".type-choice").value;
-          quizDraft.questions[questionKey].choices = [
-            ...quizDraft.questions[questionKey].choices,
-            c,
-          ];
+          quizDraft.questions[questionKey].choices.push(c);
           if (c) isEmptyQuiz = false;
           const isCorrectAnswer = choice.querySelector(".set-correct").checked;
           if (isCorrectAnswer) {
-            quizDraft.questions[questionKey].correctAnswers = [
-              ...quizDraft.questions[questionKey].correctAnswers,
-              c,
-            ];
+            quizDraft.questions[questionKey].correctAnswers.push(c);
             isEmptyQuiz = false;
           }
         });
@@ -951,7 +1065,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
   checkQuestionsState();
 
   const crtQuizCont = document.querySelector(".crt-quiz-cont");
-  const validQuizParam = quiz && isValidQuizObj(quiz);
+  const validQuizParam = quiz && isValidQuizObj(quiz, quizType === "draft" ? true : false);
 
   if (validQuizParam && quizType === "edit") {
     crtQuizCont.id = `edit-${quiz.id}`;
@@ -983,7 +1097,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
     return;
   }
 
-  if (quizType === "new") {
+  if (!quiz && quizType === "new") {
     crtQuizCont.id = "crt-quiz";
     crtQuizBtn.addEventListener("click", () => {
       createQuiz();
@@ -995,11 +1109,10 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
   }
 
   const quizDrafts = getQuizDraftsFromStorage();
-  const noneQuizDrafts = !Object.keys(quizDrafts).length;
-  quizDraftSection.classList.toggle("d-none", noneQuizDrafts);
-  crtQuizSection.classList.toggle("d-none", !noneQuizDrafts);
+  quizDraftSection.classList.toggle("d-none", !quizDrafts);
+  crtQuizSection.classList.toggle("d-none", quizDrafts);
 
-  if (noneQuizDrafts) {
+  if (!quizDrafts || !Object.keys(quizDrafts).length) {
     initCrtQuizPage(null, "new");
   } else {
     displayQuizDraftList();
@@ -1013,18 +1126,35 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
  * @param {Quiz} quiz
  */
 function setQuizVals(quiz) {
-  const { title, description, length, questions } = quiz;
+  const { title, description, questions } = quiz;
   crtQPage.querySelector("#title").value = title;
   crtQPage.querySelector("#description").value = description;
 
   if (quiz?.options?.timer) {
-    const timerToggle = crtQPage.querySelector(".timer-toggle");
+    const timerToggle = crtQPage.querySelector("#timer-toggle");
     timerToggle.checked = true;
-    toggleOnchange(timerToggle, ".type-timer-cont", ".timer-input");
+    toggleOnchange(timerToggle, "type-timer-cont", "timer-input");
     crtQPage.querySelector("#timer").value = quiz.options.timer;
   }
 
-  for (let i = 0; i < length; i++) {
+  const optionTF = quiz?.options?.tf;
+  if (optionTF) {
+    const tfToggle = crtQPage.querySelector("#tf-toggle");
+    tfToggle.checked = true;
+    toggleOnchange(
+      tfToggle,
+      "type-tf-cont",
+      "t-input f-input",
+      "\u3007 \u2715"
+    );
+    const [trueVal, falseVal] = optionTF;
+    crtQPage.querySelector("#t").value = trueVal;
+    crtQPage.querySelector("#f").value = falseVal;
+    setTFChoiceVals();
+    toggleQuizCont();
+  }
+
+  for (let i = 0; i < quiz.length; i++) {
     const questionN = i + 1;
     const question = questions[`q${questionN}`];
     const { answerType, statement } = question;
@@ -1042,37 +1172,47 @@ function setQuizVals(quiz) {
     switch (answerType) {
       case "select":
       case "select-all": {
-        const { choices } = question;
-        const choicesCont =
-          answerType === "select-all"
-            ? questionEl.querySelector(".select-alls")
-            : questionEl.querySelector(".selects");
-        const correctArrayOrStr =
-          answerType === "select-all"
-            ? question.correctAnswers
-            : question.correctAnswer;
-        let choiceEls = choicesCont.querySelectorAll(".choice");
-        for (let i = 0; i < choices.length; i++) {
-          const choice = choices[i];
-          let choiceEl = choiceEls[i];
+        if (optionTF) {
+          const choices = questionEl.querySelectorAll(".tf-choice");
+          choices.forEach((choice) => {
+            const choiceVal = choice.querySelector(".type-choice").value;
+            if (choiceVal === question.correctAnswer) {
+              choice.querySelector(".set-correct").checked = true;
+            }
+          });
+        } else {
+          const { choices } = question;
+          const choicesCont =
+            answerType === "select-all"
+              ? questionEl.querySelector(".select-alls")
+              : questionEl.querySelector(".selects");
+          const correctArrayOrStr =
+            answerType === "select-all"
+              ? question.correctAnswers
+              : question.correctAnswer;
+          let choiceEls = choicesCont.querySelectorAll(".choice");
+          for (let i = 0; i < choices.length; i++) {
+            const choice = choices[i];
+            let choiceEl = choiceEls[i];
 
-          if (!choiceEl) {
-            createChoice(questionN);
-            choiceEls = choicesCont.querySelectorAll(".choice");
-            choiceEl = choiceEls[i];
-          }
+            if (!choiceEl) {
+              createChoice(questionN);
+              choiceEls = choicesCont.querySelectorAll(".choice");
+              choiceEl = choiceEls[i];
+            }
 
-          const typeChoice = choiceEl.querySelector(".type-choice");
-          typeChoice.value = choice;
+            const typeChoice = choiceEl.querySelector(".type-choice");
+            typeChoice.value = choice;
 
-          if (
-            ((Array.isArray(correctArrayOrStr) &&
-              correctArrayOrStr.includes(choice)) ||
-              (!Array.isArray(correctArrayOrStr) &&
-                choice === correctArrayOrStr)) &&
-            correctArrayOrStr
-          ) {
-            choiceEl.querySelector(".set-correct").checked = true;
+            if (
+              ((Array.isArray(correctArrayOrStr) &&
+                correctArrayOrStr.includes(choice)) ||
+                (!Array.isArray(correctArrayOrStr) &&
+                  choice === correctArrayOrStr)) &&
+              correctArrayOrStr
+            ) {
+              choiceEl.querySelector(".set-correct").checked = true;
+            }
           }
         }
         break;
@@ -1088,7 +1228,7 @@ function setQuizVals(quiz) {
     if (question?.options?.explanation) {
       const explToggle = questionEl.querySelector(".expl-toggle");
       explToggle.checked = true;
-      toggleOnchange(explToggle, ".type-expl-cont", ".expl-textarea");
+      toggleOnchange(explToggle, "type-expl-cont", "expl-textarea");
       questionEl.querySelector(`#q${questionN}-explanation`).value =
         question.options.explanation;
     }
@@ -1107,16 +1247,16 @@ export function displayQuizDraftList(obj = null, highlight = "") {
 
   if (!obj) {
     quizDraftListObj = getQuizDraftsFromStorage();
+    if (!quizDraftListObj) return;
   }
 
   const qListObjToUse = obj ? obj : quizDraftListObj;
+
   const noneQuizDraft = !Object.keys(qListObjToUse).length;
 
   if (noneQuizDraft) {
-    quizDraftSection.classList.add("d-none");
-    crtQuizSection.classList.remove("d-none");
-    searchQDInput.removeEventListener("input", handleSearchInput);
-    return;
+    // 残り1個の下書きが削除された後に、クイズ作成画面に切り替える
+    initCrtQuizPage(null, "new");
   }
 
   Object.values(qListObjToUse).forEach((quiz) => {
@@ -1200,7 +1340,7 @@ export function displayQuizDraftList(obj = null, highlight = "") {
 function handleSearchInput(e) {
   const query = e.target.value;
   const noneQuizDraftEl = document.getElementById("none-quiz-draft");
-  
+
   if (!query) {
     noneQuizDraftEl.classList.add("d-none");
     displayQuizDraftList();

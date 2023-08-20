@@ -153,25 +153,29 @@
               </div>
             </div>
             <div class="d-flex flex-column align-items-center justify-content-center my-3 my-sm-5">
-              <p id="question-statement" class="card-text fs-4 fw-semibold">{statement}</p>
+              <p id="question-statement" class="card-text fs-4 fw-semibold text-wrap text-break mw-100">{statement}</p>
             </div>
             <div id="answer-guide" class="text-center mb-1 small">正しいと思うものを一つ選んでください</div>
             <div id="choices-group" class="row g-2 g-sm-3 justify-content-center">
               <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice1" name="choice" autocomplete="off">
-                <label class="btn btn-outline-dark w-100 choice-btn" for="choice1">{choice}</label>
+                <label class="btn btn-outline-dark w-100 choice-btn text-wrap text-break mw-100"
+                  for="choice1">{choice}</label>
               </div>
               <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice2" name="choice" autocomplete="off">
-                <label class="btn btn-outline-dark w-100 choice-btn" for="choice2">{choice}</label>
+                <label class="btn btn-outline-dark w-100 choice-btn text-wrap text-break mw-100"
+                  for="choice2">{choice}</label>
               </div>
               <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice3" name="choice" autocomplete="off">
-                <label class="btn btn-outline-dark w-100 choice-btn" for="choice3">{choice}</label>
+                <label class="btn btn-outline-dark w-100 choice-btn text-wrap text-break mw-100"
+                  for="choice3">{choice}</label>
               </div>
               <div class="col-lg-6 col-md-6 col-12 choice-cont d-none">
                 <input type="radio" class="btn-check choice-check" id="choice4" name="choice" autocomplete="off">
-                <label class="btn btn-outline-dark w-100 choice-btn" for="choice4">{choice}</label>
+                <label class="btn btn-outline-dark w-100 choice-btn text-wrap text-break mw-100"
+                  for="choice4">{choice}</label>
               </div>
             </div>
             <input type="text" id="type-text-input" class="form-control border-2 d-none" placeholder="回答"
@@ -182,7 +186,7 @@
               <h2 class="card-title question-index mb-4">{questionIndex}問目</h2>
               <div class="fs-5 mb-1">
                 <span class="fw-bolder">あなたの回答: </span>
-                <span id="user-answer">{userAnswer}</span>
+                <span id="user-answer" class="d-inline-flex align-items-center">{userAnswer}</span>
               </div>
               <div class="fs-5">
                 <span class="fw-bolder">正解: </span>
@@ -247,7 +251,7 @@
   <template id="upload-quiz-tem">
     <label class="btn btn-primary upload-q-btn" role="button">
       <input type="file" accept=".json" class="d-none upload-q">
-      <i class="bi bi-upload me-lg-1 float-start me-1 me-sm-0"></i>クイズを読み込む(JSONファイル)
+      <i class="bi bi-upload me-lg-1 float-start me-0 me-sm-2"></i>クイズを読み込む(JSONファイル)
     </label>
   </template>
   <template id="modal-tem">
@@ -343,7 +347,8 @@
               </div>
             </div>
             <div class="ms-auto">
-              <button type="button" id="del-draft-{quiz-draft-id}" class="btn btn-danger text-nowrap open-del-q-d-m">
+              <button type="button" id="del-draft-{quiz-draft-id}"
+                class="btn btn-danger text-break text-wrap open-del-q-d-m">
                 <i class="bi bi-x-lg me-1"></i>削除
               </button>
             </div>
@@ -362,11 +367,11 @@
         <h3 class="my-3 fw-bold w-100 text-center text-sm-start">下書き一覧</h3>
         <div class="w-100 d-flex justify-content-end">
           <button type="button" class="btn btn-primary crt-new-quiz d-none d-sm-inline-block">
-            <i class="bi bi-plus-lg"></i>
+            <i class="bi bi-plus-lg me-2"></i>
             クイズを新規作成
           </button>
           <button type="button" class="btn btn-primary crt-new-quiz d-sm-none w-100">
-            <i class="bi bi-plus-lg"></i>
+            <i class="bi bi-plus-lg float-start"></i>
             クイズを新規作成
           </button>
         </div>
@@ -403,11 +408,11 @@
                 <input type="text" id="description" class="form-control" placeholder="例: 動物たちに関するクイズです！">
               </div>
             </div>
-            <div id="quiz-options" class="mt-2">
+            <div id="quiz-options" class="mt-2 d-flex flex-column gap-2">
               <h5 class="card-subtitle">オプション</h5>
               <div id="option-timer">
-                <div class="d-flex align-items-center">
-                  <p class="me-2 mb-0">各問題に制限時間を設ける</p>
+                <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
+                  <span>各問題に制限時間を設ける</span>
                   <input type="checkbox" id="timer-toggle" class="d-none timer-toggle">
                   <div class="toggle-label"></div>
                 </div>
@@ -416,6 +421,27 @@
                   <div class="input-group">
                     <input type="number" class="form-control timer-input" id="timer" min="1" max="600" step="1">
                     <span class="input-group-text">秒</span>
+                  </div>
+                </div>
+              </div>
+              <div id="option-tf">
+                <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
+                  <span>&#x3007;&#x2715;クイズ(2択問題)にする</span>
+                  <input type="checkbox" id="tf-toggle" class="d-none tf-toggle">
+                  <div class="toggle-label"></div>
+                </div>
+                <div class="d-none mt-4 type-tf-cont">
+                  <label class="form-label" for="t">1つ目の選択肢を設定</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control t-input mb-2" id="t" value="&#x3007;" placeholder="1つ目の選択肢"
+                      required>
+                    <div class="invalid-feedback">選択肢を設定してください</div>
+                  </div>
+                  <label class="form-label" for="f">2つ目の選択肢を設定</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control f-input" id="f" value="&#x2715;" placeholder="2つ目の選択肢"
+                      required>
+                    <div class="invalid-feedback">選択肢を設定してください</div>
                   </div>
                 </div>
               </div>
@@ -428,7 +454,7 @@
           <div id="questions"></div>
           <div class="d-grid d-sm-flex">
             <button class="btn btn-secondary add-question">
-              <i class="bi bi-plus-lg float-start"></i>
+              <i class="bi bi-plus-lg float-start me-0 me-sm-2"></i>
               {q-n}問目を追加する
             </button>
           </div>
@@ -438,16 +464,17 @@
     </div>
   </template>
   <template id="crt-choice-tem">
-    <div class="d-grid d-sm-flex">
+    <div class="d-grid d-sm-inline-block">
       <button type="button" class="btn btn-primary crt-choice">
-        <i class="bi bi-plus-lg float-start" aria-hidden="true"></i>
+        <i class="bi bi-plus-lg float-start me-0 me-sm-2" aria-hidden="true"></i>
         選択肢を追加する
       </button>
     </div>
   </template>
   <template id="select-tem">
     <div id="q{q-num}-select-c{c-num}" class="input-group mb-2 has-validation choice">
-      <label for="q{q-num}-set-select-c{c-num}" class="input-group-text set-correct-label">
+      <label for="q{q-num}-set-select-c{c-num}" class="input-group-text set-correct-label" data-bs-toggle="tooltip"
+        title="クリックして正解を一つ選択します">
         <input type="radio" name="q{q-num}-set-select" id="q{q-num}-set-select-c{c-num}"
           class="form-check-input set-correct" required>
       </label>
@@ -456,7 +483,7 @@
       <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
-      <div class="invalid-feedback">回答を設定してください</div>
+      <div class="invalid-feedback">選択肢を設定してください</div>
     </div>
   </template>
   <template id="select-all-tem">
@@ -469,11 +496,11 @@
         placeholder="{c-num}つ目の選択肢" required>
       <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
           aria-hidden="true"></i></button>
-      <div class="invalid-feedback">回答を設定してください</div>
+      <div class="invalid-feedback">選択肢を設定してください</div>
     </div>
   </template>
   <template id="question-tem">
-    <div id="q{num}" class="gap-3 mb-3 card p-3">
+    <div id="q{num}" class="d-flex flex-column gap-3 mb-3 card p-3 question">
       <div class="row">
         <h3 class="col-sm-6 col-md-8 col-lg-9 order-1 mx-sm-auto q-header">1問目</h3>
         <div class="col-sm-6 col-md-4 col-lg-3 order-2">
@@ -488,36 +515,57 @@
           <div class="invalid-feedback">問題文を入力してください</div>
         </div>
       </div>
-      <div class="answer-type-group">
-        <label class="form-label" for="q{num}-answer-type">回答形式</label>
-        <select class="form-select answer-type" id="q{num}-answer-type">
-          <option value="select">択一形式(どれか1つを選ぶ形式)</option>
-          <option value="select-all">複数回答形式(いくつかの回答を選ぶ形式)</option>
-          <option value="type-text">入力形式(回答を文字で入力する形式)</option>
-        </select>
-      </div>
-      <div id="q{num}-type-txt-cont" class="d-none">
-        <label for="q{num}-type-txt-correct" class="form-label">正解を設定</label>
-        <div class="input-group has-validation">
-          <input type="text" id="q{num}-type-txt-correct" class="form-control" required>
-          <div class="invalid-feedback">正解を設定してください</div>
+      <div class="tf-cont d-none"><!-- まるばつクイズのときのコンテナ -->
+        <span>選択肢</span>
+        <div class="d-flex flex-column gap-2 mt-2">
+          <div class="input-group tf-choice">
+            <label for="q{num}-t-correct" class="input-group-text">
+              <input type="radio" name="q{num}-tf-correct" id="q{num}-t-correct" class="form-check-input set-correct"
+                required>
+            </label>
+            <input type="text" id="q{num}-t-type-choice" class="form-control type-choice" disabled>
+          </div>
+          <div class="input-group tf-choice">
+            <label for="q{num}-f-correct" class="input-group-text">
+              <input type="radio" name="q{num}-tf-correct" id="q{num}-f-correct" class="form-check-input set-correct"
+                required>
+            </label>
+            <input type="text" id="q{num}-f-type-choice" class="form-control type-choice" disabled>
+          </div>
         </div>
       </div>
-      <div id="q{num}-choices-cont">
-        <div id="q{num}-select-cont">
-          <p>正解と選択肢を設定</p>
-          <div class="selects"></div>
+      <div class="d-flex flex-column gap-3 normal-cont"><!-- まるばつクイズではないときのコンテナ -->
+        <div class="answer-type-group">
+          <label class="form-label" for="q{num}-answer-type">回答形式</label>
+          <select class="form-select answer-type" id="q{num}-answer-type">
+            <option value="select">択一形式(どれか1つを選ぶ形式)</option>
+            <option value="select-all">複数回答形式(いくつかの回答を選ぶ形式)</option>
+            <option value="type-text">入力形式(回答を文字で入力する形式)</option>
+          </select>
         </div>
-        <div id="q{num}-select-all-cont" class="d-none">
-          <p>正解と選択肢を設定</p>
-          <div class="select-alls"></div>
+        <div id="q{num}-type-txt-cont" class="d-none">
+          <label for="q{num}-type-txt-correct" class="form-label">正解を設定</label>
+          <div class="input-group has-validation">
+            <input type="text" id="q{num}-type-txt-correct" class="form-control" required>
+            <div class="invalid-feedback">正解を設定してください</div>
+          </div>
+        </div>
+        <div id="q{num}-choices-cont">
+          <div id="q{num}-select-cont">
+            <span>正解と選択肢を設定</span>
+            <div class="selects mt-2"></div>
+          </div>
+          <div id="q{num}-select-all-cont" class="d-none">
+            <span>正解と選択肢を設定</span>
+            <div class="select-alls mt-2"></div>
+          </div>
         </div>
       </div>
       <div id="q{num}-options">
         <h5>オプション</h5>
         <div id="q{num}-option-expl">
-          <div class="d-flex align-items-center">
-            <p class="me-2 mb-0">解説を設定する</p>
+          <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
+            <span>解説を設定する</span>
             <input type="checkbox" id="q{num}-expl-toggle" class="d-none expl-toggle">
             <div class="toggle-label"></div>
           </div>
