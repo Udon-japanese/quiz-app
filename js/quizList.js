@@ -5,6 +5,7 @@ import {
   getQuizFromStorage,
   getQuizzesFromStorage,
   removeQuizFromStorage,
+  removeQuizzesFromStorage,
 } from "../utils/storage.js";
 import { closeModal, openModal } from "../utils/modal.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
@@ -43,19 +44,21 @@ const searchQInput = document.getElementById("search-q");
 const headerBtnCont = document.getElementById("header-btn-cont");
 const noneQuizEl = document.getElementById("none-quiz");
 const noneQuizTxtEl = document.getElementById("none-quiz-txt");
+const delAllQuizzesBtn = document.getElementById("del-all-quizzes");
 
 /**@type {Object<string, Quiz>} */
 let quizListObj = {};
 initUploadBtn(headerBtnCont, 0, "d-none d-sm-inline-block");
 initUploadBtn(headerBtnCont, 100, "d-sm-none");
 const noneQuizBtnCont = noneQuizEl.querySelector(".btn-cont");
+let delQsWaitTImeout;
 initUploadBtn(noneQuizBtnCont, 100);
 
 qListPage.addEventListener("click", (e) => {
   const els = e.composedPath();
   if (!els) return;
 
-  Array.from(els).forEach((el) => {
+  Array.from(els).forEach(async (el) => {
     const classList = el.classList;
     if (!el.className) return;
 
@@ -93,8 +96,10 @@ qListPage.addEventListener("click", (e) => {
         actionBtn: {
           text: "削除",
           color: "red",
-          id: `del-quiz-${delQId}`,
-          class: "del-quiz",
+          HTMLAttributes: {
+            id: `del-quiz-${delQId}`,
+            class: "del-quiz",
+          }
         },
       });
     } else if (classList.contains("play-q")) {
@@ -109,6 +114,46 @@ qListPage.addEventListener("click", (e) => {
     } else if (classList.contains("del-quiz")) {
       const delQId = el.id.split("del-quiz-")[1];
       removeQuizFromStorage(delQId);
+      closeModal();
+      displayQuizList();
+    } else if (classList.contains("open-del-all-qs-m")) {
+      openModal({
+        title: "クイズをすべて削除",
+        body: "クイズをすべて削除します。よろしいですか？",
+        modalCont: qListPage,
+        actionBtn: {
+          text: "削除",
+          color: "red",
+          HTMLAttributes: {
+            class: "open-del-all-qs-m-again",
+          }
+        }
+      });
+    } else if (classList.contains("open-del-all-qs-m-again")) {
+      document.querySelector(".modal-body").innerHTML = `
+      <div class="text-center fw-bold">
+        <div class="text-bg-danger d-inline-block p-4 rounded-circle">
+          <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+          </svg>
+        </div>
+        <div class="mt-4">この操作は取り消せません。本当にクイズをすべて削除しますか？</div>
+      </div>
+      `;
+      const actionBtn = document.querySelector(".action-btn");
+      actionBtn.innerText = "本当に削除する";
+      actionBtn.classList.remove("open-del-all-qs-m-again");
+      actionBtn.classList.add("del-all-quizzes");
+      actionBtn.disabled = true;
+      await new Promise(resolve => {
+        delQsWaitTImeout = setTimeout(() => {
+          resolve();
+        }, 3000);
+      });
+      actionBtn.disabled = false;
+    } else if (classList.contains("del-all-quizzes")) {
+      removeQuizzesFromStorage();
       closeModal();
       displayQuizList();
     }
@@ -132,6 +177,8 @@ searchQInput.addEventListener("input", (e) => {
     displayQuizList();
     return;
   }
+  delAllQuizzesBtn.classList.toggle("d-none", query);// 検索バーが空でないときは隠す
+
   const qListObj = searchQuizzes(query, quizListObj);
   const noneResult = !Object.keys(qListObj).length;
   noneQuizEl.classList.toggle("d-none", !noneResult);
@@ -146,6 +193,10 @@ searchQInput.addEventListener("input", (e) => {
 });
 
 displayQuizList();
+
+export function clearDelQsWaitTimeout() {
+  clearTimeout(delQsWaitTImeout);
+}
 
 export function displayQuizList(obj = null, highlight = "") {
   quizzesCont.innerHTML = "";
@@ -171,6 +222,7 @@ export function displayQuizList(obj = null, highlight = "") {
   noneQuizEl.classList.toggle("d-none", !noneQuiz);
   searchQInput.classList.toggle("d-none", noneQuiz);
   headerBtnCont.classList.toggle("d-none", noneQuiz);
+  delAllQuizzesBtn.classList.toggle("d-none", noneQuiz || highlight);// 検索バーを使用していない(検索バーが空)のときのみ表示
 
   Object.values(qListObjToUse).forEach((quiz) => {
     const quizItem = cloneFromTemplate("quiz-item-tem");

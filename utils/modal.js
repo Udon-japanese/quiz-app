@@ -1,18 +1,22 @@
 "use strict";
+import { clearDelQDsWaitTimeout } from "../js/createQuiz.js";
 import { cloneFromTemplate } from "../js/index.js";
+import { clearDelQsWaitTimeout } from "../js/quizList.js";
 /**
  *
- * @param {{title: string; body: string; colorClass: string; modalCont: HTMLElement actionBtn: {text: string; id: string; class: string; color: "red" | "green" | "blue";} }} option オプション
+ * @param {{title: string; body: string; colorClass?: string; modalCont: HTMLElement actionBtn: {text: string; HTMLAttributes?: Object<string, string> color: "red" | "green" | "blue";} }} option オプション
  */
 export function openModal(option) {
   const { title, body, colorClass, modalCont, actionBtn } = option;
   const modalClone = cloneFromTemplate("modal-tem");
   modalClone.querySelector(".modal-title").innerText = title;
   modalClone.querySelector(".modal-body").innerHTML = body;
-  const elsNeedsBgColor = modalClone.querySelectorAll(".modal-header, .modal-body, .modal-footer");
-  elsNeedsBgColor.forEach(e => {
-    e.classList.add(colorClass);
-  });
+  if (colorClass) {
+    const elsNeedBgColor = modalClone.querySelectorAll(".modal-header, .modal-body, .modal-footer");
+    elsNeedBgColor.forEach(e => {
+      e.classList.add(colorClass);
+    });
+  }
   const actionBtnEl = modalClone.querySelector(".action-btn");
   let btnColor = "btn-";
   switch (actionBtn.color) {
@@ -27,17 +31,28 @@ export function openModal(option) {
       break;
   }
   actionBtnEl.classList.add(btnColor);
-  actionBtnEl.id = actionBtn.id;
-  const classes = actionBtn.class.split(" ");
-  classes.forEach((c) => {
-    actionBtnEl.classList.add(c);
-  });
+  if (actionBtn.HTMLAttributes) {
+    Object.keys(actionBtn.HTMLAttributes).forEach((key) => {
+      const val = actionBtn.HTMLAttributes[key];
+  
+      if (key === "class") {
+        const classes = val.split(" ");
+        classes.forEach((c) => {
+          actionBtnEl.classList.add(c);
+        });
+      } else {
+        actionBtnEl.setAttribute(key, val);
+      }
+    });
+  }
   actionBtnEl.innerText = actionBtn.text;
   modalCont.appendChild(modalClone);
 
   const modalEl = document.querySelector(".modal");
   trapFocus(modalEl);
   modalEl.addEventListener("hidden.bs.modal", () => {
+    clearDelQsWaitTimeout();
+    clearDelQDsWaitTimeout();
     modalEl.remove();
   });
   

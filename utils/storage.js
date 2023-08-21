@@ -17,8 +17,8 @@ export function getQuizzesFromStorage() {
   return JSON.parse(quizzesJson) || null;
 }
 
-export function removeQuizzes() {
-  storage.removeItem(QUIZZES_KEY);
+export function removeQuizzesFromStorage() {
+  storage.setItem(QUIZZES_KEY, "{}");// 空のオブジェクトを入れて、リロード時にまたデフォルトのクイズが挿入されないように
 }
 
 /**
@@ -91,7 +91,7 @@ export function getQuizDraftsFromStorage() {
 }
 
 export function removeQuizDraftsFromStorage() {
-  storage.removeItem(QUIZ_DRAFTS_KEY);
+  storage.setItem(QUIZ_DRAFTS_KEY, "{}");
 }
 
 /**

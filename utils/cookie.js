@@ -30,7 +30,6 @@ export function getCookie(name) {
       try {
         return decodeURIComponent(cookie.substring(cookieName.length));
       } catch (error) {
-        console.error("Error decoding cookie value:", error);
         return null; // エラーが発生した場合はnullを返す
       }
     }

@@ -70,12 +70,18 @@
   <div id="crt-quiz-page" class="d-none page"></div>
   <div id="quiz-list-page" class="d-none page">
     <div class="container">
-      <div class="d-flex align-items-center flex-sm-row flex-column mb-3">
+      <div class="d-flex align-items-center flex-sm-row flex-column mb-sm-0 mb-3">
         <h3 class="my-3 fw-bold w-100 text-center text-sm-start">クイズ一覧</h3>
         <div id="header-btn-cont" class="w-100 d-flex justify-content-end"></div>
       </div>
       <input type="text" id="search-q" class="form-control" placeholder="キーワードからクイズを検索">
       <div id="quizzes" class="row p-sm-0 mt-3 g-3"></div>
+      <div class="d-grid mb-3 mt-sm-0 mt-3">
+        <button type="button" id="del-all-quizzes" class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 mx-auto ms-sm-auto mt-4 open-del-all-qs-m">
+          <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
+          クイズをすべて削除する
+        </button>
+      </div>
       <div id="none-quiz" class="card text-center d-none">
         <div class="card-body p-sm-3 p-2">
           <div id="none-quiz-txt" class="card-text">
@@ -266,14 +272,13 @@
             {body}
           </div>
           <div class="modal-footer ">
-            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">閉じる</button>
+            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">キャンセル</button>
             <button type="button" tabindex="-1" class="btn action-btn">{action-btn-txt}</button>
           </div>
         </div>
       </div>
     </div>
   </template>
-  <!-- クイズページ用テンプレート -->
   <!-- クイズ一覧ページ用テンプレート -->
   <template id="quiz-item-tem">
     <div class="col-12 col-md-6 col-lg-4 col-xxl-3">
@@ -378,6 +383,12 @@
       </div>
       <input type="text" id="search-q-draft" class="form-control" placeholder="キーワードから下書きを検索">
       <div id="quiz-drafts-cont" class="row p-sm-0 mt-3 g-3"></div>
+      <div class="d-grid mb-3 mt-sm-0 mt-3">
+        <button type="button" id="del-all-quiz-drafts" class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 mx-auto ms-sm-auto mt-4 open-del-all-qds-m">
+          <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
+          下書きをすべて削除する
+        </button>
+      </div>
       <div id="none-quiz-draft" class="card d-none">
         <div class="card-body text-center p-sm-3 p-2">
           <i class="bi bi-search fs-1"></i>
