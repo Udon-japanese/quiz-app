@@ -6,10 +6,10 @@
  * @param {string} textContent 要素のテキストコンテンツ
  * @returns {HTMLElement} 作成した要素
  */
-export function createElement(tagName, attributes = {}, textContent = "") {
+export function createElement(tagName, HTMLAttributes = {}, textContent = "") {
   const element = document.createElement(tagName);
-  Object.keys(attributes).forEach((key) => {
-    const val = attributes[key];
+  Object.keys(HTMLAttributes).forEach((key) => {
+    const val = HTMLAttributes[key];
 
     if (key === "class") {
       const classes = val.split(" ");

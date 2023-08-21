@@ -13,7 +13,7 @@ import {
 import { cloneFromTemplate, navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
-import { displayQuizList, searchQuizzes } from "./quizList.js";
+import { displayQuizList, highLightText, searchQuizzes } from "./quizList.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { formatTime } from "../utils/formatTime.js";
 import { initTooltips } from "../utils/initTooltips.js";
@@ -32,7 +32,6 @@ const counterInitialState = 2;
 const answerTypeInitialState = null;
 const crtQuizObj = {};
 let quizDraftListObj;
-initCrtQuizPage();
 
 crtQPage.addEventListener("click", (e) => {
   const els = e.composedPath();
@@ -187,6 +186,10 @@ crtQPage.addEventListener("click", (e) => {
     } else if (classList.contains("continue-quiz-draft")) {
       const quizId = el.id.split("continue-quiz-draft-")[1];
       const quiz = getQuizDraftFromStorage(quizId);
+      if (!isValidQuizObj(quiz)) {
+        showToast("red", "無効な下書きデータです");
+        return;
+      }
       initCrtQuizPage(quiz, "draft");
     } else if (classList.contains("crt-new-quiz")) {
       initCrtQuizPage(null, "new");
@@ -249,8 +252,8 @@ crtQPage.addEventListener("click", (e) => {
           color: "red",
           HTMLAttributes: {
             class: "open-del-all-qds-m-again",
-          }
-        }
+          },
+        },
       });
     } else if (classList.contains("open-del-all-qds-m-again")) {
       document.querySelector(".modal-body").innerHTML = `
@@ -269,7 +272,7 @@ crtQPage.addEventListener("click", (e) => {
       actionBtn.classList.remove("open-del-all-qds-m-again");
       actionBtn.classList.add("del-all-quiz-drafts");
       actionBtn.disabled = true;
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         crtQuizObj.delQDsWaitTImeout = setTimeout(() => {
           resolve();
         }, 3000);
@@ -557,19 +560,19 @@ function createQuiz(existsId, quizType = "new") {
   }
 
   if (quizType === "edit") {
-    updateQuizToStorage(id, quiz);
+    updateQuizToStorage(quiz);
   } else if (quizType === "draft") {
-    addQuizToStorage(id, quiz);
+    addQuizToStorage(quiz);
     removeQuizDraftFromStorage(id);
   } else if (quizType === "new") {
-    addQuizToStorage(id, quiz);
+    addQuizToStorage(quiz);
   }
 
   initCrtQuizPage();
   navigateToPage("quizList");
   showToast(
     "green",
-    existsId ? "クイズの変更が保存されました" : "クイズが作成されました"
+    existsId && quizType !== "draft" ? "クイズの変更が保存されました" : "クイズが作成されました"
   );
   displayQuizList();
 }
@@ -1070,10 +1073,11 @@ export function saveQuizDraft() {
 
   if (!isEmptyQuiz) {
     if (quizDraftId) {
-      updateQuizDraftToStorage(id, quizDraft);
+      updateQuizDraftToStorage(quizDraft);
     } else {
-      addQuizDraftToStorage(id, quizDraft);
+      addQuizDraftToStorage(quizDraft);
     }
+    showToast("sky-blue", "下書きが保存されました");
   } else {
     removeQuizDraftFromStorage(id);
   }
@@ -1293,12 +1297,6 @@ export function clearDelQDsWaitTimeout() {
 export function displayQuizDraftList(obj = null, highlight = "") {
   const quizDraftsCont = document.getElementById("quiz-drafts-cont");
   quizDraftsCont.innerHTML = "";
-  let highlightRegExp, highLightReplacement;
-
-  if (highlight) {
-    highlightRegExp = new RegExp(highlight, "g");
-    highLightReplacement = `<span class="bg-warning">${highlight}</span>`;
-  }
 
   if (!obj) {
     quizDraftListObj = getQuizDraftsFromStorage();
@@ -1317,22 +1315,10 @@ export function displayQuizDraftList(obj = null, highlight = "") {
     replaceAttrVals(elsHasAttrQId, "{quiz-draft-id}", quiz.id);
     const quizTitleEl = quizDraft.querySelector(".q-title");
     quizTitleEl.innerText = quiz.title || "タイトルなし";
-    if (highlight) {
-      const quizTitleTxt = quizTitleEl.innerText;
-      quizTitleEl.innerHTML = quizTitleTxt.replace(
-        highlightRegExp,
-        highLightReplacement
-      );
-    }
+    highLightText(highlight, quizTitleEl);
     const quizDescEl = quizDraft.querySelector(".q-desc");
     quizDescEl.innerText = quiz.description || "説明なし";
-    if (highlight) {
-      const quizDescTxt = quizDescEl.innerText;
-      quizDescEl.innerHTML = quizDescTxt.replace(
-        highlightRegExp,
-        highLightReplacement
-      );
-    }
+    highLightText(highlight, quizDescEl);
     const hasOptions = {
       quiz: {
         timer: false,
@@ -1378,12 +1364,7 @@ export function displayQuizDraftList(obj = null, highlight = "") {
       "{quiz-length}",
       quiz.length
     );
-    if (highlight) {
-      qLengthEl.innerHTML = qLengthEl.innerText.replace(
-        highlightRegExp,
-        highLightReplacement
-      );
-    }
+    highLightText(highlight, qLengthEl);
     quizDraftsCont.appendChild(quizDraft);
     initTooltips();
   });
@@ -1392,7 +1373,7 @@ export function displayQuizDraftList(obj = null, highlight = "") {
 function handleSearchInput(e) {
   const query = e.target.value;
   const noneQuizDraftEl = document.getElementById("none-quiz-draft");
-  
+
   delAllQDsBtn.classList.toggle("d-none", query);
   if (!query) {
     noneQuizDraftEl.classList.add("d-none");

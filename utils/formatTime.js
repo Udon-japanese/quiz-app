@@ -1,9 +1,17 @@
+"use strict";
+import { isNumNotNaN } from "./isNumNotNaN.js";
+
+/**
+ * @description 秒の単位で与えられた数字を、読みやすくフォーマットする
+ * @param {number} seconds フォーマットしたい数字(秒)
+ * @returns {string} フォーマット後の文字列(分、秒を含む)
+ */
 export function formatTime(seconds) {
-  if (typeof seconds !== "number" || isNaN(seconds)) {
-    return null;
+  if (!isNumNotNaN(seconds)) {
+    return null;// 数字でない場合
   }
 
-  if (seconds < 60) {
+  if (seconds < 60) {// 1分未満
     return `${seconds}秒`;
   } else {
     const minutes = Math.floor(seconds / 60);

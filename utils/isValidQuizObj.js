@@ -1,11 +1,10 @@
 "use strict";
-
 import { isUUID } from "./isUUID.js";
-
 /**
- *
- * @param {object} obj
- * @returns {boolean}
+ *@description 有効なクイズデータかどうかを判別する
+ * @param {object} obj 判別するオブジェクト
+ * @param {boolean} [isDraft=false] 下書きのデータかどうか
+ * @returns {boolean} 有効なクイズデータかどうか
  */
 export function isValidQuizObj(obj, isDraft = false) {
   if (!obj) return false;

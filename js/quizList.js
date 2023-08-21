@@ -33,10 +33,9 @@ const defaultQuizzes = [
 
 if (!getQuizzesFromStorage()) {
   defaultQuizzes.forEach((defaultQuiz) => {
-    addQuizToStorage(defaultQuiz.id, defaultQuiz);
+    addQuizToStorage(defaultQuiz);
   });
 }
-initTooltips();
 
 const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
@@ -69,8 +68,8 @@ qListPage.addEventListener("click", (e) => {
       const delQ = quizListObj[delQId];
       const optionTimer = delQ?.options?.timer;
       const optionExpls = Object.values(delQ.questions)
-                            .map(q => q?.options?.explanation)
-                            .filter(expl => expl);
+        .map((q) => q?.options?.explanation)
+        .filter((expl) => expl);
       openModal({
         title: "クイズを削除",
         body: `このクイズを削除します。よろしいですか？
@@ -84,8 +83,14 @@ qListPage.addEventListener("click", (e) => {
                   問題数: ${delQ.length}問
                 </span>
                 <div class="card-text q-info text-secondary d-flex gap-2">
-                ${optionTimer ? `<i class="bi bi-stopwatch-fill fs-3"></i>` : ""}
-                ${optionExpls.length ? `<i class="bi bi-book-fill fs-3"></i>` : ""}
+                ${
+                  optionTimer ? `<i class="bi bi-stopwatch-fill fs-3"></i>` : ""
+                }
+                ${
+                  optionExpls.length
+                    ? `<i class="bi bi-book-fill fs-3"></i>`
+                    : ""
+                }
                 </div>
               </div>
             </div>
@@ -99,7 +104,7 @@ qListPage.addEventListener("click", (e) => {
           HTMLAttributes: {
             id: `del-quiz-${delQId}`,
             class: "del-quiz",
-          }
+          },
         },
       });
     } else if (classList.contains("play-q")) {
@@ -126,8 +131,8 @@ qListPage.addEventListener("click", (e) => {
           color: "red",
           HTMLAttributes: {
             class: "open-del-all-qs-m-again",
-          }
-        }
+          },
+        },
       });
     } else if (classList.contains("open-del-all-qs-m-again")) {
       document.querySelector(".modal-body").innerHTML = `
@@ -146,7 +151,7 @@ qListPage.addEventListener("click", (e) => {
       actionBtn.classList.remove("open-del-all-qs-m-again");
       actionBtn.classList.add("del-all-quizzes");
       actionBtn.disabled = true;
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         delQsWaitTImeout = setTimeout(() => {
           resolve();
         }, 3000);
@@ -177,7 +182,7 @@ searchQInput.addEventListener("input", (e) => {
     displayQuizList();
     return;
   }
-  delAllQuizzesBtn.classList.toggle("d-none", query);// 検索バーが空でないときは隠す
+  delAllQuizzesBtn.classList.toggle("d-none", query); // 検索バーが空でないときは隠す
 
   const qListObj = searchQuizzes(query, quizListObj);
   const noneResult = !Object.keys(qListObj).length;
@@ -192,8 +197,6 @@ searchQInput.addEventListener("input", (e) => {
   displayQuizList(qListObj, query);
 });
 
-displayQuizList();
-
 export function clearDelQsWaitTimeout() {
   clearTimeout(delQsWaitTImeout);
 }
@@ -203,13 +206,6 @@ export function displayQuizList(obj = null, highlight = "") {
 
   if (!obj) {
     quizListObj = getQuizzesFromStorage() || {};
-  }
-
-  let highlightRegExp, highLightReplacement;
-
-  if (highlight) {
-    highlightRegExp = new RegExp(highlight, "g");
-    highLightReplacement = `<span class="bg-warning">${highlight}</span>`;
   }
 
   const qListObjToUse = obj ? obj : quizListObj;
@@ -222,7 +218,7 @@ export function displayQuizList(obj = null, highlight = "") {
   noneQuizEl.classList.toggle("d-none", !noneQuiz);
   searchQInput.classList.toggle("d-none", noneQuiz);
   headerBtnCont.classList.toggle("d-none", noneQuiz);
-  delAllQuizzesBtn.classList.toggle("d-none", noneQuiz || highlight);// 検索バーを使用していない(検索バーが空)のときのみ表示
+  delAllQuizzesBtn.classList.toggle("d-none", noneQuiz || highlight); // 検索バーを使用していない(検索バーが空)のときのみ表示
 
   Object.values(qListObjToUse).forEach((quiz) => {
     const quizItem = cloneFromTemplate("quiz-item-tem");
@@ -232,22 +228,10 @@ export function displayQuizList(obj = null, highlight = "") {
     replaceAttrVals(elsHasAttrQId, "{quiz-id}", quiz.id);
     const quizTitleEl = quizItem.querySelector(".q-title");
     quizTitleEl.innerText = quiz.title;
-    if (highlight) {
-      const quizTitleTxt = quizTitleEl.innerText;
-      quizTitleEl.innerHTML = quizTitleTxt.replace(
-        highlightRegExp,
-        highLightReplacement
-      );
-    }
+    highLightText(highlight, quizTitleEl);
     const quizDescEl = quizItem.querySelector(".q-desc");
     quizDescEl.innerText = quiz.description;
-    if (highlight) {
-      const quizDescTxt = quizDescEl.innerText;
-      quizDescEl.innerHTML = quizDescTxt.replace(
-        highlightRegExp,
-        highLightReplacement
-      );
-    }
+    highLightText(highlight, quizDescEl);
     const hasOptions = {
       quiz: {
         timer: false,
@@ -274,22 +258,26 @@ export function displayQuizList(obj = null, highlight = "") {
       quizInfoEl.classList.remove("d-none");
       if (hasOptions.quiz.timer) {
         const timerIcon = quizInfoEl.querySelector(".timer-icon");
-        timerIcon.timer = replaceAttrVals([timerIcon], "{option-timer}", formatTime(optionTimer));
+        timerIcon.timer = replaceAttrVals(
+          [timerIcon],
+          "{option-timer}",
+          formatTime(optionTimer)
+        );
         timerIcon.classList.toggle("d-none", !hasOptions.quiz.timer);
       }
       if (hasOptions.question.explanation) {
-        quizInfoEl.querySelector(".expl-icon").classList.toggle("d-none", !hasOptions.question.explanation);
+        quizInfoEl
+          .querySelector(".expl-icon")
+          .classList.toggle("d-none", !hasOptions.question.explanation);
       }
     }
 
     const qLengthEl = quizItem.querySelector(".q-length");
-    qLengthEl.innerText = qLengthEl.innerText.replace("{quiz-length}", quiz.length);
-    if (highlight) {
-      qLengthEl.innerHTML = qLengthEl.innerText.replace(
-        highlightRegExp,
-        highLightReplacement
-      );
-    }
+    qLengthEl.innerText = qLengthEl.innerText.replace(
+      "{quiz-length}",
+      quiz.length
+    );
+    highLightText(highlight, qLengthEl);
     quizzesCont.appendChild(quizItem);
     initTooltips();
   });
@@ -309,9 +297,9 @@ export function searchQuizzes(query, quizListObj) {
     const description = quiz.description || "説明なし";
     const quizLength = quiz.length;
 
-    const lowercaseQuery = query.toLowerCase();
-    const lowercaseTitle = title.toLowerCase();
-    const lowercaseDesc = description.toLowerCase();
+    const lowercaseQuery = query.toUpperCase();
+    const lowercaseTitle = title.toUpperCase();
+    const lowercaseDesc = description.toUpperCase();
 
     if (
       lowercaseTitle.includes(lowercaseQuery) ||
@@ -323,4 +311,25 @@ export function searchQuizzes(query, quizListObj) {
   });
 
   return resultObj;
+}
+
+export function highLightText(highlight, textEl) {
+  if (!highlight) return;
+
+  const upperHighlight = highlight.toUpperCase();
+  const text = textEl.innerText;
+  const upperText = text.toUpperCase();
+
+  if (upperText.includes(upperHighlight)) {
+    const highlightI = upperText.indexOf(upperHighlight);
+    const replacement = text.substring(
+      highlightI,
+      highlightI + upperHighlight.length
+    );
+    const escapedRepl = replacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const hlRegExp = new RegExp(escapedRepl, "g");
+    const hlRepl = `<span class="bg-warning">${replacement}</span>`;
+
+    textEl.innerHTML = text.replace(hlRegExp, hlRepl);
+  }
 }

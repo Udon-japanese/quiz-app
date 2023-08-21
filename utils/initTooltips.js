@@ -1,5 +1,8 @@
+/**
+ * @description BootstrapのTooltipを初期化する
+ * @returns {void} なし
+ */
 export function initTooltips() {
-  // Bootstrap の Tooltip の設定
   document
     .querySelectorAll('[data-bs-toggle="tooltip"]')
     .forEach((tooltipTriggerEl) => {

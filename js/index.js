@@ -9,7 +9,7 @@ import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
-import { saveQuizDraft } from "./createQuiz.js";
+import { saveQuizDraft, initCrtQuizPage } from "./createQuiz.js";
 import { isUUID } from "../utils/isUUID.js";
 
 const topPage = document.getElementById("top-page");
@@ -85,7 +85,7 @@ document.addEventListener("change", (e) => {
           const obj = JSON.parse(jsonContent);
 
           if (isValidQuizObj(obj)) {
-            addQuizToStorage(obj.id, obj);
+            addQuizToStorage(obj);
             showToast("green", "クイズが保存されました");
             navigateToPage("quizList");
           } else {
@@ -140,6 +140,12 @@ export function navigateToPage(pageName) {
     createQuiz: navToCrtQPBtn,
   };
 
+  if (pageName === "quizList") {
+    displayQuizList();
+  } else if (pageName === "createQuiz") {
+    initCrtQuizPage();
+  }
+
   if (pageName === "quizList" || pageName === "createQuiz") {
     navbarBtns.forEach((b) => {
       const isActive = b === navbarBtnMap[pageName];
@@ -160,7 +166,7 @@ function switchToPage(pageName) {
   if (pageName == "quiz") {
     setCookie(
       "lastAccess",
-      `${pageName}?${
+      `${pageName}?id=${
         document.querySelector(".has-quiz-id").id.split("quiz-")[1]
       }`
     );
@@ -221,7 +227,7 @@ function loadInitialPage() {
   const lastAccess = getCookie("lastAccess");
   if (lastAccess) {
     if (lastAccess.startsWith("quiz?")) {
-      const qId = lastAccess.split("quiz?")[1];
+      const qId = lastAccess.split("quiz?id=")[1];
       if (!isUUID(qId)) {
         navigateToPage("top");
         return;

@@ -3,6 +3,7 @@ import { navigateToPage } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { getVolumeFromStorage, setVolumeToStorage } from "../utils/storage.js";
+import { isNumNotNaN } from "../utils/isNumNotNaN.js";
 
 const answerGuide = document.getElementById("answer-guide");
 const choiceChecks = document.querySelectorAll(".choice-check");
@@ -281,7 +282,7 @@ function showQuestion() {
   questionSection.classList.remove("d-none");
   explSection.classList.add("d-none");
   const time = quizObj.quiz?.options?.timer;
-  const isNum = !isNaN(time);
+  const isNum = isNumNotNaN(time);
   document.getElementById("timer-group").classList.toggle("d-none", !isNum);
   const q = getCurrentQuestion();
   const questionIndex = quizObj.questionIndex;

@@ -1,10 +1,10 @@
 "use strict";
 import { cloneFromTemplate } from "../js/index.js";
-
 /**
  * @description トーストを表示する
- * @param {"red" | "yellow" | "green"} color トーストの色
- * @param {string} message トーストのメッセージ
+ * @param {"red" | "yellow" | "green" | "sky-blue"} color トーストの色
+ * @param {string} message トーストに表示したいメッセージ
+ * @returns {void} なし
  */
 export function showToast(color, message) {
   let toast = document.getElementById("toast");
@@ -13,21 +13,26 @@ export function showToast(color, message) {
     document.body.insertBefore(toastClone, document.body.firstChild);
     toast = document.getElementById("toast");
   }
-  toast.classList.remove("text-bg-danger", "text-bg-warning", "text-bg-success");
+  toast.classList.remove("text-bg-danger", "text-bg-warning", "text-bg-success", "bg-info", "text-light");
   
-  let toastColor = "text-bg-";
+  let toastColorClass = "text-bg-";
   switch (color) {
     case "red":
-      toastColor += "danger";
+      toastColorClass += "danger";
       break;
     case "yellow":
-      toastColor += "warning";
+      toastColorClass += "warning";
       break;
     case "green":
-      toastColor += "success";
+      toastColorClass += "success";
+      break;
+    case "sky-blue":
+      toastColorClass = "bg-info text-light";
       break;
   }
-  toast.classList.add(toastColor);
+  toastColorClass.split(" ").forEach(colorClass => {
+    toast.classList.add(colorClass);
+  })
   const toastBody = toast.querySelector(".toast-body");
   toastBody.innerText = message;
 

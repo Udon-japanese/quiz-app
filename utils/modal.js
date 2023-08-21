@@ -3,8 +3,9 @@ import { clearDelQDsWaitTimeout } from "../js/createQuiz.js";
 import { cloneFromTemplate } from "../js/index.js";
 import { clearDelQsWaitTimeout } from "../js/quizList.js";
 /**
- *
+ * @description モーダルを作成、表示する
  * @param {{title: string; body: string; colorClass?: string; modalCont: HTMLElement actionBtn: {text: string; HTMLAttributes?: Object<string, string> color: "red" | "green" | "blue";} }} option オプション
+ * @returns {void} なし
  */
 export function openModal(option) {
   const { title, body, colorClass, modalCont, actionBtn } = option;
@@ -51,8 +52,8 @@ export function openModal(option) {
   const modalEl = document.querySelector(".modal");
   trapFocus(modalEl);
   modalEl.addEventListener("hidden.bs.modal", () => {
-    clearDelQsWaitTimeout();
-    clearDelQDsWaitTimeout();
+    clearDelQsWaitTimeout();// クイズ全削除ボタンのタイムアウト
+    clearDelQDsWaitTimeout();// 下書き全削除ボタンのタイムアウト
     modalEl.remove();
   });
   
@@ -60,19 +61,23 @@ export function openModal(option) {
   modalInstance.show();
 }
 
+/**
+ * @description モーダルを閉じる
+ * @returns {void} なし
+ */
 export function closeModal() {
   const modalEl = document.querySelector(".modal");
   const modal = bootstrap.Modal.getInstance(modalEl);
   modal.hide();
 }
 
-/**
- *
- * @param {Element} el
- */
-
 
 // https://hidde.blog/using-javascript-to-trap-focus-in-an-element/
+/**
+ * @description 要素からフォーカスが出ないようにする
+ * @param {Element} el フォーカスさせたい要素
+ * @returns {void} なし
+ */
 function trapFocus(el) {
   const focusableEls = el.querySelectorAll(
     `a[href]:not([disabled]):not([tabindex="-1"]),
