@@ -1,9 +1,5 @@
 "use strict";
-import {
-  addQuizToStorage,
-  getQuizFromStorage,
-} from "../utils/storage.js";
-import { createElement } from "../utils/createElement.js";
+import { addQuizToStorage, getQuizFromStorage } from "../utils/storage.js";
 import { displayQuizList } from "./quizList.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
@@ -25,9 +21,11 @@ const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
 const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 loadInitialPage();
+toggleElsByScrollability();
 
 // ページがロードされたときに容量不足を監視
 window.addEventListener("load", monitorStorageCapacity);
+window.addEventListener("resize", toggleElsByScrollability);
 document.addEventListener("click", (e) => {
   const els = e.composedPath();
   if (!els) return;
@@ -44,20 +42,6 @@ document.addEventListener("click", (e) => {
       navigateToPage("quizList");
     } else if (classList.contains("to-q-page")) {
       navigateToPage("quiz");
-    } else if (classList.contains("share-q")) {
-      const quizId = el.id.split("share-")[1];
-      const quiz = getQuizFromStorage(quizId);
-      const blob = new Blob([JSON.stringify(quiz)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const dlLink = createElement("a", {
-        href: url,
-        download: `quiz_${quizId}.json`,
-        class: "d-none",
-      });
-      dlLink.click();
-      dlLink.remove();
-      URL.revokeObjectURL(url);
-      navigateToPage("quizList");
     }
   });
 });
@@ -134,6 +118,7 @@ export function navigateToPage(pageName) {
   offcanvasInstance.hide();
 
   switchToPage(pageName);
+  
 
   const navbarBtnMap = {
     quizList: navToQListPBtn,
@@ -156,6 +141,8 @@ export function navigateToPage(pageName) {
       b.classList.remove("active");
     });
   }
+
+  toggleElsByScrollability();
 }
 
 /**
@@ -256,4 +243,20 @@ function monitorStorageCapacity() {
       "データをこれ以上保存できません。新しくクイズを保存したい場合は、不要なクイズを削除してください"
     );
   }
+}
+
+export function toggleElsByScrollability() {
+  const body = document.body;
+  const isScrollable = body.scrollHeight > body.clientHeight;
+  const screenWidth = window.innerWidth;
+  const isScreenSMOrWider = screenWidth > 575.98;
+  document.querySelectorAll(".del-all-cont").forEach((btnCont) => {
+    if (btnCont) btnCont.classList.toggle("container", isScreenSMOrWider); //クイズ・下書き全削除ボタンをsm未満では画面幅いっぱいにするため
+  });
+  document.querySelectorAll(".visible-on-scrollable").forEach((el) => {
+    if (el) el.classList.toggle("d-none", !isScrollable);
+  });
+  document.querySelectorAll(".hidden-on-scrollable").forEach((el) => {
+    if (el) el.classList.toggle("d-none", isScrollable);
+  });
 }

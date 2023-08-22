@@ -10,7 +10,7 @@ import {
   updateQuizDraftToStorage,
   removeQuizDraftsFromStorage,
 } from "../utils/storage.js";
-import { cloneFromTemplate, navigateToPage } from "./index.js";
+import { cloneFromTemplate, navigateToPage, toggleElsByScrollability } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/replaceAttrVals.js";
 import { displayQuizList, highLightText, searchQuizzes } from "./quizList.js";
@@ -26,7 +26,7 @@ let addQBtn,
   searchQDInput,
   quizDraftSection,
   crtQuizSection,
-  delAllQDsBtn;
+  delAllQDsBtns;
 
 const counterInitialState = 2;
 const answerTypeInitialState = null;
@@ -1110,7 +1110,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
   searchQDInput = document.getElementById("search-q-draft");
   quizDraftSection = document.getElementById("quiz-draft-section");
   crtQuizSection = document.getElementById("crt-quiz-section");
-  delAllQDsBtn = document.getElementById("del-all-quiz-drafts");
+  delAllQDsBtns = document.querySelectorAll(".del-all-quiz-drafts-btn");
   initQuizObject(crtQuizObj);
   createQuestion(true);
   toggleAnswerType(1);
@@ -1366,15 +1366,19 @@ export function displayQuizDraftList(obj = null, highlight = "") {
     );
     highLightText(highlight, qLengthEl);
     quizDraftsCont.appendChild(quizDraft);
-    initTooltips();
   });
+  initTooltips();
+  toggleElsByScrollability();
 }
 
 function handleSearchInput(e) {
   const query = e.target.value;
   const noneQuizDraftEl = document.getElementById("none-quiz-draft");
 
-  delAllQDsBtn.classList.toggle("d-none", query);
+  delAllQDsBtns.forEach(btn => {
+    btn.classList.toggle("d-none", query);
+  });
+
   if (!query) {
     noneQuizDraftEl.classList.add("d-none");
     displayQuizDraftList();

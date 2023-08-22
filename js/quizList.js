@@ -1,5 +1,5 @@
 "use strict";
-import { cloneFromTemplate, initUploadBtn, navigateToPage } from "./index.js";
+import { cloneFromTemplate, initUploadBtn, navigateToPage, toggleElsByScrollability } from "./index.js";
 import {
   addQuizToStorage,
   getQuizFromStorage,
@@ -19,6 +19,7 @@ import wordQuiz from "../quizzes/word-quiz.json" assert { type: "json" };
 import { initCrtQuizPage } from "./createQuiz.js";
 import { formatTime } from "../utils/formatTime.js";
 import { initTooltips } from "../utils/initTooltips.js";
+import { createElement } from "../utils/createElement.js";
 /**
  * @type {Quiz[]}
  */
@@ -43,7 +44,7 @@ const searchQInput = document.getElementById("search-q");
 const headerBtnCont = document.getElementById("header-btn-cont");
 const noneQuizEl = document.getElementById("none-quiz");
 const noneQuizTxtEl = document.getElementById("none-quiz-txt");
-const delAllQuizzesBtn = document.getElementById("del-all-quizzes");
+const delAllQuizzesBtns = document.querySelectorAll(".del-all-quizzes-btn");
 
 /**@type {Object<string, Quiz>} */
 let quizListObj = {};
@@ -116,6 +117,22 @@ qListPage.addEventListener("click", (e) => {
       const quiz = getQuizFromStorage(quizId);
       navigateToPage("createQuiz");
       initCrtQuizPage(quiz, "edit");
+    } else if (classList.contains("share-q")) {
+      const quizId = el.id.split("share-")[1];
+      const quiz = getQuizFromStorage(quizId);
+      const blob = new Blob([JSON.stringify(quiz)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const dlLink = createElement("a", {
+        href: url,
+        download: `quiz_${quizId}.json`,
+        class: "d-none",
+      });
+      dlLink.click();
+      dlLink.remove();
+      URL.revokeObjectURL(url);
+      navigateToPage("quizList");
     } else if (classList.contains("del-quiz")) {
       const delQId = el.id.split("del-quiz-")[1];
       removeQuizFromStorage(delQId);
@@ -182,7 +199,9 @@ searchQInput.addEventListener("input", (e) => {
     displayQuizList();
     return;
   }
-  delAllQuizzesBtn.classList.toggle("d-none", query); // 検索バーが空でないときは隠す
+  delAllQuizzesBtns.forEach((btn) => {
+    btn.classList.toggle("d-none", query); // 検索バーが空でないときは隠す
+  });
 
   const qListObj = searchQuizzes(query, quizListObj);
   const noneResult = !Object.keys(qListObj).length;
@@ -218,7 +237,9 @@ export function displayQuizList(obj = null, highlight = "") {
   noneQuizEl.classList.toggle("d-none", !noneQuiz);
   searchQInput.classList.toggle("d-none", noneQuiz);
   headerBtnCont.classList.toggle("d-none", noneQuiz);
-  delAllQuizzesBtn.classList.toggle("d-none", noneQuiz || highlight); // 検索バーを使用していない(検索バーが空)のときのみ表示
+  delAllQuizzesBtns.forEach((btn) => {
+    btn.classList.toggle("d-none", noneQuiz || highlight); // 検索バーを使用していない(検索バーが空)のときのみ表示
+  });
 
   Object.values(qListObjToUse).forEach((quiz) => {
     const quizItem = cloneFromTemplate("quiz-item-tem");
@@ -279,8 +300,9 @@ export function displayQuizList(obj = null, highlight = "") {
     );
     highLightText(highlight, qLengthEl);
     quizzesCont.appendChild(quizItem);
-    initTooltips();
   });
+  initTooltips();
+  toggleElsByScrollability();
 }
 
 /**
@@ -326,7 +348,7 @@ export function highLightText(highlight, textEl) {
       highlightI,
       highlightI + upperHighlight.length
     );
-    const escapedRepl = replacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedRepl = replacement.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const hlRegExp = new RegExp(escapedRepl, "g");
     const hlRepl = `<span class="bg-warning">${replacement}</span>`;
 

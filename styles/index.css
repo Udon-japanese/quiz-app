@@ -21,7 +21,7 @@ textarea {
 }
 
 
-@media (max-width: 575px) {
+@media (max-width: 575.98px) {
   /* スクロールバー */
   ::-webkit-scrollbar {
     display: none;
@@ -36,6 +36,14 @@ textarea {
   画面が思わぬ場所にスクロールしてしまう不具合を防止 */
   .dropdown-menu.show {
     inset: 0px 0px auto auto !important;
+  }
+
+  .hidden-on-scrollable {
+    border-radius: 0%;
+  }
+
+  .visible-on-scrollable {
+    border-radius: 0%;
   }
 }
 
