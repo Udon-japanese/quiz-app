@@ -1,5 +1,10 @@
 "use strict";
-import { addQuizToStorage, getQuizFromStorage, getThemeFromStorage, setThemeToStorage } from "../utils/storage.js";
+import {
+  addQuizToStorage,
+  getQuizFromStorage,
+  getThemeFromStorage,
+  setThemeToStorage,
+} from "../utils/storage.js";
 import { displayQuizList } from "./quizList.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
@@ -7,7 +12,7 @@ import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft, initCrtQuizPage } from "./createQuiz.js";
 import { isUUID } from "../utils/isUUID.js";
-import { toggleElem } from "../utils/elemManipulation.js";
+import { hideElem, toggleElem } from "../utils/elemManipulation.js";
 
 const topPage = document.getElementById("top-page");
 const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page"); // ナビゲーションバー上にあるクイズ作成ページへ移動するボタン
@@ -107,7 +112,7 @@ function applyTheme(theme) {
   const body = document.body;
 
   // テーマに基づいてボタンやアイコンのスタイルを切り替える
-  document.querySelectorAll(".choice-btn").forEach(choiceBtn => {
+  document.querySelectorAll(".choice-btn").forEach((choiceBtn) => {
     choiceBtn.classList.toggle("btn-outline-dark", !isDarkMode);
     choiceBtn.classList.toggle("btn-outline-light", isDarkMode);
   });
@@ -307,10 +312,19 @@ export function toggleBtnsByScrollability() {
   document.querySelectorAll(".del-all-cont").forEach((btnCont) => {
     if (btnCont) btnCont.classList.toggle("container", isScreenSMOrWider); //クイズ・下書き全削除ボタンをsm未満では画面幅いっぱいにするため
   });
-  document.querySelectorAll(".visible-on-scrollable").forEach((btn) => {
-    if (btn) toggleElem(btn, !isScrollable);
-  });
-  document.querySelectorAll(".hidden-on-scrollable").forEach((btn) => {
-    if (btn) toggleElem(btn, isScrollable);
-  });
+
+  const hiddenDelAllBtns = document.querySelectorAll(".hidden-del-all-btn");
+  if (hiddenDelAllBtns.length) {
+    console.log("hoe")
+    hiddenDelAllBtns.forEach((btn) => {
+      hideElem(btn);
+    });
+  } else {
+    document.querySelectorAll(".visible-on-scrollable").forEach((btn) => {
+      toggleElem(btn, !isScrollable);
+    });
+    document.querySelectorAll(".hidden-on-scrollable").forEach((btn) => {
+      toggleElem(btn, isScrollable);
+    });
+  }
 }

@@ -22,7 +22,7 @@ import {
 } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/elemManipulation.js";
-import { displayQuizList, highLightText, searchQuizzes } from "./quizList.js";
+import { displayQuizList, highlightText, searchQuizzes } from "./quizList.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { formatTime } from "../utils/formatTime.js";
 import { initTooltips } from "../utils/initTooltips.js";
@@ -34,6 +34,7 @@ const answerTypeInitialState = null;
 const createChoiceCallLimit = 4;
 const createQuestionCallLimit = 10;
 const crtQuizObj = {};
+const existsRandomUUID = "crypto" in window && "randomUUID" in window.crypto;
 
 crtQPage.addEventListener("click", (e) => {
   const elems = e.composedPath();
@@ -379,7 +380,7 @@ function setTFChoiceVals() {
 }
 /**
  * @description 入力された内容をもとに、クイズを作成、ローカルストレージに保存する
- * @param {`${string}-${string}-${string}-${string}-${string}`} existsId 既に存在するid名(下書き、編集時)
+ * @param {string} existsId 既に存在するid名(下書き、編集時)
  * @param {"new" | "edit" | "draft"} [quizType="new"] 保存するクイズデータの種類
  * @returns {void} なし
  */
@@ -388,7 +389,8 @@ function createQuiz(existsId, quizType = "new") {
   // 必要な値が入っていなければ、トーストとフォームの色を変えて警告する
   let invalidForm = null;
   const crtQuizHeader = document.getElementById("crt-quiz-title");
-  const id = existsId || crypto.randomUUID();
+  const id =
+    existsId || existsRandomUUID ? crypto.randomUUID() : generateUUIDv4();
   const titleElem = document.getElementById("title");
   const title = titleElem.value;
   if (!title) {
@@ -976,7 +978,8 @@ export function saveQuizDraft() {
   // 一つもフォームが入力されていなかったら保存しない
   let isEmptyQuiz = true;
   // フォームに入力されている値をオブジェクトに保存し、ローカルストレージに保存する
-  const id = quizDraftId || crypto.randomUUID();
+  const id =
+    quizDraftId || existsRandomUUID ? crypto.randomUUID() : generateUUIDv4();
   const title = document.getElementById("title").value;
   const descriptionElem = document.getElementById("description");
   const description = descriptionElem.value;
@@ -1358,10 +1361,10 @@ function displayQuizDraftList(obj = null, highlight = "") {
     replaceAttrVals(elsHasAttrQId, "{quiz-draft-id}", quiz.id);
     const quizTitleEl = quizDraft.querySelector(".q-title");
     quizTitleEl.innerText = quiz.title || "タイトルなし";
-    highLightText(highlight, quizTitleEl);
+    highlightText(highlight, quizTitleEl);
     const quizDescEl = quizDraft.querySelector(".q-desc");
     quizDescEl.innerText = quiz.description || "説明なし";
-    highLightText(highlight, quizDescEl);
+    highlightText(highlight, quizDescEl);
     const hasOptions = {
       quiz: {
         timer: false,
@@ -1408,7 +1411,7 @@ function displayQuizDraftList(obj = null, highlight = "") {
       "{quiz-length}",
       quiz.length
     );
-    highLightText(highlight, qLengthEl);
+    highlightText(highlight, qLengthEl);
     quizDraftsCont.appendChild(quizDraft);
   });
   initTooltips();
@@ -1424,7 +1427,7 @@ function handleSearchInput(e) {
   const noneQuizDraftEl = document.getElementById("none-quiz-draft");
 
   document.querySelectorAll(".del-all-quiz-drafts-btn").forEach((btn) => {
-    toggleElem(btn, query);
+    btn.classList.toggle("hidden-del-all-btn", query);
   }); // 検索バーが空のときのみ下書き全削除ボタン(2つ)表示する
 
   if (!query) {
@@ -1444,4 +1447,37 @@ function handleSearchInput(e) {
     return;
   }
   displayQuizDraftList(qDListObj, query);
+}
+
+// https://github.com/googlearchive/chrome-platform-analytics/blob/master/src/internal/identifier.js
+// Copyright 2013 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+/**
+ * @description webkit系ブラウザで、crypto.randomUUID()が使用できないときに、代用で使用する
+ * @returns {string} UUIDv4の文字列
+ */
+function generateUUIDv4() {// 元コード analytics.internal.Identifier.generateUuid = function() {
+  let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split("");// 元コード var chars = analytics.internal.Identifier.UUID_FMT_.split('');
+  for (let i = 0, len = chars.length; i < len; i++) {// 元コード for (var i = 0, len = chars.length; i < len; i++) {
+      switch (chars[i]) {
+          case "x":
+              chars[i] = Math.floor(Math.random() * 16).toString(16);// 元コード chars[i] = goog.math.randomInt(16).toString(16);
+              break;
+          case "y":
+              chars[i] = (Math.floor(Math.random() * 4) + 8).toString(16);// 元コード chars[i] = (goog.math.randomInt(4) + 8).toString(16);
+              break;
+      }
+  }
+  return chars.join("");
 }

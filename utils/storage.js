@@ -32,7 +32,7 @@ export function removeQuizzesFromStorage() {
 
 /**
  * @description 一つのクイズを取得する
- * @param {`${string}-${string}-${string}-${string}-${string}`} id クイズのid
+ * @param {string} id クイズのid
  * @returns {Quiz | {}} クイズのオブジェクト(存在しなければ空のオブジェクト)
  */
 export function getQuizFromStorage(id) {
@@ -58,7 +58,7 @@ export function addQuizToStorage(quiz) {
 }
 /**
  * @description 一つのクイズを削除する
- * @param {`${string}-${string}-${string}-${string}-${string}`} id クイズのid
+ * @param {string} id クイズのid
  * @returns {void} なし
  */
 export function removeQuizFromStorage(id) {
@@ -146,7 +146,7 @@ export function removeQuizDraftsFromStorage() {
 
 /**
  * @description 一つのクイズの下書きを取得する
- * @param {`${string}-${string}-${string}-${string}-${string}`} id クイズの下書きのid
+ * @param {string} id クイズの下書きのid
  * @returns {Quiz | {}} クイズの下書きのオブジェクト(存在しなければ空のオブジェクト)
  */
 export function getQuizDraftFromStorage(id) {
@@ -172,7 +172,7 @@ export function addQuizDraftToStorage(quizDraft) {
 }
 /**
  * @description 一つのクイズの下書きを削除する
- * @param {`${string}-${string}-${string}-${string}-${string}`} id
+ * @param {string} id
  * @returns {void} なし
  */
 export function removeQuizDraftFromStorage(id) {
