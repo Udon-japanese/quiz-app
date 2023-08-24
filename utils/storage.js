@@ -4,8 +4,8 @@ import { isNumNotNaN } from "./isNumNotNaN.js";
 const storage = localStorage;
 const QUIZZES_KEY = "quizzes";
 const VOLUME_KEY = "volume";
+const THEME_KEY = "theme";
 const QUIZ_DRAFTS_KEY = "quizDrafts";
-
 /**
  * @description 複数または一つのクイズを保存する
  * @param {Object<string, Quiz>} quizzes クイズのオブジェクトが集まったオブジェクト
@@ -14,7 +14,6 @@ const QUIZ_DRAFTS_KEY = "quizDrafts";
 export function saveQuizzesToStorage(quizzes) {
   storage.setItem(QUIZZES_KEY, JSON.stringify(quizzes));
 }
-
 /**
  * @description 保存されているすべてのクイズを取得する
  * @returns {Object<string, Quiz> | null} クイズのオブジェクトが集まったオブジェクト(見つからなかった場合はnull)
@@ -23,13 +22,12 @@ export function getQuizzesFromStorage() {
   const quizzesJson = storage.getItem(QUIZZES_KEY);
   return JSON.parse(quizzesJson) || null;
 }
-
 /**
  * @description すべてのクイズを削除する(空のオブジェクトを保存する)
  * @returns {void} なし
  */
 export function removeQuizzesFromStorage() {
-  storage.setItem(QUIZZES_KEY, "{}");// 空のオブジェクトを入れて、リロード時にまたデフォルトのクイズが挿入されないようにする
+  storage.setItem(QUIZZES_KEY, "{}"); // 空のオブジェクトを入れて、リロード時にまたデフォルトのクイズが挿入されないようにする
 }
 
 /**
@@ -41,7 +39,6 @@ export function getQuizFromStorage(id) {
   const quizzes = getQuizzesFromStorage();
   return quizzes[id] || {};
 }
-
 /**
  * @description 一つのクイズを保存する
  * @param {Quiz} quiz クイズのオブジェクト
@@ -59,7 +56,6 @@ export function addQuizToStorage(quiz) {
   quizzes[quizId] = quiz;
   saveQuizzesToStorage(quizzes);
 }
-
 /**
  * @description 一つのクイズを削除する
  * @param {`${string}-${string}-${string}-${string}-${string}`} id クイズのid
@@ -72,7 +68,6 @@ export function removeQuizFromStorage(id) {
     saveQuizzesToStorage(quizzes);
   }
 }
-
 /**
  * @description 一つのクイズを更新する
  * @param {Quiz} updatedQuiz プロパティが更新されたクイズのオブジェクト
@@ -100,7 +95,6 @@ export function getVolumeFromStorage() {
     return null;
   }
 }
-
 /**
  * @description 音量を記録する
  * @param {number} volume 0~1までの数字
@@ -111,6 +105,23 @@ export function setVolumeToStorage(volume) {
 }
 
 /**
+ * @description 保存されているテーマの種類を取得する
+ * @returns {"light" | "dark" | null} テーマの文字列(存在しない場合はnullを返す)
+ */
+export function getThemeFromStorage() {
+  const theme = storage.getItem(THEME_KEY);
+  return theme || null;
+}
+/**
+ * @description 現在のテーマを記録する
+ * @param {"light" | "dark"} theme テーマの色の名前 
+ * @returns {void} なし
+ */
+export function setThemeToStorage(theme) {
+  storage.setItem(THEME_KEY, theme);
+}
+
+/**
  * @description クイズの下書きを複数または一つ保存する
  * @param {Object<string, Quiz>} quizDrafts クイズの下書きの集まり
  * @returns {void} なし
@@ -118,7 +129,6 @@ export function setVolumeToStorage(volume) {
 export function saveQuizDraftsToStorage(quizDrafts) {
   storage.setItem(QUIZ_DRAFTS_KEY, JSON.stringify(quizDrafts));
 }
-
 /**
  * @description クイズの下書きの集まりを取得する
  * @returns {Object<string, Quiz> | null} 下書きの集まり(なければnull)
@@ -127,12 +137,11 @@ export function getQuizDraftsFromStorage() {
   const quizDrafts = storage.getItem(QUIZ_DRAFTS_KEY);
   return JSON.parse(quizDrafts) || null;
 }
-
 /**
  * @description クイズの下書きをすべて削除する(空のオブジェクトを保存する)
  */
 export function removeQuizDraftsFromStorage() {
-  storage.setItem(QUIZ_DRAFTS_KEY, "{}");// 空のオブジェクトを入れて、リロード時にまたデフォルトのクイズが挿入されないようにする
+  storage.setItem(QUIZ_DRAFTS_KEY, "{}"); // 空のオブジェクトを入れて、リロード時にまたデフォルトのクイズが挿入されないようにする
 }
 
 /**
@@ -144,7 +153,6 @@ export function getQuizDraftFromStorage(id) {
   const quizDrafts = getQuizDraftsFromStorage();
   return quizDrafts[id] || {};
 }
-
 /**
  * @description 一つのクイズの下書きを追加する
  * @param {Quiz} quizDraft クイズの下書きのオブジェクト
@@ -162,10 +170,9 @@ export function addQuizDraftToStorage(quizDraft) {
   quizDrafts[quizDraftId] = quizDraft;
   saveQuizDraftsToStorage(quizDrafts);
 }
-
 /**
  * @description 一つのクイズの下書きを削除する
- * @param {`${string}-${string}-${string}-${string}-${string}`} id 
+ * @param {`${string}-${string}-${string}-${string}-${string}`} id
  * @returns {void} なし
  */
 export function removeQuizDraftFromStorage(id) {
@@ -175,7 +182,6 @@ export function removeQuizDraftFromStorage(id) {
     saveQuizDraftsToStorage(quizDrafts);
   }
 }
-
 /**
  * @description 一つのクイズの下書きを更新する
  * @param {Quiz} updatedQuizDraft 更新されたクイズの下書きのオブジェクト

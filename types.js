@@ -1,7 +1,9 @@
+"use strict";
+// 型情報
 /**
  * @typedef {Object} QuizOption
  * @property {number} [timer] クイズのタイマー設定（秒）
- * @property {string[]} [tf] マルバツクイズの選択肢
+ * @property {string[]} [tf] マルバツクイズ(True or False quiz)の選択肢
  */
 /**
  * @typedef {Object} QuestionOption

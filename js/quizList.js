@@ -1,5 +1,10 @@
 "use strict";
-import { cloneFromTemplate, initUploadBtn, navigateToPage, toggleElsByScrollability } from "./index.js";
+import {
+  cloneFromTemplate,
+  initUploadBtn,
+  navigateToPage,
+  toggleBtnsByScrollability,
+} from "./index.js";
 import {
   addQuizToStorage,
   getQuizFromStorage,
@@ -8,21 +13,30 @@ import {
   removeQuizzesFromStorage,
 } from "../utils/storage.js";
 import { closeModal, openModal } from "../utils/modal.js";
-import { replaceAttrVals } from "../utils/replaceAttrVals.js";
+import { replaceAttrVals } from "../utils/elemManipulation.js";
 import { initQuizPage } from "./quiz.js";
+import { initCrtQuizPage } from "./createQuiz.js";
+import { formatTime } from "../utils/formatTime.js";
+import { initTooltips } from "../utils/initTooltips.js";
+import { createElement } from "../utils/elemManipulation.js";
+import { isValidQuizObj } from "../utils/isValidQuizObj.js";
+import { showToast } from "../utils/showToast.js";
+import { toggleElem, showElem } from "../utils/elemManipulation.js";
 import commonSenseQuiz from "../quizzes/common-sense-quiz.json" assert { type: "json" };
 import commonSenseQuiz2 from "../quizzes/common-sense-quiz2.json" assert { type: "json" };
 import gameQuiz from "../quizzes/game-quiz.json" assert { type: "json" };
 import sportsQuiz from "../quizzes/sports-quiz.json" assert { type: "json" };
 import japanQuiz from "../quizzes/japan-quiz.json" assert { type: "json" };
 import wordQuiz from "../quizzes/word-quiz.json" assert { type: "json" };
-import { initCrtQuizPage } from "./createQuiz.js";
-import { formatTime } from "../utils/formatTime.js";
-import { initTooltips } from "../utils/initTooltips.js";
-import { createElement } from "../utils/createElement.js";
-/**
- * @type {Quiz[]}
- */
+
+const qListPage = document.getElementById("quiz-list-page");
+const quizzesCont = document.getElementById("quizzes");
+const searchQInput = document.getElementById("search-q");
+const headerBtnCont = document.getElementById("header-btn-cont");
+const noneQuizElem = document.getElementById("none-quiz");
+const noneQuizTxtElem = document.getElementById("none-quiz-txt");
+const delAllQuizzesBtns = document.querySelectorAll(".del-all-quizzes-btn");
+/** @type {Quiz[]} */
 const defaultQuizzes = [
   commonSenseQuiz,
   commonSenseQuiz2,
@@ -31,42 +45,36 @@ const defaultQuizzes = [
   japanQuiz,
   wordQuiz,
 ];
+const qListObj = {
+  /**@type {Object<string, Quiz> | {}} */
+  quizList: {},
+  delQsWaitTImeout: null,
+};
+const INVALID_QUIZ_DATA_MESSAGE = "無効なクイズデータです";
 
 if (!getQuizzesFromStorage()) {
+  // 初めてページに訪れたとき、デフォルトのクイズを追加する
   defaultQuizzes.forEach((defaultQuiz) => {
     addQuizToStorage(defaultQuiz);
   });
 }
-
-const qListPage = document.getElementById("quiz-list-page");
-const quizzesCont = document.getElementById("quizzes");
-const searchQInput = document.getElementById("search-q");
-const headerBtnCont = document.getElementById("header-btn-cont");
-const noneQuizEl = document.getElementById("none-quiz");
-const noneQuizTxtEl = document.getElementById("none-quiz-txt");
-const delAllQuizzesBtns = document.querySelectorAll(".del-all-quizzes-btn");
-
-/**@type {Object<string, Quiz>} */
-let quizListObj = {};
 initUploadBtn(headerBtnCont, 0, "d-none d-sm-inline-block");
 initUploadBtn(headerBtnCont, 100, "d-sm-none");
-const noneQuizBtnCont = noneQuizEl.querySelector(".btn-cont");
-let delQsWaitTImeout;
-initUploadBtn(noneQuizBtnCont, 100);
+initUploadBtn(noneQuizElem.querySelector(".btn-cont"), 100);
 
 qListPage.addEventListener("click", (e) => {
-  const els = e.composedPath();
-  if (!els) return;
+  const elems = e.composedPath();
+  if (!elems) return;
 
-  Array.from(els).forEach(async (el) => {
-    const classList = el.classList;
-    if (!el.className) return;
+  Array.from(elems).forEach(async (elem) => {
+    const classList = elem.classList;
+    if (!elem.className) return;
 
     if (classList.contains("upload-q")) {
-      el.value = "";
+      elem.value = "";
     } else if (classList.contains("open-del-q-m")) {
-      const delQId = el.id.split("del-")[1];
-      const delQ = quizListObj[delQId];
+      const delQId = elem.id.split("del-")[1];
+      const delQ = qListObj.quizList[delQId];
       const optionTimer = delQ?.options?.timer;
       const optionExpls = Object.values(delQ.questions)
         .map((q) => q?.options?.explanation)
@@ -109,17 +117,30 @@ qListPage.addEventListener("click", (e) => {
         },
       });
     } else if (classList.contains("play-q")) {
-      const quizId = el.id.split("play-")[1];
+      const quizId = elem.id.split("play-")[1];
       const quiz = getQuizFromStorage(quizId);
+      if (!isValidQuizObj(quiz)) {
+        showToast("red", INVALID_QUIZ_DATA_MESSAGE);
+        return;
+      }
       initQuizPage(quiz);
     } else if (classList.contains("edit-q")) {
-      const quizId = el.id.split("edit-")[1];
+      const quizId = elem.id.split("edit-")[1];
       const quiz = getQuizFromStorage(quizId);
+      if (!isValidQuizObj(quiz)) {
+        showToast("red", INVALID_QUIZ_DATA_MESSAGE);
+        return;
+      }
       navigateToPage("createQuiz");
       initCrtQuizPage(quiz, "edit");
     } else if (classList.contains("share-q")) {
-      const quizId = el.id.split("share-")[1];
+      const quizId = elem.id.split("share-")[1];
       const quiz = getQuizFromStorage(quizId);
+      if (!isValidQuizObj(quiz)) {
+        showToast("red", INVALID_QUIZ_DATA_MESSAGE);
+        return;
+      }
+      // クイズデータ(json)のダウンロードを実行する
       const blob = new Blob([JSON.stringify(quiz)], {
         type: "application/json",
       });
@@ -134,7 +155,7 @@ qListPage.addEventListener("click", (e) => {
       URL.revokeObjectURL(url);
       navigateToPage("quizList");
     } else if (classList.contains("del-quiz")) {
-      const delQId = el.id.split("del-quiz-")[1];
+      const delQId = elem.id.split("del-quiz-")[1];
       removeQuizFromStorage(delQId);
       closeModal();
       displayQuizList();
@@ -152,6 +173,7 @@ qListPage.addEventListener("click", (e) => {
         },
       });
     } else if (classList.contains("open-del-all-qs-m-again")) {
+      // ミスによりクイズがすべて削除されないように、削除承認モーダルを2回表示する
       document.querySelector(".modal-body").innerHTML = `
       <div class="text-center fw-bold">
         <div class="text-bg-danger d-inline-block p-4 rounded-circle">
@@ -169,7 +191,8 @@ qListPage.addEventListener("click", (e) => {
       actionBtn.classList.add("del-all-quizzes");
       actionBtn.disabled = true;
       await new Promise((resolve) => {
-        delQsWaitTImeout = setTimeout(() => {
+        // 誤って削除ボタンを押さないように、3秒待たないと押せない仕様
+        qListObj.delQsWaitTImeout = setTimeout(() => {
           resolve();
         }, 3000);
       });
@@ -181,13 +204,15 @@ qListPage.addEventListener("click", (e) => {
     }
   });
 });
-qListPage.addEventListener("hidden.bs.dropdown", (e) => {
+qListPage.addEventListener("shown.bs.dropdown", (e) => {
+  // ドロップダウンが表示されている間、3点リーダーに背景色をつける
   e.relatedTarget.classList.toggle(
     "ellipsis-bg",
     e.relatedTarget.classList.contains("show")
   );
 });
-qListPage.addEventListener("shown.bs.dropdown", (e) => {
+qListPage.addEventListener("hidden.bs.dropdown", (e) => {
+  // ドロップダウンが隠れたとき、3点リーダーの背景色をなくす
   e.relatedTarget.classList.toggle(
     "ellipsis-bg",
     e.relatedTarget.classList.contains("show")
@@ -200,59 +225,77 @@ searchQInput.addEventListener("input", (e) => {
     return;
   }
   delAllQuizzesBtns.forEach((btn) => {
-    btn.classList.toggle("d-none", query); // 検索バーが空でないときは隠す
+    toggleElem(btn, query); // 検索バーが空のときのみ表示する
   });
 
-  const qListObj = searchQuizzes(query, quizListObj);
-  const noneResult = !Object.keys(qListObj).length;
-  noneQuizEl.classList.toggle("d-none", !noneResult);
+  const quizList = searchQuizzes(query, qListObj.quizList);
+  const noneResult = !Object.keys(quizList).length;
+  toggleElem(noneQuizElem, !noneResult);
   if (noneResult) {
-    noneQuizTxtEl.innerHTML = `<div><i class="bi bi-search fs-1"></i></div>
+    noneQuizTxtElem.innerHTML = `
+    <div>
+      <i class="bi bi-search fs-1"></i>
+    </div>
     「${query}」に当てはまるクイズは見つかりませんでした。他のキーワードで検索するか、自分でクイズを作成、または他の人のクイズで遊んでみましょう！`;
-    headerBtnCont.classList.toggle("d-none", noneResult);
+    toggleElem(headerBtnCont, noneResult);
     quizzesCont.innerHTML = "";
     return;
   }
-  displayQuizList(qListObj, query);
+  displayQuizList(quizList, query);
 });
-
+/**
+ * @description クイズ全削除ボタンのタイムアウトを解除する
+ * @returns {void} なし
+ */
 export function clearDelQsWaitTimeout() {
-  clearTimeout(delQsWaitTImeout);
+  clearTimeout(qListObj.delQsWaitTImeout);
 }
-
+/**
+ * @description クイズ一覧を表示する
+ * @param {Quiz} [obj=null] 一覧表示させるオブジェクト(デフォルトでは保存されているすべてのクイズを一覧表示する)
+ * @param {string} [highlight=""] ハイライトをつける時に使用するテキスト
+ * @returns {void} なし
+ */
 export function displayQuizList(obj = null, highlight = "") {
   quizzesCont.innerHTML = "";
 
   if (!obj) {
-    quizListObj = getQuizzesFromStorage() || {};
+    qListObj.quizList = getQuizzesFromStorage() || {};
   }
 
-  const qListObjToUse = obj ? obj : quizListObj;
-  const noneQuiz = !Object.keys(qListObjToUse).length;
+  const qListObjToUse = obj ? obj : qListObj.quizList;
+  const noneQuiz = !Object.keys(qListObjToUse).length || !qListObjToUse;
   if (noneQuiz) {
-    noneQuizTxtEl.innerHTML = `<div>
-    <i class="bi bi-emoji-frown fs-1"></i>
-    </div>まだクイズがありません。自分でクイズを作成するか、他の人のクイズで遊んでみましょう！`;
+    noneQuizTxtElem.innerHTML = `
+    <div>
+      <i class="bi bi-emoji-frown fs-1"></i>
+    </div>
+    まだクイズがありません。自分でクイズを作成するか、他の人のクイズで遊んでみましょう！`;
   }
-  noneQuizEl.classList.toggle("d-none", !noneQuiz);
-  searchQInput.classList.toggle("d-none", noneQuiz);
-  headerBtnCont.classList.toggle("d-none", noneQuiz);
+  toggleElem(noneQuizElem, !noneQuiz);
+  toggleElem(searchQInput, noneQuiz);
+  toggleElem(headerBtnCont, noneQuiz);
   delAllQuizzesBtns.forEach((btn) => {
-    btn.classList.toggle("d-none", noneQuiz || highlight); // 検索バーを使用していない(検索バーが空)のときのみ表示
+    toggleElem(btn, noneQuiz || highlight); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
   });
-
+  // テンプレートの中身をクイズのデータで置き換え手表示する
   Object.values(qListObjToUse).forEach((quiz) => {
+    if (!isValidQuizObj(quiz)) return;
+
     const quizItem = cloneFromTemplate("quiz-item-tem");
     const elsHasAttrQId = quizItem.querySelectorAll(
       "[id*='{quiz-id}'], [aria-labelledby*='{quiz-id}']"
     );
     replaceAttrVals(elsHasAttrQId, "{quiz-id}", quiz.id);
-    const quizTitleEl = quizItem.querySelector(".q-title");
-    quizTitleEl.innerText = quiz.title;
-    highLightText(highlight, quizTitleEl);
-    const quizDescEl = quizItem.querySelector(".q-desc");
-    quizDescEl.innerText = quiz.description;
-    highLightText(highlight, quizDescEl);
+
+    const quizTitleElem = quizItem.querySelector(".q-title");
+    quizTitleElem.innerText = quiz.title;
+    highLightText(highlight, quizTitleElem);
+
+    const quizDescElem = quizItem.querySelector(".q-desc");
+    quizDescElem.innerText = quiz.description;
+    highLightText(highlight, quizDescElem);
+
     const hasOptions = {
       quiz: {
         timer: false,
@@ -271,44 +314,46 @@ export function displayQuizList(obj = null, highlight = "") {
     if (optionTimer) {
       hasOptions.quiz.timer = true;
     }
-
     const hasAnyOption =
       hasOptions.quiz.timer || hasOptions.question.explanation;
     if (hasAnyOption) {
-      const quizInfoEl = quizItem.querySelector(".q-info");
-      quizInfoEl.classList.remove("d-none");
+      const quizInfoElem = quizItem.querySelector(".q-info");
+      showElem(quizInfoElem);
       if (hasOptions.quiz.timer) {
-        const timerIcon = quizInfoEl.querySelector(".timer-icon");
+        const timerIcon = quizInfoElem.querySelector(".timer-icon");
         timerIcon.timer = replaceAttrVals(
           [timerIcon],
           "{option-timer}",
           formatTime(optionTimer)
         );
-        timerIcon.classList.toggle("d-none", !hasOptions.quiz.timer);
+        toggleElem(timerIcon, !hasOptions.quiz.timer);
       }
       if (hasOptions.question.explanation) {
-        quizInfoEl
-          .querySelector(".expl-icon")
-          .classList.toggle("d-none", !hasOptions.question.explanation);
+        toggleElem(
+          quizInfoElem.querySelector(".expl-icon"),
+          !hasOptions.question.explanation
+        );
       }
     }
 
-    const qLengthEl = quizItem.querySelector(".q-length");
-    qLengthEl.innerText = qLengthEl.innerText.replace(
+    const qLengthElem = quizItem.querySelector(".q-length");
+    qLengthElem.innerText = qLengthElem.innerText.replace(
       "{quiz-length}",
       quiz.length
     );
-    highLightText(highlight, qLengthEl);
+    highLightText(highlight, qLengthElem);
+
     quizzesCont.appendChild(quizItem);
   });
-  initTooltips();
-  toggleElsByScrollability();
-}
 
+  initTooltips();
+  toggleBtnsByScrollability();
+}
 /**
- * @description
- * @param {string} query
- * @returns {}
+ * @description クイズ一覧のオブジェクトから、クエリを含むプロパティを持つオブジェクトを返す
+ * @param {string} query 検索する文字列(searchQInputのvalue)
+ * @param {Object<string, Quiz>} クイズ一覧のオブジェクト
+ * @returns {Object<string, Quiz> | {}} ヒットしたクイズのオブジェクト(何もヒットしなければ空のオブジェクト)
  */
 export function searchQuizzes(query, quizListObj) {
   const resultObj = {};
@@ -319,6 +364,7 @@ export function searchQuizzes(query, quizListObj) {
     const description = quiz.description || "説明なし";
     const quizLength = quiz.length;
 
+    // 小文字大文字関係なく一致させるため、大文字に統一する
     const lowercaseQuery = query.toUpperCase();
     const lowercaseTitle = title.toUpperCase();
     const lowercaseDesc = description.toUpperCase();
@@ -334,12 +380,18 @@ export function searchQuizzes(query, quizListObj) {
 
   return resultObj;
 }
-
-export function highLightText(highlight, textEl) {
+/**
+ * @description 要素のテキストに、ハイライトの文字列をもとに背景色を付ける
+ * @param {string} highlight ハイライトの文字列
+ * @param {Element} textElem ハイライトを当てたい要素
+ * @returns {void} なし
+ */
+export function highLightText(highlight, textElem) {
   if (!highlight) return;
 
+  // ハイライトと要素のテキストを大文字に統一・比較することで、大文字小文字関係なく文字が一致していれば背景色を変える
   const upperHighlight = highlight.toUpperCase();
-  const text = textEl.innerText;
+  const text = textElem.innerText;
   const upperText = text.toUpperCase();
 
   if (upperText.includes(upperHighlight)) {
@@ -348,10 +400,10 @@ export function highLightText(highlight, textEl) {
       highlightI,
       highlightI + upperHighlight.length
     );
-    const escapedRepl = replacement.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedRepl = replacement.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // 特殊文字を文字列に変換する
     const hlRegExp = new RegExp(escapedRepl, "g");
     const hlRepl = `<span class="bg-warning">${replacement}</span>`;
 
-    textEl.innerHTML = text.replace(hlRegExp, hlRepl);
+    textElem.innerHTML = text.replace(hlRegExp, hlRepl);
   }
 }

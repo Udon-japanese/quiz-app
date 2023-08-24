@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @description BootstrapのTooltipを初期化する
  * @returns {void} なし

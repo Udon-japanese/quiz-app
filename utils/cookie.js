@@ -14,7 +14,6 @@ export function setCookie(name, value, daysToExpire = 14) {
   }`;
   document.cookie = `${name}=${cookieValue}; path=/`;
 }
-
 /**
  * @description キー名でクッキーを取得する
  * @param {string} name 保存しているクッキーのキー名
@@ -35,7 +34,6 @@ export function getCookie(name) {
   }
   return null; // 該当するクッキーが見つからない場合
 }
-
 /**
  * @description キー名でクッキーを削除する
  * @param {string} name キー名

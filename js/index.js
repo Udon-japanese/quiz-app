@@ -1,5 +1,5 @@
 "use strict";
-import { addQuizToStorage, getQuizFromStorage } from "../utils/storage.js";
+import { addQuizToStorage, getQuizFromStorage, getThemeFromStorage, setThemeToStorage } from "../utils/storage.js";
 import { displayQuizList } from "./quizList.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
@@ -7,32 +7,43 @@ import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft, initCrtQuizPage } from "./createQuiz.js";
 import { isUUID } from "../utils/isUUID.js";
+import { toggleElem } from "../utils/elemManipulation.js";
 
 const topPage = document.getElementById("top-page");
+const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page"); // ナビゲーションバー上にあるクイズ作成ページへ移動するボタン
+const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page"); // ナビゲーションバー上にあるクイズ一覧ページへ移動するボタン
+const toggleThemeBtn = document.getElementById("toggle-theme");
+const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 const pages = {
   top: topPage,
   createQuiz: document.getElementById("crt-quiz-page"),
   quizList: document.getElementById("quiz-list-page"),
   quiz: document.getElementById("quiz-page"),
 };
+const LAST_ACCESS_KEY_NAME = "lastAccess";
 
-const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page");
-const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page");
-const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 loadInitialPage();
-toggleElsByScrollability();
+toggleBtnsByScrollability();
+const savedTheme = getThemeFromStorage();
+if (savedTheme === "dark" || savedTheme === "light") {
+  applyTheme(savedTheme);
+}
 
-// ページがロードされたときに容量不足を監視
 window.addEventListener("load", monitorStorageCapacity);
-window.addEventListener("resize", toggleElsByScrollability);
+window.addEventListener("resize", toggleBtnsByScrollability);
+window.addEventListener("beforeunload", () => {
+  if (getCurrentPageName() === "createQuiz") {
+    saveQuizDraft();
+  }
+});
 document.addEventListener("click", (e) => {
-  const els = e.composedPath();
-  if (!els) return;
+  const elems = e.composedPath();
+  if (!elems) return;
 
-  Array.from(els).forEach((el) => {
-    if (!el.className) return;
-    const classList = el.classList;
+  Array.from(elems).forEach((elem) => {
+    if (!elem.className) return;
+    const classList = elem.classList;
 
     if (classList.contains("to-top-page")) {
       navigateToPage("top");
@@ -46,19 +57,20 @@ document.addEventListener("click", (e) => {
   });
 });
 document.addEventListener("change", (e) => {
-  const els = e.composedPath();
-  if (!els) return;
+  const elems = e.composedPath();
+  if (!elems) return;
 
-  Array.from(els).forEach((el) => {
-    if (!el.className) return;
-    const classList = el.classList;
+  Array.from(elems).forEach((elem) => {
+    if (!elem.className) return;
+    const classList = elem.classList;
 
     if (classList.contains("upload-q")) {
-      const file = el.files[0];
+      // いくつかのページでアップロードするためindex.jsに配置
+      const file = elem.files[0];
       if (!file) return;
       if (file.type !== "application/json") {
         showToast("red", "JSONファイルのみアップロードできます");
-        el.value = "";
+        elem.value = "";
         return;
       }
       const reader = new FileReader();
@@ -67,42 +79,79 @@ document.addEventListener("change", (e) => {
         const jsonContent = e.target.result;
         try {
           const obj = JSON.parse(jsonContent);
-
-          if (isValidQuizObj(obj)) {
-            addQuizToStorage(obj);
-            showToast("green", "クイズが保存されました");
-            navigateToPage("quizList");
-          } else {
+          if (!isValidQuizObj(obj)) {
             showToast("red", "無効なクイズデータです");
             return;
           }
+          addQuizToStorage(obj);
+          showToast("green", "クイズが保存されました");
+          navigateToPage("quizList");
         } catch (err) {
           showToast("red", "JSONファイルの解析に失敗しました");
           return;
         }
+
         displayQuizList();
       };
     }
   });
 });
+toggleThemeBtn.addEventListener("click", toggleTheme);
 
 /**
- *
- * @returns {"quizList" | "createQuiz" | "top" | "quiz"}
+ * @description テーマに合わせてスタイルを変える
+ * @returns {void} なし
+ */
+function applyTheme(theme) {
+  const isDarkMode = theme === "dark";
+  const body = document.body;
+
+  // テーマに基づいてボタンやアイコンのスタイルを切り替える
+  document.querySelectorAll(".choice-btn").forEach(choiceBtn => {
+    choiceBtn.classList.toggle("btn-outline-dark", !isDarkMode);
+    choiceBtn.classList.toggle("btn-outline-light", isDarkMode);
+  });
+  toggleElem(document.getElementById("dark-mode-icon"), isDarkMode);
+  toggleElem(document.getElementById("light-mode-icon"), !isDarkMode);
+  toggleThemeBtn.classList.toggle("btn-dark", !isDarkMode);
+  toggleThemeBtn.classList.toggle("btn-light", isDarkMode);
+
+  // テーマを切り替える
+  body.setAttribute("data-bs-theme", theme);
+  setThemeToStorage(theme);
+}
+/**
+ * @description テーマをトグルする
+ * @returns {void} なし
+ */
+function toggleTheme() {
+  const body = document.body;
+  const currentTheme = body.getAttribute("data-bs-theme");
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+  bootstrap.Offcanvas.getOrCreateInstance(
+    document.getElementById("offcanvas")
+  ).hide();
+
+  applyTheme(newTheme); // テーマを切り替えて適用する
+}
+/**
+ * @description 現在のページの名前を取得する
+ * @returns {"quizList" | "createQuiz" | "top" | "quiz" | null} 現在のページの名前(一致するものがなければnull)
  */
 function getCurrentPageName() {
-  const currentPageEl = document.querySelector(".page:not(.d-none)");
+  const currentPageElem = document.querySelector(".page:not(.d-none)"); // 現在のページ以外は非表示(class="d-none")のため
   for (const pageName in pages) {
-    if (pages[pageName].id === currentPageEl?.id) {
+    if (pages[pageName].id === currentPageElem?.id) {
       return pageName;
     }
   }
   return null;
 }
-
 /**
- * @description
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
+ * @description 指定したページに移動し、ページごとに必要な処理を行う
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName 移動したいページの名前
+ * @returns {void} なし
  */
 export function navigateToPage(pageName) {
   const currentPageName = getCurrentPageName();
@@ -112,13 +161,11 @@ export function navigateToPage(pageName) {
     saveQuizDraft();
   }
 
-  const offcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(
+  bootstrap.Offcanvas.getOrCreateInstance(
     document.getElementById("offcanvas")
-  );
-  offcanvasInstance.hide();
+  ).hide(); // 画面幅がsm未満の時に、ナビゲーションバー(オフキャンバス)上のページ遷移ボタンを押したら閉じるように
 
   switchToPage(pageName);
-  
 
   const navbarBtnMap = {
     quizList: navToQListPBtn,
@@ -132,86 +179,87 @@ export function navigateToPage(pageName) {
   }
 
   if (pageName === "quizList" || pageName === "createQuiz") {
-    navbarBtns.forEach((b) => {
-      const isActive = b === navbarBtnMap[pageName];
-      b.classList.toggle("active", isActive);
+    navbarBtns.forEach((btn) => {
+      const isActive = btn === navbarBtnMap[pageName];
+      btn.classList.toggle("active", isActive);
     });
   } else {
-    navbarBtns.forEach((b) => {
-      b.classList.remove("active");
+    navbarBtns.forEach((btn) => {
+      btn.classList.remove("active");
     });
   }
 
-  toggleElsByScrollability();
+  toggleBtnsByScrollability();
 }
-
 /**
- * @description
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName
+ * @description 表示するページを切り替え、そのページにアクセスしたことをクッキーに保存する
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName 表示したいページの名前
+ * @returns {void} なし
  */
 function switchToPage(pageName) {
   if (pageName == "quiz") {
     setCookie(
-      "lastAccess",
+      LAST_ACCESS_KEY_NAME,
       `${pageName}?id=${
         document.querySelector(".has-quiz-id").id.split("quiz-")[1]
       }`
     );
   } else {
-    setCookie("lastAccess", pageName, 14);
+    setCookie(LAST_ACCESS_KEY_NAME, pageName, 14);
   }
   hideOtherPages(pages[pageName]);
 }
-
 /**
- * @description
- * @param {HTMLElement} showPage
+ * @description 見せるページ以外のページを隠す
+ * @param {HTMLElement} showPage 見せたいページ
+ * @returns {void} なし
  */
 function hideOtherPages(showPage) {
-  Object.values(pages).forEach((p) => {
-    const isShowPage = p === showPage;
-    p.classList.toggle("d-none", !isShowPage);
+  Object.values(pages).forEach((page) => {
+    toggleElem(page, page !== showPage);
   });
 }
-
 /**
  * @description templateタグのクローンを生成する
  * @param {string} id templateタグのid名
- * @returns {DocumentFragment} cloneされた要素
+ * @returns {DocumentFragment} 生成されたクローンの要素
  */
 export function cloneFromTemplate(id) {
   const template = document.getElementById(id);
-  const clone = template.content.cloneNode(true);
-  return clone;
+  return template.content.cloneNode(true);
 }
-
 /**
- * @description
- * @param {HTMLElement} btnCont
- * @param {0 | 25 | 50 | 75 | 100} width
- * @param {string} className
+ * @description クイズをアップロードするボタンを作成、設定する
+ * @param {HTMLElement} btnCont ボタンが挿入される親要素
+ * @param {0 | 25 | 50 | 75 | 100} [width=0] ボタンの幅
+ * @param {string} [className=""] ボタンに付与するクラス(複数渡す場合は半角スペースで区切る)
+ * @returns {void} なし
  */
-export function initUploadBtn(btnCont, width, className = "") {
+export function initUploadBtn(btnCont, width = 0, className = "") {
   const uploadQBtn = cloneFromTemplate("upload-quiz-tem");
   btnCont.appendChild(uploadQBtn);
+
   const uploadQBtnEls = btnCont.querySelectorAll(".upload-q-btn");
-  uploadQBtnEls.forEach((b) => {
-    if (b.classList.contains("initialized")) return;
+  uploadQBtnEls.forEach((uploadBtn) => {
+    if (uploadBtn.classList.contains("initialized")) return; // 初期化済みだったらリターン
     if (width) {
-      b.classList.add(`w-${width}`);
+      uploadBtn.classList.add(`w-${width}`);
     }
     if (className) {
       const classes = className.split(" ");
-      classes.forEach((c) => {
-        b.classList.add(c);
+      classes.forEach((cl) => {
+        uploadBtn.classList.add(cl);
       });
     }
-    b.classList.add("initialized");
+    uploadBtn.classList.add("initialized");
   });
 }
-
+/**
+ * @description ユーザが最初に訪れた時に、クッキーの値により開くページを決定し、表示する
+ * @returns {void} なし
+ */
 function loadInitialPage() {
-  const lastAccess = getCookie("lastAccess");
+  const lastAccess = getCookie(LAST_ACCESS_KEY_NAME);
   if (lastAccess) {
     if (lastAccess.startsWith("quiz?")) {
       const qId = lastAccess.split("quiz?id=")[1];
@@ -220,7 +268,7 @@ function loadInitialPage() {
         return;
       }
       const quiz = getQuizFromStorage(qId);
-      if (!Object.keys(quiz).length) {
+      if (!isValidQuizObj(quiz)) {
         navigateToPage("top");
         return;
       }
@@ -232,9 +280,12 @@ function loadInitialPage() {
     navigateToPage("top");
   }
 }
-
+/**
+ * @description ローカルストレージの容量がいっぱいになっていたら、データの削除を促す
+ * @returns {void} なし
+ */
 function monitorStorageCapacity() {
-  const maxLocalStorageSize = 5 * 1000 * 1000; // 5MB
+  const maxLocalStorageSize = 5 * 1000 * 1000; // localStorageの最大容量である5MB
   const usedLocalStorageSpace = JSON.stringify(localStorage).length;
 
   if (usedLocalStorageSpace >= maxLocalStorageSize) {
@@ -244,8 +295,11 @@ function monitorStorageCapacity() {
     );
   }
 }
-
-export function toggleElsByScrollability() {
+/**
+ * @description 2つずつあるクイズ・下書き全削除ボタンを、画面幅によって最適な方のみ表示する
+ * @returns {void} なし
+ */
+export function toggleBtnsByScrollability() {
   const body = document.body;
   const isScrollable = body.scrollHeight > body.clientHeight;
   const screenWidth = window.innerWidth;
@@ -253,10 +307,10 @@ export function toggleElsByScrollability() {
   document.querySelectorAll(".del-all-cont").forEach((btnCont) => {
     if (btnCont) btnCont.classList.toggle("container", isScreenSMOrWider); //クイズ・下書き全削除ボタンをsm未満では画面幅いっぱいにするため
   });
-  document.querySelectorAll(".visible-on-scrollable").forEach((el) => {
-    if (el) el.classList.toggle("d-none", !isScrollable);
+  document.querySelectorAll(".visible-on-scrollable").forEach((btn) => {
+    if (btn) toggleElem(btn, !isScrollable);
   });
-  document.querySelectorAll(".hidden-on-scrollable").forEach((el) => {
-    if (el) el.classList.toggle("d-none", isScrollable);
+  document.querySelectorAll(".hidden-on-scrollable").forEach((btn) => {
+    if (btn) toggleElem(btn, isScrollable);
   });
 }

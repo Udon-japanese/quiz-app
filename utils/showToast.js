@@ -7,14 +7,10 @@ import { cloneFromTemplate } from "../js/index.js";
  * @returns {void} なし
  */
 export function showToast(color, message) {
-  let toast = document.getElementById("toast");
-  if (!toast) {
-    const toastClone = cloneFromTemplate("toast-tem");
-    document.body.insertBefore(toastClone, document.body.firstChild);
-    toast = document.getElementById("toast");
-  }
-  toast.classList.remove("text-bg-danger", "text-bg-warning", "text-bg-success", "bg-info", "text-light");
-  
+  const toastClone = cloneFromTemplate("toast-tem");
+  document.body.insertBefore(toastClone, document.body.firstChild);
+  const toast = document.getElementById("toast");
+
   let toastColorClass = "text-bg-";
   switch (color) {
     case "red":
@@ -30,12 +26,16 @@ export function showToast(color, message) {
       toastColorClass = "bg-info text-light";
       break;
   }
-  toastColorClass.split(" ").forEach(colorClass => {
+  toastColorClass.split(" ").forEach((colorClass) => {
     toast.classList.add(colorClass);
-  })
+  });
+
   const toastBody = toast.querySelector(".toast-body");
   toastBody.innerText = message;
 
-  const toastInstance = bootstrap.Toast.getOrCreateInstance(toast);
+  toast.addEventListener("hidden.bs.toast", () => {
+    toast.remove();
+  });
+  const toastInstance = new bootstrap.Toast(toast);
   toastInstance.show();
 }

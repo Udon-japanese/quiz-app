@@ -4,7 +4,7 @@ import { cloneFromTemplate } from "../js/index.js";
 import { clearDelQsWaitTimeout } from "../js/quizList.js";
 /**
  * @description モーダルを作成、表示する
- * @param {{title: string; body: string; colorClass?: string; modalCont: HTMLElement actionBtn: {text: string; HTMLAttributes?: Object<string, string> color: "red" | "green" | "blue";} }} option オプション
+ * @param {{title: string; body: string; colorClass?: string; modalCont: HTMLElement actionBtn: {text: string; HTMLAttributes?: Object<string, string> color: "red" | "green" | "blue";} }} option オプションのオブジェクト
  * @returns {void} なし
  */
 export function openModal(option) {
@@ -12,13 +12,15 @@ export function openModal(option) {
   const modalClone = cloneFromTemplate("modal-tem");
   modalClone.querySelector(".modal-title").innerText = title;
   modalClone.querySelector(".modal-body").innerHTML = body;
+
   if (colorClass) {
     const elsNeedBgColor = modalClone.querySelectorAll(".modal-header, .modal-body, .modal-footer");
     elsNeedBgColor.forEach(e => {
       e.classList.add(colorClass);
     });
   }
-  const actionBtnEl = modalClone.querySelector(".action-btn");
+
+  const actionBtnElem = modalClone.querySelector(".action-btn");
   let btnColor = "btn-";
   switch (actionBtn.color) {
     case "red":
@@ -31,7 +33,8 @@ export function openModal(option) {
       btnColor += "primary";
       break;
   }
-  actionBtnEl.classList.add(btnColor);
+  actionBtnElem.classList.add(btnColor);
+  
   if (actionBtn.HTMLAttributes) {
     Object.keys(actionBtn.HTMLAttributes).forEach((key) => {
       const val = actionBtn.HTMLAttributes[key];
@@ -39,47 +42,44 @@ export function openModal(option) {
       if (key === "class") {
         const classes = val.split(" ");
         classes.forEach((c) => {
-          actionBtnEl.classList.add(c);
+          actionBtnElem.classList.add(c);
         });
       } else {
-        actionBtnEl.setAttribute(key, val);
+        actionBtnElem.setAttribute(key, val);
       }
     });
   }
-  actionBtnEl.innerText = actionBtn.text;
+  actionBtnElem.innerText = actionBtn.text;
   modalCont.appendChild(modalClone);
 
-  const modalEl = document.querySelector(".modal");
-  trapFocus(modalEl);
-  modalEl.addEventListener("hidden.bs.modal", () => {
-    clearDelQsWaitTimeout();// クイズ全削除ボタンのタイムアウト
-    clearDelQDsWaitTimeout();// 下書き全削除ボタンのタイムアウト
-    modalEl.remove();
+  const modalElem = document.querySelector(".modal");
+  trapFocus(modalElem);
+  modalElem.addEventListener("hidden.bs.modal", () => {
+    clearDelQsWaitTimeout();// クイズ全削除ボタンが押せるようになるまでのsetTimeoutを解除
+    clearDelQDsWaitTimeout();// 下書き全削除ボタンが押せるようになるまでのsetTimeoutを解除
+    modalElem.remove();
   });
   
   const modalInstance = new bootstrap.Modal(document.querySelector(".modal"));
   modalInstance.show();
 }
-
 /**
  * @description モーダルを閉じる
  * @returns {void} なし
  */
 export function closeModal() {
-  const modalEl = document.querySelector(".modal");
-  const modal = bootstrap.Modal.getInstance(modalEl);
-  modal.hide();
+  const modalElem = document.querySelector(".modal");
+  bootstrap.Modal.getInstance(modalElem).hide();
 }
-
 
 // https://hidde.blog/using-javascript-to-trap-focus-in-an-element/
 /**
  * @description 要素からフォーカスが出ないようにする
- * @param {Element} el フォーカスさせたい要素
+ * @param {Element} elem フォーカスさせたい要素
  * @returns {void} なし
  */
-function trapFocus(el) {
-  const focusableEls = el.querySelectorAll(
+function trapFocus(elem) {
+  const focusableEls = elem.querySelectorAll(
     `a[href]:not([disabled]):not([tabindex="-1"]),
     button:not([disabled]):not([tabindex="-1"]),
     textarea:not([disabled]):not([tabindex="-1"]),
@@ -91,12 +91,8 @@ function trapFocus(el) {
   const firstFocusableEl = focusableEls[0];
   const lastFocusableEl = focusableEls[focusableEls.length - 1];
 
-  el.addEventListener("keydown", (e) => {
-    const isTabPressed = e.key === "Tab"
-
-    if (!isTabPressed) {
-      return;
-    }
+  elem.addEventListener("keydown", (e) => {
+    if (!e.key === "Tab") return;
 
     if (e.shiftKey) {
       if (document.activeElement === firstFocusableEl) {

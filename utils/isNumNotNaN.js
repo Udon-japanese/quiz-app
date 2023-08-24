@@ -1,5 +1,6 @@
+"use strict";
 /**
- * @description 引数の値が数字かつNaNでないかどうかを判別する
+ * @description 引数の値が数字かつNaNでない場合true,それ以外はfalseを返す
  * @param {any} value 数字かどうか調べたい値
  * @returns {boolean} 数字かどうか
  */
