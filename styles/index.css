@@ -27,7 +27,7 @@ body[data-bs-theme="dark"] {
   background-color: #414141;
 }
 [data-bs-theme="dark"] .ellipsis-bg {
-  background-color: #f2f2f2 3a !important;
+  background-color: #505050 !important;
 }
 [data-bs-theme="dark"] .page-header {
   color: #212529;
@@ -39,6 +39,12 @@ body[data-bs-theme="dark"] {
 [data-bs-theme="dark"] .modal-body,
 [data-bs-theme="dark"] .modal-footer {
   background-color: #2c3135 !important;
+}
+[data-bs-theme="dark"] .highlight {
+  background-color: #ffffff !important;
+}
+[data-bs-theme="dark"] #timer-cont {
+  border-color: #cccccc !important;
 }
 
 @media (max-width: 575.98px) {
@@ -105,7 +111,7 @@ input:checked + .toggle-label::before {
 @media (hover: hover) and (pointer: fine) {/** モバイルでは動作しない **/
   /* 3点リーダーボタン */
   [data-bs-theme="dark"] .ellipsis-hover:hover {
-    background-color: #f2f2f21c;
+    background-color: #343434;
   }
 
   .ellipsis-hover:hover {

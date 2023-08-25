@@ -240,6 +240,7 @@ searchQInput.addEventListener("input", (e) => {
     </div>
     「${query}」に当てはまるクイズは見つかりませんでした。他のキーワードで検索するか、自分でクイズを作成、または他の人のクイズで遊んでみましょう！`;
     toggleElem(headerBtnCont, noneResult);
+    toggleBtnsByScrollability();
     quizzesCont.innerHTML = "";
     return;
   }
@@ -404,7 +405,7 @@ export function highlightText(highlight, textElem) {
     );
     const escapedRepl = replacement.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // 特殊文字を文字列に変換する
     const hlRegExp = new RegExp(escapedRepl, "g");
-    const hlRepl = `<span class="bg-warning">${replacement}</span>`;
+    const hlRepl = `<span class="bg-warning highlight">${replacement}</span>`;
 
     textElem.innerHTML = text.replace(hlRegExp, hlRepl);
   }

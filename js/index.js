@@ -315,7 +315,6 @@ export function toggleBtnsByScrollability() {
 
   const hiddenDelAllBtns = document.querySelectorAll(".hidden-del-all-btn");
   if (hiddenDelAllBtns.length) {
-    console.log("hoe")
     hiddenDelAllBtns.forEach((btn) => {
       hideElem(btn);
     });

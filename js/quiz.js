@@ -65,10 +65,6 @@ document.getElementById("quiz-page").addEventListener("click", (e) => {
         if (selected) {
           noneChecked = false;
         }
-        const choiceBtn = document.querySelector(`[for="${choiceCheck.id}"]`);
-        // 押したことが分かりやすいように、チェックされているかのアイコンを変更
-        toggleElem(choiceBtn.querySelector(".choice-checked-icon"), !selected);
-        toggleElem(choiceBtn.querySelector(".choice-unchecked-icon"), selected);
       });
       if (noneChecked) {
         decisionBtn.disabled = true;
@@ -369,9 +365,7 @@ function showQuestion() {
       const shuffledChoices = shuffleChoices(q.choices);
       const choiceBtns = document.querySelectorAll(".choice-btn");
       choiceBtns.forEach((b, i) => {
-        b.innerHTML = `${shuffledChoices[i]}
-        <i class="bi bi-check-circle float-end choice-checked-icon d-none"></i>
-        <i class="bi bi-circle float-end choice-unchecked-icon"></i>`;
+        b.innerText = shuffledChoices[i];
       });
       break;
     }
@@ -702,15 +696,15 @@ function drawPieChart(startPercentage, endPercentage) {
  */
 function getQuizResultMessage(accuracy) {
   if (accuracy <= 20) {
-    return "がんばりましょう！😕";
+    return "がんばりましょう！\uD83D\uDE15";
   } else if (accuracy <= 40) {
-    return "まだまだこれからです！😐";
+    return "まだまだこれからです！\uD83D\uDE10";
   } else if (accuracy <= 60) {
-    return "いい調子です！🙂";
+    return "いい調子です！\uD83D\uDE42";
   } else if (accuracy < 100) {
-    return "すばらしいです！😃";
+    return "すばらしいです！\uD83D\uDE03";
   } else {
-    return "おめでとうございます！🥳";
+    return "おめでとうございます！\uD83E\uDD73";
   }
 }
 /**

@@ -7,15 +7,15 @@ import { isUUID } from "./isUUID.js";
  * @returns {boolean} 有効なクイズデータかどうか
  */
 export function isValidQuizObj(obj) {
-  if (!obj || !isUUID(obj.id)) {console.log("f");return false;}
+  if (!obj || !isUUID(obj.id)) return false;
 
   const requiredKeys = ["id", "title", "description", "length", "questions"];
   const { questions } = obj;
 
-  if (typeof questions !== "object") {console.log("f");return false;}
+  if (typeof questions !== "object") return false;
 
   const optionTimer = obj?.options?.timer;
-  if (optionTimer && !isNumNotNaN(optionTimer)) {console.log("f");return false;}
+  if (optionTimer && !isNumNotNaN(optionTimer)) return false;
 
   const optionTF = obj?.options?.tf;
   if (
@@ -25,7 +25,7 @@ export function isValidQuizObj(obj) {
       optionTF.every((choice) => typeof choice === "string")
     )
   )
-    {console.log("f");return false;}
+    return false;
 
   const validateQuestion = (question) => isValidQuestionObj(question);
 
@@ -37,10 +37,10 @@ export function isValidQuizObj(obj) {
         (key in obj && typeof obj[key] === "string")
     )
   )
-    {console.log("f");return false;}
+    return false;
 
   if (!Object.values(questions).every((question) => validateQuestion(question)))
-    {console.log("f");return false;}
+    return false;
 
   return true;
 }
@@ -49,10 +49,10 @@ function isValidQuestionObj(question) {
   const requiredKeys = ["answerType", "statement"];
 
   const optionExplanation = question?.options?.explanation;
-  if (optionExplanation && typeof optionExplanation !== "string") {console.log("f");return false;}
+  if (optionExplanation && typeof optionExplanation !== "string") return false;
 
   const validAnswerTypes = ["select", "select-all", "type-text"];
-  if (!validAnswerTypes.includes(question.answerType)) {console.log("f");return false;}
+  if (!validAnswerTypes.includes(question.answerType)) return false;
 
   const validateChoices = () =>
     Array.isArray(question.choices) &&
@@ -64,7 +64,7 @@ function isValidQuestionObj(question) {
       (key) => key in question && typeof question[key] === "string"
     )
   )
-    {console.log("f");return false;}
+    return false;
 
   // それぞれの回答形式に必要なプロパティが正しい値で存在するか調べる
   if (
@@ -79,16 +79,16 @@ function isValidQuestionObj(question) {
           : "correctAnswer" in question)
       )
     )
-      {console.log("f");return false;}
+      return false;
 
     if (
       (question.answerType === "select" ||
         question.answerType === "select-all") &&
       !validateChoices()
     )
-      {console.log("f");return false;}
+      return false;
   } else if (question.answerType === "type-text") {
-    if (typeof question.correctAnswer !== "string") {console.log("f");return false;}
+    if (typeof question.correctAnswer !== "string") return false;
   }
 
   return true;

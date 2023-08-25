@@ -1444,6 +1444,7 @@ function handleSearchInput(e) {
   ).innerText = `「${query}」に当てはまる下書きは見つかりませんでした`;
   if (noneResult) {
     document.getElementById("quiz-drafts-cont").innerHTML = "";
+    toggleBtnsByScrollability();
     return;
   }
   displayQuizDraftList(qDListObj, query);
