@@ -23,12 +23,26 @@ import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { showToast } from "../utils/showToast.js";
 import { toggleElem, showElem } from "../utils/elemManipulation.js";
 
-const { default: commonSenseQuiz } = await import("../quizzes/common-sense-quiz.json", { assert: { type: "json" } });// webkit系ブラウザで動的インポートしか使用できないため
-const { default: commonSenseQuiz2 } = await import("../quizzes/common-sense-quiz2.json", { assert: { type: "json" } });
-const { default: gameQuiz } = await import("../quizzes/game-quiz.json", { assert: { type: "json" } });
-const { default: sportsQuiz } = await import("../quizzes/sports-quiz.json", { assert: { type: "json" } });
-const { default: japanQuiz } = await import("../quizzes/japan-quiz.json", { assert: { type: "json" } });
-const { default: wordQuiz } = await import("../quizzes/word-quiz.json", { assert: { type: "json" } });
+const { default: commonSenseQuiz } = await import(
+  "../quizzes/common-sense-quiz.json",
+  { assert: { type: "json" } }
+); // webkit系ブラウザで動的インポートしか使用できないため
+const { default: commonSenseQuiz2 } = await import(
+  "../quizzes/common-sense-quiz2.json",
+  { assert: { type: "json" } }
+);
+const { default: gameQuiz } = await import("../quizzes/game-quiz.json", {
+  assert: { type: "json" },
+});
+const { default: sportsQuiz } = await import("../quizzes/sports-quiz.json", {
+  assert: { type: "json" },
+});
+const { default: japanQuiz } = await import("../quizzes/japan-quiz.json", {
+  assert: { type: "json" },
+});
+const { default: wordQuiz } = await import("../quizzes/word-quiz.json", {
+  assert: { type: "json" },
+});
 const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
 const searchQInput = document.getElementById("search-q");
@@ -124,6 +138,7 @@ qListPage.addEventListener("click", (e) => {
         return;
       }
       initQuizPage(quiz);
+      navigateToPage("quiz");
     } else if (classList.contains("edit-q")) {
       const quizId = elem.id.split("edit-")[1];
       const quiz = getQuizFromStorage(quizId);
@@ -153,12 +168,15 @@ qListPage.addEventListener("click", (e) => {
       dlLink.click();
       dlLink.remove();
       URL.revokeObjectURL(url);
-      navigateToPage("quizList");
     } else if (classList.contains("del-quiz")) {
       const delQId = elem.id.split("del-quiz-")[1];
       removeQuizFromStorage(delQId);
       closeModal();
-      displayQuizList();
+      if (searchQInput.value) {
+        handleSearchQuizzes(); // 検索バーを使用している場合は、その結果を維持する
+      } else {
+        displayQuizList();
+      }
     } else if (classList.contains("open-del-all-qs-m")) {
       openModal({
         title: "クイズをすべて削除",
@@ -218,18 +236,23 @@ qListPage.addEventListener("hidden.bs.dropdown", (e) => {
     e.relatedTarget.classList.contains("show")
   );
 });
-searchQInput.addEventListener("input", (e) => {
-  const query = e.target.value;
-  
+searchQInput.addEventListener("input", handleSearchQuizzes);
+/**
+ * @description クイズ検索バーのハンドリングをする
+ * @returns {void} なし
+ */
+function handleSearchQuizzes() {
+  const query = searchQInput.value;
+
   delAllQuizzesBtns.forEach((btn) => {
     btn.classList.toggle("hidden-del-all-btn", query); // 検索バーが空のときのみ表示する
   });
-  
+
   if (!query) {
     displayQuizList();
     return;
   }
-
+  qListObj.quizList = getQuizzesFromStorage(); // 削除後、更新するため
   const quizList = searchQuizzes(query, qListObj.quizList);
   const noneResult = !Object.keys(quizList).length;
   toggleElem(noneQuizElem, !noneResult);
@@ -240,12 +263,12 @@ searchQInput.addEventListener("input", (e) => {
     </div>
     「${query}」に当てはまるクイズは見つかりませんでした。他のキーワードで検索するか、自分でクイズを作成、または他の人のクイズで遊んでみましょう！`;
     toggleElem(headerBtnCont, noneResult);
-    toggleBtnsByScrollability();
+    toggleBtnsByScrollability("quizList");
     quizzesCont.innerHTML = "";
     return;
   }
   displayQuizList(quizList, query);
-});
+}
 /**
  * @description クイズ全削除ボタンのタイムアウトを解除する
  * @returns {void} なし
@@ -263,6 +286,7 @@ export function displayQuizList(obj = null, highlight = "") {
   quizzesCont.innerHTML = "";
 
   if (!obj) {
+    searchQInput.value = ""; // ページ間を移動してきたときに空にする
     qListObj.quizList = getQuizzesFromStorage() || {};
   }
 
@@ -279,7 +303,7 @@ export function displayQuizList(obj = null, highlight = "") {
   toggleElem(searchQInput, noneQuiz);
   toggleElem(headerBtnCont, noneQuiz);
   delAllQuizzesBtns.forEach((btn) => {
-    btn.classList.toggle("hidden-del-all-btn", noneQuiz || highlight) // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
+    btn.classList.toggle("hidden-del-all-btn", noneQuiz || highlight); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
   });
   // テンプレートの中身をクイズのデータで置き換え手表示する
   Object.values(qListObjToUse).forEach((quiz) => {
@@ -296,7 +320,7 @@ export function displayQuizList(obj = null, highlight = "") {
     highlightText(highlight, quizTitleElem);
 
     const quizDescElem = quizItem.querySelector(".q-desc");
-    quizDescElem.innerText = quiz.description;
+    quizDescElem.innerText = quiz.description || "説明なし";
     highlightText(highlight, quizDescElem);
 
     const hasOptions = {
@@ -324,11 +348,7 @@ export function displayQuizList(obj = null, highlight = "") {
       showElem(quizInfoElem);
       if (hasOptions.quiz.timer) {
         const timerIcon = quizInfoElem.querySelector(".timer-icon");
-        timerIcon.timer = replaceAttrVals(
-          [timerIcon],
-          "{option-timer}",
-          formatTime(optionTimer)
-        );
+        replaceAttrVals([timerIcon], "{option-timer}", formatTime(optionTimer));
         toggleElem(timerIcon, !hasOptions.quiz.timer);
       }
       if (hasOptions.question.explanation) {
@@ -350,7 +370,7 @@ export function displayQuizList(obj = null, highlight = "") {
   });
 
   initTooltips();
-  toggleBtnsByScrollability();
+  toggleBtnsByScrollability("quizList");
 }
 /**
  * @description クイズ一覧のオブジェクトから、クエリを含むプロパティを持つオブジェクトを返す

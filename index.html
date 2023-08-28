@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +42,8 @@
             <button type="button" class="text-start nav-link fw-semibold to-q-list-page">
               <i class="bi bi-list-task me-1"></i>クイズ一覧
             </button>
-            <button type="button" id="toggle-theme" class="btn btn-dark ms-sm-auto mt-3 mt-sm-0" aria-label="ダークモード・ライトモードを切り替える">
+            <button type="button" id="toggle-theme" class="btn btn-dark ms-sm-auto mt-3 mt-sm-0"
+              aria-label="ダークモード・ライトモードを切り替える">
               <i id="dark-mode-icon" class="bi bi-moon-fill"></i>
               <i id="light-mode-icon" class="bi bi-brightness-high-fill d-none"></i>
             </button>
@@ -91,11 +93,13 @@
       </div>
     </div>
     <div class="d-grid container del-all-cont"><!-- 画面幅に応じて適切な位置に配置される方のボタンのみ表示 -->
-      <button type="button" class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qs-m visible-on-scrollable del-all-quizzes-btn">
+      <button type="button"
+        class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qs-m visible-on-scrollable del-all-quizzes-btn">
         <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
         クイズをすべて削除する
       </button>
-      <button type="button" class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qs-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quizzes-btn">
+      <button type="button"
+        class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qs-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quizzes-btn">
         <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
         クイズをすべて削除する
       </button>
@@ -103,12 +107,14 @@
   </div>
   <div id="quiz-page" class="d-none page">
     <div class="container">
-      <div id="quiz-${quiz-id}" class="card p-1 p-sm-3 my-4 col-lg-9 col-md-10 col-12 has-quiz-id m-auto bg-body-tertiary">
+      <div id="quiz-{quiz-id}"
+        class="card p-1 p-sm-3 my-4 col-lg-9 col-md-10 col-12 has-quiz-id m-auto bg-body-tertiary">
         <div class="d-flex justify-content-end mt-2 me-2 m-sm-0">
-          <div
+          <div id="volume-btn-cont"
             class="col-6 col-sm-5 col-lg-4 d-flex align-items-center rounded bg-light-subtle border border-1 shadow-sm px-3 py-1">
             <button type="button" id="toggle-volume"
               class="btn btn-default p-0 me-2 text-primary rounded-circle border-0">
+              <!-- bootstrap iconsのiタグのほうでは完璧な正方形が作れなかったためsvgの方を使用 -->
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" id="volume-mute-icon" fill="currentColor"
                 class="bi bi-volume-mute-fill" viewBox="0 0 16 16">
                 <path
@@ -228,8 +234,8 @@
             <div class="d-flex flex-column justify-content-center flex-grow-1">
               <div id="result-message-cont" class="text-center fs-5">
                 <span id="normal-score-group">
-                  <span id="quiz-length" class="fw-bold">{quiz-length}</span>問中<span id="correct-length" 
-                  class="fw-bold">{correct-length}</span>問正解！
+                  <span id="quiz-length" class="fw-bold">{quiz-length}</span>問中<span id="correct-length"
+                    class="fw-bold">{correct-length}</span>問正解！
                 </span>
                 <span id="perfect-score">全問正解！</span>
                 <div id="result-message" class="d-lg-inline-block">{result-message}</div>
@@ -270,7 +276,7 @@
   </template>
   <template id="modal-tem">
     <div class="modal fade" tabindex="-1" aria-labelledby="modal" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modal">{title}</h5>
@@ -280,7 +286,7 @@
             {body}
           </div>
           <div class="modal-footer ">
-            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">キャンセル</button>
+            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary cancel-btn">キャンセル</button>
             <button type="button" tabindex="-1" class="btn action-btn">{action-btn-txt}</button>
           </div>
         </div>
@@ -312,12 +318,12 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-md-start" aria-labelledby="menu-{quiz-id}">
                   <li>
-                    <button class="dropdown-item share-q" type="button" id="share-{quiz-id}">
+                    <button class="dropdown-item px-2 share-q" type="button" id="share-{quiz-id}">
                       <i class="bi bi-share me-3"></i>このクイズを共有する (JSON形式で保存)
                     </button>
                   </li>
                   <li>
-                    <button type="button" class="dropdown-item edit-q" id="edit-{quiz-id}">
+                    <button type="button" class="dropdown-item px-2 edit-q" id="edit-{quiz-id}">
                       <i class="bi bi-pencil me-3"></i>このクイズを編集する
                     </button>
                   </li>
@@ -325,7 +331,7 @@
                     <hr class="dropdown-divider">
                   </li>
                   <li>
-                    <button id="del-{quiz-id}" class="dropdown-item open-del-q-m" type="button">
+                    <button id="del-{quiz-id}" class="dropdown-item px-2 open-del-q-m" type="button">
                       <i class="bi bi-x-circle-fill text-danger me-3"></i>
                       <span>このクイズを削除する</span>
                     </button>
@@ -399,14 +405,16 @@
               {none-quiz-draft-txt}
             </div>
           </div>
-        </div> 
+        </div>
       </div>
       <div class="d-grid container del-all-cont">
-        <button type="button" class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn">
+        <button type="button"
+          class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
           下書きをすべて削除する
         </button>
-        <button type="button" class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qds-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quiz-drafts-btn">
+        <button type="button"
+          class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qds-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quiz-drafts-btn">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
           下書きをすべて削除する
         </button>
@@ -437,7 +445,7 @@
               <h5 class="card-subtitle">オプション</h5>
               <div id="option-timer">
                 <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
-                  <span>各問題に制限時間を設ける</span>
+                  <label class="user-select-none" for="timer-toggle">各問題に制限時間を設ける</label>
                   <input type="checkbox" id="timer-toggle" class="d-none timer-toggle">
                   <label for="timer-toggle" class="toggle-label"></label>
                 </div>
@@ -451,15 +459,15 @@
               </div>
               <div id="option-tf">
                 <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
-                  <span>&#x3007;&#x2715;クイズ(2択問題)にする</span>
+                  <label for="tf-toggle" class="user-select-none">&#x3007;&#x2715;クイズ(2択問題)にする</label>
                   <input type="checkbox" id="tf-toggle" class="d-none tf-toggle">
                   <label for="tf-toggle" class="toggle-label"></label>
                 </div>
                 <div class="d-none mt-4 type-tf-cont">
                   <label class="form-label" for="true">1つ目の選択肢を設定</label>
                   <div class="input-group">
-                    <input type="text" class="form-control t-input mb-2" id="true" value="&#x3007;" placeholder="1つ目の選択肢"
-                      required>
+                    <input type="text" class="form-control t-input mb-2" id="true" value="&#x3007;"
+                      placeholder="1つ目の選択肢" required>
                     <div class="invalid-feedback">選択肢を設定してください</div>
                   </div>
                   <label class="form-label" for="false">2つ目の選択肢を設定</label>
@@ -499,7 +507,8 @@
   <template id="select-tem">
     <div id="q{q-num}-select-c{c-num}" class="input-group mb-2 has-validation choice">
       <label for="q{q-num}-set-select-c{c-num}" class="input-group-text" aria-label="正解を設定">
-        <input type="radio" name="q{q-num}-set-select" id="q{q-num}-set-select-c{c-num}" class="form-check-input set-correct mt-0" required aria-label="正解を設定">
+        <input type="radio" name="q{q-num}-set-select" id="q{q-num}-set-select-c{c-num}"
+          class="form-check-input set-correct mt-0" required aria-label="正解を設定">
       </label>
       <input type="text" id="q{q-num}-type-select-c{c-num}" class="form-control rounded-end type-choice"
         placeholder="{c-num}つ目の選択肢" required>
@@ -512,7 +521,8 @@
   <template id="select-all-tem">
     <div id="q{q-num}-select-all-c{c-num}" class="input-group mb-2 has-validation choice">
       <label for="q{q-num}-set-select-all-c{c-num}" class="input-group-text" aria-label="正解を設定">
-        <input type="checkbox" name="q{q-num}-set-select-all" id="q{q-num}-set-select-all-c{c-num}" class="form-check-input set-correct mt-0" aria-label="正解を設定">
+        <input type="checkbox" name="q{q-num}-set-select-all" id="q{q-num}-set-select-all-c{c-num}"
+          class="form-check-input set-correct mt-0" aria-label="正解を設定">
       </label>
       <input type="text" id="q{q-num}-type-select-all-c{c-num}" class="form-control rounded-end type-choice"
         placeholder="{c-num}つ目の選択肢" required>
@@ -542,15 +552,15 @@
         <div class="d-flex flex-column gap-2 mt-2">
           <div class="input-group tf-choice">
             <label for="q{num}-t-correct" class="input-group-text" aria-label="正解を設定">
-              <input type="radio" name="q{num}-tf-correct" id="q{num}-t-correct" class="form-check-input set-correct mt-0"
-                required aria-label="正解を設定">
+              <input type="radio" name="q{num}-tf-correct" id="q{num}-t-correct"
+                class="form-check-input set-correct mt-0" required aria-label="正解を設定">
             </label>
             <input type="text" id="q{num}-t-type-choice" class="form-control type-choice" disabled>
           </div>
           <div class="input-group tf-choice">
             <label for="q{num}-f-correct" class="input-group-text" aria-label="正解を設定">
-              <input id="q{num}-f-correct" type="radio" name="q{num}-tf-correct" class="form-check-input set-correct mt-0"
-                required aria-label="正解を設定">
+              <input id="q{num}-f-correct" type="radio" name="q{num}-tf-correct"
+                class="form-check-input set-correct mt-0" required aria-label="正解を設定">
             </label>
             <input type="text" id="q{num}-f-type-choice" class="form-control type-choice" disabled>
           </div>
@@ -558,7 +568,7 @@
       </div>
       <div class="d-flex flex-column gap-3 normal-cont"><!-- まるばつクイズではないときのコンテナ -->
         <div class="answer-type-group">
-          <label class="form-label" for="q{num}-answer-type">回答形式</label>
+          <label class="form-label" for="q{num}-answer-type">回答形式を選択</label>
           <select class="form-select answer-type" id="q{num}-answer-type">
             <option value="select">択一形式(どれか1つを選ぶ形式)</option>
             <option value="select-all">複数回答形式(いくつかの回答を選ぶ形式)</option>
@@ -587,7 +597,7 @@
         <h5>オプション</h5>
         <div id="q{num}-option-expl">
           <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
-            <span>解説を設定する</span>
+            <label for="q{num}-expl-toggle" class="user-select-none">解説を設定する</label>
             <input type="checkbox" id="q{num}-expl-toggle" class="d-none expl-toggle">
             <label for="q{num}-expl-toggle" class="toggle-label"></label>
           </div>

@@ -16,6 +16,7 @@ import {
   removeQuizDraftsFromStorage,
 } from "../utils/storage.js";
 import {
+  LAST_ACCESS_KEY_NAME,
   cloneFromTemplate,
   navigateToPage,
   toggleBtnsByScrollability,
@@ -27,6 +28,7 @@ import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { formatTime } from "../utils/formatTime.js";
 import { initTooltips } from "../utils/initTooltips.js";
 import { closeModal, openModal } from "../utils/modal.js";
+import { setCookie } from "../utils/cookie.js";
 
 const crtQPage = document.getElementById("crt-quiz-page");
 const counterInitialState = 2;
@@ -34,7 +36,8 @@ const answerTypeInitialState = null;
 const createChoiceCallLimit = 4;
 const createQuestionCallLimit = 10;
 const crtQuizObj = {};
-const existsRandomUUID = "crypto" in window && "randomUUID" in window.crypto;
+const existsCryptoRandomUUID =
+  "crypto" in window && "randomUUID" in window.crypto;
 
 crtQPage.addEventListener("click", (e) => {
   const elems = e.composedPath();
@@ -390,7 +393,8 @@ function createQuiz(existsId, quizType = "new") {
   let invalidForm = null;
   const crtQuizHeader = document.getElementById("crt-quiz-title");
   const id =
-    existsId || existsRandomUUID ? crypto.randomUUID() : generateUUIDv4();
+    existsId ||
+    (existsCryptoRandomUUID ? crypto.randomUUID() : generateUUIDv4());
   const titleElem = document.getElementById("title");
   const title = titleElem.value;
   if (!title) {
@@ -398,7 +402,7 @@ function createQuiz(existsId, quizType = "new") {
     invalidForm = crtQuizHeader;
   }
   const descriptionElem = document.getElementById("description");
-  const description = descriptionElem.value || "説明なし";
+  const description = descriptionElem.value;
 
   const questions = getQuestions();
 
@@ -593,10 +597,10 @@ function createQuiz(existsId, quizType = "new") {
 /**
  * @description 追加上限に達していなければ選択肢を作成する
  * @param {number} questionN 問題の番号
- * @param {boolean} isInit 初期追加時かどうか
+ * @param {boolean} [isInit=false] 初期追加時かどうか
  * @returns {void} なし
  */
-function createChoice(questionN, isInit) {
+function createChoice(questionN, isInit = false) {
   const strQN = questionN.toString();
   const question = document.getElementById(`q${questionN}`);
 
@@ -628,6 +632,21 @@ function createChoice(questionN, isInit) {
   replaceAttrVals(selectAllElsHasAttrCN, "{c-num}", choiceN);
   replaceAttrVals(selectElsHasAttrQN, "{q-num}", questionN);
   replaceAttrVals(selectAllElsHasAttrQN, "{q-num}", questionN);
+
+  if (isInit) {
+    const selectSetCorrect = selectChoice.querySelector(".set-correct");
+    const selectAllSetCorrect = selectAllChoice.querySelector(".set-correct");
+    selectSetCorrect.setAttribute("data-bs-toggle", "tooltip");
+    selectSetCorrect.setAttribute(
+      "title",
+      "ここをクリックして、正解を設定します(1つまで)"
+    );
+    selectAllSetCorrect.setAttribute("data-bs-toggle", "tooltip");
+    selectAllSetCorrect.setAttribute(
+      "title",
+      "ここをクリックして、正解を設定します(1つ以上)"
+    );
+  }
 
   const selectCont = question.querySelector(".selects");
   const selectAllCont = question.querySelector(".select-alls");
@@ -678,18 +697,21 @@ function createQuestion(isInit = false, isScroll = true) {
 
   crtQuizObj.elem.questionsCont.appendChild(question);
 
+  toggleAnswerType(questionN);
+  checkQuestionsState();
+  initTooltips();
+
   if (isInit) return;
+
+  toggleQuizCont();
+  setTFChoiceVals();
+
   if (isScroll) {
     crtQuizObj.elem.questionsCont
       .querySelector(`#q${counter}`)
       .scrollIntoView({ behavior: "smooth", block: "start" });
   }
   crtQuizObj.questionCounter++;
-
-  toggleAnswerType(questionN);
-  setTFChoiceVals();
-  toggleQuizCont();
-  checkQuestionsState();
 }
 /**
  * @description それぞれの問題の回答方式をオブジェクトに記録し、回答形式の要素を一つだけ表示する
@@ -969,6 +991,7 @@ export function saveQuizDraft() {
   const crtQuizContId = document.querySelector(".crt-quiz-cont").id;
   let quizDraftId;
   if (crtQuizContId.startsWith("edit")) {
+    // 編集画面だった場合は下書きとして保存しない
     initCrtQuizPage();
     return;
   } else if (crtQuizContId.startsWith("draft")) {
@@ -979,7 +1002,8 @@ export function saveQuizDraft() {
   let isEmptyQuiz = true;
   // フォームに入力されている値をオブジェクトに保存し、ローカルストレージに保存する
   const id =
-    quizDraftId || existsRandomUUID ? crypto.randomUUID() : generateUUIDv4();
+    quizDraftId ||
+    (existsCryptoRandomUUID ? crypto.randomUUID() : generateUUIDv4());
   const title = document.getElementById("title").value;
   const descriptionElem = document.getElementById("description");
   const description = descriptionElem.value;
@@ -1108,13 +1132,19 @@ export function saveQuizDraft() {
 
   if (!isEmptyQuiz) {
     if (quizDraftId) {
+      const prevQuizDraft = getQuizDraftFromStorage(quizDraftId);
+      if (areQuizzesEqual(prevQuizDraft, quizDraft)) return; // 下書きに変化がないときは保存とトースト表示をしない
+
       updateQuizDraftToStorage(quizDraft);
     } else {
       addQuizDraftToStorage(quizDraft);
     }
     showToast("sky-blue", "下書きが保存されました");
   } else {
-    removeQuizDraftFromStorage(id);
+    if (quizDraftId) {
+      removeQuizDraftFromStorage(id);
+      showToast("sky-blue", "下書きが空になったため、自動的に削除されました");
+    }
   }
 
   initCrtQuizPage();
@@ -1131,8 +1161,6 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
   crtQPage.appendChild(crtQPageClone);
   initQuizObject(crtQuizObj);
   createQuestion(true);
-  toggleAnswerType(1);
-  checkQuestionsState();
 
   const crtQuizCont = document.querySelector(".crt-quiz-cont");
   const validQuizParam = quiz && isValidQuizObj(quiz);
@@ -1163,7 +1191,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
   } else if (quizType === "draft") {
     if (validQuizParam) {
       crtQuizCont.id = `draft-${quiz.id}`;
-      crtQPage.querySelector("#crt-quiz-subtitle").innerHTML =
+      crtQPage.querySelector("#crt-quiz-subtitle").innerText =
         "フォームが一つでも入力されている場合、クイズは自動的に保存されます。また、フォームがすべて空になると、保存された下書きは削除されます";
       crtQuizObj.elem.crtQuizBtn.addEventListener("click", () => {
         createQuiz(quiz.id, quizType);
@@ -1175,6 +1203,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
         "input",
         handleSearchInput
       );
+      setCookie(LAST_ACCESS_KEY_NAME, `createQuiz?draftId=${quiz.id}`);
       return;
     } else {
       showToast("red", "無効な下書きデータです");
@@ -1353,17 +1382,17 @@ function displayQuizDraftList(obj = null, highlight = "") {
   }
 
   const qListObjToUse = obj ? obj : crtQuizObj.quizDraftListObj;
-  Object.values(qListObjToUse).forEach((quiz) => {
-    if (!isValidQuizObj(quiz)) return;
+  Object.values(qListObjToUse).forEach((quizD) => {
+    if (!isValidQuizObj(quizD)) return;
     // 要素に下書きのデータを設定し、ハイライトがあればハイライトもつける
     const quizDraft = cloneFromTemplate("quiz-draft-tem");
     const elsHasAttrQId = quizDraft.querySelectorAll("[id*='{quiz-draft-id}']");
-    replaceAttrVals(elsHasAttrQId, "{quiz-draft-id}", quiz.id);
+    replaceAttrVals(elsHasAttrQId, "{quiz-draft-id}", quizD.id);
     const quizTitleEl = quizDraft.querySelector(".q-title");
-    quizTitleEl.innerText = quiz.title || "タイトルなし";
+    quizTitleEl.innerText = quizD.title || "タイトルなし";
     highlightText(highlight, quizTitleEl);
     const quizDescEl = quizDraft.querySelector(".q-desc");
-    quizDescEl.innerText = quiz.description || "説明なし";
+    quizDescEl.innerText = quizD.description || "説明なし";
     highlightText(highlight, quizDescEl);
     const hasOptions = {
       quiz: {
@@ -1373,13 +1402,13 @@ function displayQuizDraftList(obj = null, highlight = "") {
         explanation: false,
       },
     };
-    Object.values(quiz.questions).forEach((question) => {
+    Object.values(quizD.questions).forEach((question) => {
       if (hasOptions.question.explanation) return;
       if (question?.options?.explanation) {
         hasOptions.question.explanation = true;
       }
     });
-    const optionTimer = quiz?.options?.timer;
+    const optionTimer = quizD?.options?.timer;
     if (optionTimer) {
       hasOptions.quiz.timer = true;
     }
@@ -1391,11 +1420,7 @@ function displayQuizDraftList(obj = null, highlight = "") {
       showElem(quizInfoEl);
       if (hasOptions.quiz.timer) {
         const timerIcon = quizInfoEl.querySelector(".timer-icon");
-        timerIcon.timer = replaceAttrVals(
-          [timerIcon],
-          "{option-timer}",
-          formatTime(optionTimer)
-        );
+        replaceAttrVals([timerIcon], "{option-timer}", formatTime(optionTimer));
         toggleElem(timerIcon, !hasOptions.quiz.timer);
       }
       if (hasOptions.question.explanation) {
@@ -1409,13 +1434,13 @@ function displayQuizDraftList(obj = null, highlight = "") {
     const qLengthEl = quizDraft.querySelector(".q-length");
     qLengthEl.innerText = qLengthEl.innerText.replace(
       "{quiz-length}",
-      quiz.length
+      quizD.length
     );
     highlightText(highlight, qLengthEl);
     quizDraftsCont.appendChild(quizDraft);
   });
   initTooltips();
-  toggleBtnsByScrollability();
+  toggleBtnsByScrollability("createQuiz");
 }
 /**
  * @description 下書き一覧を検索するときに、イベントリスナーのコールバックとしてこの関数を登録する
@@ -1444,10 +1469,56 @@ function handleSearchInput(e) {
   ).innerText = `「${query}」に当てはまる下書きは見つかりませんでした`;
   if (noneResult) {
     document.getElementById("quiz-drafts-cont").innerHTML = "";
-    toggleBtnsByScrollability();
+    toggleBtnsByScrollability("createQuiz");
     return;
   }
   displayQuizDraftList(qDListObj, query);
+}
+/**
+ * @description 二つのクイズのオブジェクトが一致していたらtrue,それ以外ならfalseを返す
+ * @param {Quiz} quiz1 1つ目のクイズオブジェクト
+ * @param {Quiz} quiz2 2つ目のクイズオブジェクト
+ * @returns {boolean} 二つのクイズオブジェクトが一致しているかどうか
+ */
+function areQuizzesEqual(quiz1, quiz2) {
+  // タイプが異なる場合は不一致
+  if (typeof quiz1 !== typeof quiz2) {
+    return false;
+  }
+
+  // オブジェクトがnullかundefinedの場合は不一致
+  if (
+    quiz1 === null ||
+    quiz2 === null ||
+    quiz1 === undefined ||
+    quiz2 === undefined
+  ) {
+    return false;
+  }
+
+  // タイプがオブジェクトの場合
+  if (typeof quiz1 === "object") {
+    const keys1 = Object.keys(quiz1);
+    const keys2 = Object.keys(quiz2);
+
+    // キーの数が異なる場合は不一致
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    // すべてのプロパティを比較
+    for (const key of keys1) {
+      if (!areQuizzesEqual(quiz1[key], quiz2[key])) {
+        return false;
+      }
+    }
+
+    // すべてのプロパティが一致した場合は一致
+    return true;
+  }
+
+  // タイプがオブジェクト以外の場合は値を比較
+  return quiz1 === quiz2;
 }
 
 // https://github.com/googlearchive/chrome-platform-analytics/blob/master/src/internal/identifier.js
@@ -1468,17 +1539,19 @@ function handleSearchInput(e) {
  * @description webkit系ブラウザで、crypto.randomUUID()が使用できないときに、代用で使用する
  * @returns {string} UUIDv4の文字列
  */
-function generateUUIDv4() {// 元コード analytics.internal.Identifier.generateUuid = function() {
-  let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split("");// 元コード var chars = analytics.internal.Identifier.UUID_FMT_.split('');
-  for (let i = 0, len = chars.length; i < len; i++) {// 元コード for (var i = 0, len = chars.length; i < len; i++) {
-      switch (chars[i]) {
-          case "x":
-              chars[i] = Math.floor(Math.random() * 16).toString(16);// 元コード chars[i] = goog.math.randomInt(16).toString(16);
-              break;
-          case "y":
-              chars[i] = (Math.floor(Math.random() * 4) + 8).toString(16);// 元コード chars[i] = (goog.math.randomInt(4) + 8).toString(16);
-              break;
-      }
+function generateUUIDv4() {
+  // 元コード analytics.internal.Identifier.generateUuid = function() {
+  let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split(""); // 元コード var chars = analytics.internal.Identifier.UUID_FMT_.split('');
+  for (let i = 0, len = chars.length; i < len; i++) {
+    // 元コード for (var i = 0, len = chars.length; i < len; i++) {
+    switch (chars[i]) {
+      case "x":
+        chars[i] = Math.floor(Math.random() * 16).toString(16); // 元コード chars[i] = goog.math.randomInt(16).toString(16);
+        break;
+      case "y":
+        chars[i] = (Math.floor(Math.random() * 4) + 8).toString(16); // 元コード chars[i] = (goog.math.randomInt(4) + 8).toString(16);
+        break;
+    }
   }
   return chars.join("");
 }

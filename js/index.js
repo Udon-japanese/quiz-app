@@ -1,8 +1,11 @@
 "use strict";
 import {
   addQuizToStorage,
+  getIsFirstVisitFromStorage,
+  getQuizDraftFromStorage,
   getQuizFromStorage,
   getThemeFromStorage,
+  setIsFirstVisitToStorage,
   setThemeToStorage,
 } from "../utils/storage.js";
 import { displayQuizList } from "./quizList.js";
@@ -11,8 +14,8 @@ import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft, initCrtQuizPage } from "./createQuiz.js";
-import { isUUID } from "../utils/isUUID.js";
 import { hideElem, toggleElem } from "../utils/elemManipulation.js";
+import { openModal } from "../utils/modal.js";
 
 const topPage = document.getElementById("top-page");
 const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page"); // ナビゲーションバー上にあるクイズ作成ページへ移動するボタン
@@ -25,18 +28,57 @@ const pages = {
   quizList: document.getElementById("quiz-list-page"),
   quiz: document.getElementById("quiz-page"),
 };
-const LAST_ACCESS_KEY_NAME = "lastAccess";
+export const LAST_ACCESS_KEY_NAME = "lastAccess";
+const welcomeTourMap = new Map([
+  [
+    "createQuiz",
+    {
+      "3つの回答形式の中から、それぞれの問題に最適なものを選んで使えます":
+        "../images/carousel/create-quiz1.png",
+      "オプションで、クイズ作成時にマルバツクイズ(2択クイズ)にできます":
+        "../images/carousel/create-quiz2.png",
+      "下書きを複数保存することができ、後からいつでも続きから再開できます":
+        "../images/carousel/create-quiz3.png",
+    },
+  ],
+  [
+    "quizList",
+    {
+      "三点リーダーをクリックすると、クイズの共有・編集・削除ができます":
+        "../images/carousel/quiz-list1.png",
+      "検索バーを使うと、クイズを絞り込めます":
+        "../images/carousel/quiz-list2.png",
+      "クイズを読み込むボタンで、ほかの人が作成したクイズを保存できます。また、ほかの人のクイズを編集することもできます":
+        "../images/carousel/quiz-list3.png",
+    },
+  ],
+  [
+    "quiz",
+    {
+      "3つの回答形式があり、択一なら一つ選び、複数回答なら1つ以上選び、入力なら答えを入力します":
+        "../images/carousel/quiz1.png",
+      "タイマーが設定されている問題もあります。時間内に間に合うように頑張りましょう！":
+        "../images/carousel/quiz2.png",
+      "クイズ終了後のリザルト画面では、正答率のグラフ、正答数、メッセージが見られます。全問正解時には特別な演出もあります！":
+        "../images/carousel/quiz3.png",
+    },
+  ],
+]);
 
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 loadInitialPage();
-toggleBtnsByScrollability();
 const savedTheme = getThemeFromStorage();
 if (savedTheme === "dark" || savedTheme === "light") {
   applyTheme(savedTheme);
 }
 
 window.addEventListener("load", monitorStorageCapacity);
-window.addEventListener("resize", toggleBtnsByScrollability);
+window.addEventListener("resize", () => {
+  const currentPageName = getCurrentPageName();
+  if (currentPageName === "createQuiz" || currentPageName === "quizList") {
+    toggleBtnsByScrollability(currentPageName);
+  }
+});
 window.addEventListener("beforeunload", () => {
   if (getCurrentPageName() === "createQuiz") {
     saveQuizDraft();
@@ -56,8 +98,6 @@ document.addEventListener("click", (e) => {
       navigateToPage("createQuiz");
     } else if (classList.contains("to-q-list-page")) {
       navigateToPage("quizList");
-    } else if (classList.contains("to-q-page")) {
-      navigateToPage("quiz");
     }
   });
 });
@@ -103,6 +143,58 @@ document.addEventListener("change", (e) => {
 });
 toggleThemeBtn.addEventListener("click", toggleTheme);
 
+/**
+ * @description 初回のみ使い方を表示する
+ * @param {Object<string, string>} imageMap 画像代替テキストをキー、画像urlを値とするオブジェクト
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName ページの名前
+ * @returns {void} なし
+ */
+function showWelcomeTour(imageMap, pageName) {
+  const alts = Object.keys(imageMap);
+  const images = Object.values(imageMap);
+  openModal({
+    title: "説明",
+    body: `
+  <div id="welcome-tour-carousel" class="carousel slide" data-bs-interval="0" data-bs-touch="true">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#welcome-tour-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#welcome-tour-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#welcome-tour-carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="${images[0]}" class="d-block w-100" alt="${alts[0]}">
+      </div>
+      <div class="carousel-item">
+        <img src="${images[1]}" class="d-block w-100" alt="${alts[1]}">
+      </div>
+      <div class="carousel-item">
+        <img src="${images[2]}" class="d-block w-100" alt="${alts[2]}">
+      </div>
+    </div>
+  </div>`,
+    colorClass: "bg-light",
+    modalCont: pages[pageName],
+    header: {
+      HTMLAttributes: {
+        class: "d-none",
+      },
+    },
+    cancelBtn: {
+      HTMLAttributes: {
+        class: "d-none",
+      },
+    },
+    actionBtn: {
+      text: "始める",
+      color: "blue",
+      HTMLAttributes: {
+        "data-bs-dismiss": "modal",
+      },
+    },
+  });
+  setIsFirstVisitToStorage(pageName);
+}
 /**
  * @description テーマに合わせてスタイルを変える
  * @returns {void} なし
@@ -188,13 +280,19 @@ export function navigateToPage(pageName) {
       const isActive = btn === navbarBtnMap[pageName];
       btn.classList.toggle("active", isActive);
     });
+
+    toggleBtnsByScrollability(pageName);
   } else {
     navbarBtns.forEach((btn) => {
       btn.classList.remove("active");
     });
   }
 
-  toggleBtnsByScrollability();
+  const imageMap = welcomeTourMap.get(pageName);
+  const isFirstVisit = getIsFirstVisitFromStorage(pageName);
+  if (imageMap && isFirstVisit) {
+    showWelcomeTour(imageMap, pageName);
+  }
 }
 /**
  * @description 表示するページを切り替え、そのページにアクセスしたことをクッキーに保存する
@@ -203,14 +301,10 @@ export function navigateToPage(pageName) {
  */
 function switchToPage(pageName) {
   if (pageName == "quiz") {
-    setCookie(
-      LAST_ACCESS_KEY_NAME,
-      `${pageName}?id=${
-        document.querySelector(".has-quiz-id").id.split("quiz-")[1]
-      }`
-    );
+    const quizId = document.querySelector(".has-quiz-id").id.split("quiz-")[1];
+    setCookie(LAST_ACCESS_KEY_NAME, `${pageName}?id=${quizId}`);
   } else {
-    setCookie(LAST_ACCESS_KEY_NAME, pageName, 14);
+    setCookie(LAST_ACCESS_KEY_NAME, pageName);
   }
   hideOtherPages(pages[pageName]);
 }
@@ -266,18 +360,28 @@ export function initUploadBtn(btnCont, width = 0, className = "") {
 function loadInitialPage() {
   const lastAccess = getCookie(LAST_ACCESS_KEY_NAME);
   if (lastAccess) {
-    if (lastAccess.startsWith("quiz?")) {
-      const qId = lastAccess.split("quiz?id=")[1];
-      if (!isUUID(qId)) {
-        navigateToPage("top");
-        return;
-      }
-      const quiz = getQuizFromStorage(qId);
+    if (lastAccess.startsWith("quiz?id=")) {
+      const quizId = lastAccess.split("quiz?id=")[1];
+      const quiz = getQuizFromStorage(quizId);
+
       if (!isValidQuizObj(quiz)) {
         navigateToPage("top");
         return;
       }
+
       initQuizPage(quiz);
+      navigateToPage("quiz");
+    } else if (lastAccess.startsWith("createQuiz?draftId=")) {
+      const quizDraftId = lastAccess.split("createQuiz?draftId=")[1];
+      const quizDraft = getQuizDraftFromStorage(quizDraftId);
+
+      if (!isValidQuizObj(quizDraft)) {
+        navigateToPage("top");
+        return;
+      }
+
+      navigateToPage("createQuiz");
+      initCrtQuizPage(quizDraft, "draft");
     } else {
       navigateToPage(lastAccess);
     }
@@ -301,29 +405,40 @@ function monitorStorageCapacity() {
   }
 }
 /**
- * @description 2つずつあるクイズ・下書き全削除ボタンを、画面幅によって最適な方のみ表示する
+ * @description 2つずつあるクイズ・下書き全削除ボタンを、ページごとに、画面幅によって最適な方のみ表示する
+ * @param {"quizList" | "createQuiz"} [pageName=null] ページの名前(そのページでこの関数を実行する際に使用する)
  * @returns {void} なし
  */
-export function toggleBtnsByScrollability() {
+export function toggleBtnsByScrollability(pageName) {
   const body = document.body;
   const isScrollable = body.scrollHeight > body.clientHeight;
   const screenWidth = window.innerWidth;
   const isScreenSMOrWider = screenWidth > 575.98;
+
   document.querySelectorAll(".del-all-cont").forEach((btnCont) => {
     if (btnCont) btnCont.classList.toggle("container", isScreenSMOrWider); //クイズ・下書き全削除ボタンをsm未満では画面幅いっぱいにするため
   });
 
-  const hiddenDelAllBtns = document.querySelectorAll(".hidden-del-all-btn");
+  const page = pages[pageName];
+  const hiddenDelAllBtns = page.querySelectorAll(".hidden-del-all-btn");
   if (hiddenDelAllBtns.length) {
     hiddenDelAllBtns.forEach((btn) => {
       hideElem(btn);
     });
-  } else {
-    document.querySelectorAll(".visible-on-scrollable").forEach((btn) => {
-      toggleElem(btn, !isScrollable);
-    });
-    document.querySelectorAll(".hidden-on-scrollable").forEach((btn) => {
-      toggleElem(btn, isScrollable);
-    });
+    return;
   }
+
+  const delAllBtnClass =
+    pageName === "createQuiz"
+      ? ".del-all-quiz-drafts-btn"
+      : ".del-all-quizzes-btn";
+  const delAllBtns = document.querySelectorAll(delAllBtnClass);
+
+  delAllBtns.forEach((delAllBtn) => {
+    if (delAllBtn.classList.contains("visible-on-scrollable")) {
+      toggleElem(delAllBtn, !isScrollable);
+    } else if (delAllBtn.classList.contains("hidden-on-scrollable")) {
+      toggleElem(delAllBtn, isScrollable);
+    }
+  });
 }

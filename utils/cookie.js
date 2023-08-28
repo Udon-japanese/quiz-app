@@ -26,7 +26,7 @@ export function getCookie(name) {
     const cookie = cookies[i].trim();
     if (cookie.indexOf(cookieName) === 0) {
       try {
-        return decodeURIComponent(cookie.substring(cookieName.length));// 値を取り出し、デコードして返す
+        return decodeURIComponent(cookie.substring(cookieName.length)); // 値を取り出し、デコードして返す
       } catch (err) {
         return null; // エラーが発生した場合
       }
@@ -36,7 +36,7 @@ export function getCookie(name) {
 }
 /**
  * @description キー名でクッキーを削除する
- * @param {string} name キー名
+ * @param {string} name 保存しているクッキーのキー名
  * @returns {void} なし
  */
 export function deleteCookie(name) {

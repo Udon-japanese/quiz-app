@@ -114,7 +114,7 @@ export function getThemeFromStorage() {
 }
 /**
  * @description 現在のテーマを記録する
- * @param {"light" | "dark"} theme テーマの色の名前 
+ * @param {"light" | "dark"} theme テーマの色の名前
  * @returns {void} なし
  */
 export function setThemeToStorage(theme) {
@@ -194,4 +194,23 @@ export function updateQuizDraftToStorage(updatedQuizDraft) {
     quizDrafts[quizDraftId] = updatedQuizDraft;
     saveQuizDraftsToStorage(quizDrafts);
   }
+}
+
+/**
+ * @description ユーザがそのページにすでに訪れたことをセットする(falseがセットされる)
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName ページの名前
+ * @returns {void} なし
+ */
+export function setIsFirstVisitToStorage(pageName) {
+  storage.setItem(`${pageName}FirstVisit`, false);
+}
+/**
+ * @description ユーザがそのページに初めて訪れたかどうかの値を取得する
+ * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName ページの名前
+ * @returns {boolean} ユーザがそのページに初めて訪れたならtrue,そうでないならfalseを返す
+ */
+export function getIsFirstVisitFromStorage(pageName) {
+  const isFirstVisit = storage.getItem(`${pageName}FirstVisit`);
+  if (isFirstVisit === null) return true;
+  return JSON.parse(isFirstVisit);
 }

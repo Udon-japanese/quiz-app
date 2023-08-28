@@ -1,8 +1,8 @@
 "use strict";
-import { navigateToPage } from "./index.js";
-import { getThemeFromStorage, getVolumeFromStorage, setVolumeToStorage } from "../utils/storage.js";
+import { getVolumeFromStorage, setVolumeToStorage } from "../utils/storage.js";
 import { isNumNotNaN } from "../utils/isNumNotNaN.js";
 import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
+import { iOS } from "../utils/isIOS.js";
 
 const answerGuide = document.getElementById("answer-guide");
 const choiceChecks = document.querySelectorAll(".choice-check");
@@ -14,8 +14,10 @@ const correctOrWrongGroup = document.getElementById("correct-or-wrong-group");
 const questionSection = document.getElementById("question-section");
 const explSection = document.getElementById("explanation-section");
 const audioVolumeInput = document.getElementById("audio-volume-input");
+const toggleVolumeBtn = document.getElementById("toggle-volume");
 const confettiCanvas = document.getElementById("confetti");
 const resultMessageCont = document.getElementById("result-message-cont");
+const volumeBtnCont = document.getElementById("volume-btn-cont");
 const screens = {
   title: document.getElementById("title-screen"),
   countdown: document.getElementById("countdown-screen"),
@@ -30,6 +32,7 @@ const audio = {
   drumroll: new Audio("audios/drumroll.mp3"),
   cymbal: new Audio("audios/cymbal.mp3"),
 };
+const isIOS = iOS();
 const quizObj = {
   /**@type {Quiz} */
   quiz: null,
@@ -38,13 +41,24 @@ const quizObj = {
   countdownTimeout: null,
   waitTImeout: null,
   correctLength: 0,
-  volume: getVolumeFromStorage() ?? audioVolumeInput.value / 100,
+  volume: isIOS
+    ? getVolumeFromStorage() ?? 1
+    : getVolumeFromStorage() ?? audioVolumeInput.value / 100, // iOSではミュート/ミュート解除しかできないので、ストレージに保存されていない場合は1を代入する
   confettiFrameId: 0,
   confettiTimeout: null,
 };
 
+// iOSではミュート/ミュート解除しかできないので、音量トグルボタンのみ適切なスタイルをつけて表示する
+toggleElem(audioVolumeInput, isIOS);
+volumeBtnCont.classList.toggle("col-6", !isIOS);
+volumeBtnCont.classList.toggle("col-sm-5", !isIOS);
+volumeBtnCont.classList.toggle("col-lg-4", !isIOS);
+volumeBtnCont.classList.toggle("px-3", !isIOS);
+volumeBtnCont.classList.toggle("px-2", isIOS);
+toggleVolumeBtn.classList.toggle("me-2", !isIOS);
 audioVolumeInput.value = quizObj.volume * 100;
 Object.values(audio).forEach((aud) => {
+  aud.load();
   aud.volume = quizObj.volume;
 });
 changeVolumeIcon(quizObj.volume);
@@ -103,7 +117,7 @@ nextQuestionBtn.addEventListener("click", () => {
       document.getElementById("quiz-length").innerText = quizLength;
       document.getElementById("correct-length").innerText = correctLength;
     }
-    
+
     toggleElem(document.getElementById("perfect-score"), !isPerfect);
     toggleElem(document.getElementById("normal-score-group"), isPerfect);
 
@@ -186,18 +200,19 @@ decisionBtn.addEventListener("click", async () => {
     }
   }
 });
-document.getElementById("toggle-volume").addEventListener("click", () => {
+toggleVolumeBtn.addEventListener("click", () => {
   if (parseInt(audioVolumeInput.value) > 0) {
     audioVolumeInput.value = 0;
     Object.values(audio).forEach((aud) => {
-      aud.volume = 0;
+      aud.muted = true;
       setVolumeToStorage(0);
     });
     changeVolumeIcon(0);
   } else {
-    const volume = quizObj.volume || 1; // 1 はローカルストレージにvolumeが0で保存されている時、1を代入することで、このボタンを押しても音量が0のまま変わらなくなるのを防ぐ
+    const volume = quizObj.volume || 1; // 1 はローカルストレージにvolumeが0で保存されている(quizObj.volumeが0)時、1を代入することで、このボタンを押しても音量が0のまま変わらなくなるのを防ぐ
     audioVolumeInput.value = volume * 100;
     Object.values(audio).forEach((aud) => {
+      aud.muted = false;
       aud.volume = volume;
       setVolumeToStorage(volume);
     });
@@ -211,7 +226,12 @@ audioVolumeInput.addEventListener("input", () => {
     quizObj.volume = volume;
   }
   Object.values(audio).forEach((aud) => {
-    aud.volume = volume;
+    if (volume === 0) {
+      aud.muted = true;
+    } else {
+      aud.muted = false;
+      aud.volume = volume;
+    }
     setVolumeToStorage(volume);
   });
 
@@ -329,6 +349,7 @@ function showQuestion() {
   const isNum = isNumNotNaN(time);
   toggleElem(document.getElementById("timer-group"), !isNum);
   const q = getCurrentQuestion();
+  const { answerType } = q;
   const questionIndex = quizObj.questionIndex;
   document.querySelectorAll(".question-index").forEach((qIndexElem) => {
     qIndexElem.innerText = `${questionIndex}問目`;
@@ -338,14 +359,13 @@ function showQuestion() {
   }
   document.getElementById("question-statement").innerText = q.statement;
 
-  const { answerType } = q;
   switch (answerType) {
     case "select":
     case "select-all": {
       answerGuide.innerHTML =
         answerType === "select"
           ? "正しいと思う選択肢を一つ選んでください"
-          : '正しいと思う選択肢を<span class="fw-bold">一つ以上</span>選んでください';
+          : '正しいと思う選択肢を<span class="fw-bold">すべて(一つ以上)</span>選んでください';
       const choicesLength = q.choices.length;
       const choices = document.querySelectorAll(".choice-cont");
       choices.forEach((choice, i) => {
@@ -535,11 +555,10 @@ export function initQuizPage(quizData = null) {
   const quiz = quizObj.quiz;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
-  document.getElementById("quiz-description").innerText = quiz.description;
+  document.getElementById("quiz-description").innerText = quiz.description || "説明なし";
   nextQuestionBtn.innerText = "次の問題";
   showScreen("title");
   showElem(questionSection);
-  navigateToPage("quiz");
 }
 /**
  * @description 選択肢の順番をランダムに並び替える
@@ -572,6 +591,7 @@ function wait(seconds) {
  * @returns {void} なし
  */
 function playAudio(audio, isLoop = false) {
+  audio.load();
   audio.currentTime = 0;
   audio.loop = isLoop;
   audio.play();
@@ -642,9 +662,6 @@ function drawPieChart(startPercentage, endPercentage) {
     context.font = "bold 24px Arial";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.strokeStyle = "lightgray";
-    context.lineWidth = 3;
-    context.strokeText(`${percentage}%`, centerX, centerY);
     context.fillText(`${percentage}%`, centerX, centerY);
   }
 

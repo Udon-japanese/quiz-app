@@ -4,11 +4,11 @@ import { cloneFromTemplate } from "../js/index.js";
 import { clearDelQsWaitTimeout } from "../js/quizList.js";
 /**
  * @description モーダルを作成、表示する
- * @param {{title: string; body: string; colorClass?: string; modalCont: HTMLElement actionBtn: {text: string; HTMLAttributes?: Object<string, string> color: "red" | "green" | "blue";} }} option オプションのオブジェクト
+ * @param {{title: string; body: string; colorClass?: string; modalCont: HTMLElement; header: {HTMLAttributes?: Object<string, string>} cancelBtn?: {HTMLAttributes?: Object<string, string>} actionBtn: {text: string; HTMLAttributes?: Object<string, string> color: "red" | "green" | "blue";} }} option オプションのオブジェクト
  * @returns {void} なし
  */
 export function openModal(option) {
-  const { title, body, colorClass, modalCont, actionBtn } = option;
+  const { title, body, colorClass, modalCont, header, cancelBtn, actionBtn } = option;
   const modalClone = cloneFromTemplate("modal-tem");
   modalClone.querySelector(".modal-title").innerText = title;
   modalClone.querySelector(".modal-body").innerHTML = body;
@@ -18,6 +18,16 @@ export function openModal(option) {
     elsNeedBgColor.forEach(e => {
       e.classList.add(colorClass);
     });
+  }
+
+  const modalHeaderElem = modalClone.querySelector(".modal-header");
+  if (header?.HTMLAttributes) {
+    applyAttributes(modalHeaderElem, header.HTMLAttributes);
+  }
+
+  const cancelBtnElem = modalClone.querySelector(".cancel-btn");
+  if (cancelBtn?.HTMLAttributes) {
+    applyAttributes(cancelBtnElem, cancelBtn.HTMLAttributes);
   }
 
   const actionBtnElem = modalClone.querySelector(".action-btn");
@@ -35,19 +45,8 @@ export function openModal(option) {
   }
   actionBtnElem.classList.add(btnColor);
   
-  if (actionBtn.HTMLAttributes) {
-    Object.keys(actionBtn.HTMLAttributes).forEach((key) => {
-      const val = actionBtn.HTMLAttributes[key];
-  
-      if (key === "class") {
-        const classes = val.split(" ");
-        classes.forEach((c) => {
-          actionBtnElem.classList.add(c);
-        });
-      } else {
-        actionBtnElem.setAttribute(key, val);
-      }
-    });
+  if (actionBtn?.HTMLAttributes) {
+    applyAttributes(actionBtnElem, actionBtn.HTMLAttributes);
   }
   actionBtnElem.innerText = actionBtn.text;
   modalCont.appendChild(modalClone);
@@ -62,6 +61,25 @@ export function openModal(option) {
   
   const modalInstance = new bootstrap.Modal(document.querySelector(".modal"));
   modalInstance.show();
+
+  /**
+   * @description 指定された属性を要素に適用する
+   * @param {Element} element 属性を付与する要素
+   * @param {Object<string, string>} attributes 属性のオブジェクト 
+   */
+  function applyAttributes(element, attributes) {
+    Object.keys(attributes).forEach(key => {
+      const val = attributes[key];
+      if (key === "class") {
+        const classes = val.split(" ");
+        classes.forEach(className => {
+          element.classList.add(className);
+        });
+      } else {
+        element.setAttribute(key, val);
+      }
+    });
+  }
 }
 /**
  * @description モーダルを閉じる
