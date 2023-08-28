@@ -1,3 +1,4 @@
+"use strict";
 /**
  * @description iOSデバイスならtrue,それ以外ならfalseを返す
  * @returns {boolean} iOSデバイスかどうか(MacBookなどはiOSに含んでいない)
