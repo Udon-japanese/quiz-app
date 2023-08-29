@@ -114,7 +114,7 @@
             class="col-6 col-sm-5 col-lg-4 d-flex align-items-center rounded bg-light-subtle border border-1 shadow-sm px-3 py-1">
             <button type="button" id="toggle-volume"
               class="btn btn-default p-0 me-2 text-primary rounded-circle border-0">
-              <!-- bootstrap iconsのiタグのほうでは完璧な正方形が作れなかったためsvgの方を使用 -->
+              <!-- bootstrap iconsのiタグを使用する方法では完璧な正方形が作れなかったためsvgの方を使用 -->
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" id="volume-mute-icon" fill="currentColor"
                 class="bi bi-volume-mute-fill" viewBox="0 0 16 16">
                 <path
@@ -140,7 +140,7 @@
                   d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
               </svg>
             </button>
-            <input id="audio-volume-input" type="range" min="0" max="1" value="0.5" step="0.01" class="input-range">
+            <input id="audio-volume-input" type="range" min="0" max="100" value="50" class="input-range">
           </div>
         </div>
         <div id="title-screen" class="card-body d-none">

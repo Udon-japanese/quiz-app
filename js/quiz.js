@@ -31,7 +31,7 @@ const quizObj = {
   countdownTimeout: null,
   waitTImeout: null,
   correctLength: 0,
-  volume: getVolumeFromStorage() ?? audioVolumeInput.value,
+  volume: getVolumeFromStorage() ?? audioVolumeInput.value / 100,
   confettiFrameId: 0,
   confettiTimeout: null,
   audioCtx: null,
@@ -47,7 +47,7 @@ const audioBuffers = {
 };
 const audioSources = [];
 
-audioVolumeInput.value = quizObj.volume;
+audioVolumeInput.value = quizObj.volume * 100;
 changeVolumeIcon(quizObj.volume);
 
 document.getElementById("quiz-page").addEventListener("click", (e) => {
@@ -85,8 +85,11 @@ typeTextInput.addEventListener("input", () => {
 });
 startQuizBtn.addEventListener("click", async () => {
   startQuizBtn.disabled = true;
-  quizObj.audioCtx = new window.AudioContext();
-  quizObj.gainNode = quizObj.audioCtx.createGain();
+  if (quizObj.audioCtx === null && quizObj.gainNode === null) {
+    // ユーザのアクションがあってから初期化する
+    quizObj.audioCtx = new window.AudioContext();
+    quizObj.gainNode = quizObj.audioCtx.createGain();
+  }
   startQuizBtn.innerHTML = `
   <div>
     <div class="spinner-border-sm spinner-border text-light" role="status">
@@ -215,17 +218,18 @@ decisionBtn.addEventListener("click", async () => {
 });
 toggleVolumeBtn.addEventListener("click", () => {
   if (quizObj.audioCtx === null && quizObj.gainNode === null) {
+    // ユーザのアクションがあってから初期化する
     quizObj.audioCtx = new window.AudioContext();
     quizObj.gainNode = quizObj.audioCtx.createGain();
   }
 
-  if (audioVolumeInput.value > 0) {
+  if (parseInt(audioVolumeInput.value) > 0) {
     audioVolumeInput.value = 0;
     changeVolume(0);
     changeVolumeIcon(0);
   } else {
     const volume = quizObj.volume || 1; // 1 はローカルストレージにvolumeが0で保存されている(quizObj.volumeが0)時、1を代入することで、このボタンを押しても音量が0のまま変わらなくなるのを防ぐ
-    audioVolumeInput.value = volume;
+    audioVolumeInput.value = volume * 100;
     setVolumeToStorage(volume);
     changeVolume(volume);
     changeVolumeIcon(volume);
@@ -233,12 +237,13 @@ toggleVolumeBtn.addEventListener("click", () => {
 });
 audioVolumeInput.addEventListener("input", () => {
   if (quizObj.audioCtx === null && quizObj.gainNode === null) {
+    // ユーザのアクションがあってから初期化する
     quizObj.audioCtx = new window.AudioContext();
     quizObj.gainNode = quizObj.audioCtx.createGain();
   }
 
-  const volume = audioVolumeInput.value;
-  if (volume !== 0) {
+  const volume = audioVolumeInput.value / 100;
+  if (parseInt(audioVolumeInput.value) !== 0) {
     quizObj.volume = volume;
   }
 
@@ -289,11 +294,11 @@ function changeVolumeIcon(volume) {
   toggleElem(
     document.getElementById("volume-off-icon"),
     volume >= 0.3 || volume === 0
-  ); // 音量が30%未満の時
+  ); // 音量が30%未満の時見せる
   toggleElem(
     document.getElementById("volume-down-icon"),
     volume >= 0.8 || volume < 0.3 || volume === 0
-  ); // 音量が80%未満の時
+  ); // 音量が80%未満の時見せる
   toggleElem(document.getElementById("volume-up-icon"), volume < 0.8);
 }
 /**
