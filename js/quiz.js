@@ -31,7 +31,7 @@ const quizObj = {
   countdownTimeout: null,
   waitTImeout: null,
   correctLength: 0,
-  volume: getVolumeFromStorage() ?? audioVolumeInput.value / 100,
+  volume: getVolumeFromStorage() ?? parseInt(audioVolumeInput.value / 100),
   confettiFrameId: 0,
   confettiTimeout: null,
   audioCtx: null,
@@ -46,7 +46,9 @@ const audioBuffers = {
   cymbal: null,
 };
 const audioSources = [];
-
+setInterval(() => {
+  console.log(quizObj.volume, audioVolumeInput.value)
+}, 100);
 audioVolumeInput.value = quizObj.volume * 100;
 changeVolumeIcon(quizObj.volume);
 
@@ -85,11 +87,7 @@ typeTextInput.addEventListener("input", () => {
 });
 startQuizBtn.addEventListener("click", async () => {
   startQuizBtn.disabled = true;
-  if (quizObj.audioCtx === null && quizObj.gainNode === null) {
-    // ユーザのアクションがあってから初期化する
-    quizObj.audioCtx = new window.AudioContext();
-    quizObj.gainNode = quizObj.audioCtx.createGain();
-  }
+  handleChangeVolumeInput();
   startQuizBtn.innerHTML = `
   <div>
     <div class="spinner-border-sm spinner-border text-light" role="status">
@@ -110,7 +108,6 @@ startQuizBtn.addEventListener("click", async () => {
     audioBuffers.drumroll || (await loadAudioBuffer("audios/drumroll.mp3"));
   audioBuffers.cymbal =
     audioBuffers.cymbal || (await loadAudioBuffer("audios/cymbal.mp3"));
-  changeVolume(quizObj.volume);
   startQuiz();
   startQuizBtn.innerHTML = "スタート";
   startQuizBtn.disabled = false;
@@ -235,22 +232,28 @@ toggleVolumeBtn.addEventListener("click", () => {
     changeVolumeIcon(volume);
   }
 });
-audioVolumeInput.addEventListener("input", () => {
+audioVolumeInput.addEventListener("input", handleChangeVolumeInput);
+
+/**
+ * @description audioVolumeInputの値が変化したときにハンドリングする
+ * @returns {void} なし
+ */
+function handleChangeVolumeInput() {
   if (quizObj.audioCtx === null && quizObj.gainNode === null) {
     // ユーザのアクションがあってから初期化する
     quizObj.audioCtx = new window.AudioContext();
     quizObj.gainNode = quizObj.audioCtx.createGain();
   }
 
-  const volume = audioVolumeInput.value / 100;
-  if (parseInt(audioVolumeInput.value) !== 0) {
+  const volume = parseInt(audioVolumeInput.value) / 100;
+  if ((volume * 100) !== 0) {
     quizObj.volume = volume;
   }
 
   changeVolume(volume);
   setVolumeToStorage(volume);
   changeVolumeIcon(volume);
-});
+}
 /**
  * @description クイズ正誤判定後の処理と、解説の表示をする
  * @param {string} expl 解説の文
