@@ -49,7 +49,7 @@ const searchQInput = document.getElementById("search-q");
 const headerBtnCont = document.getElementById("header-btn-cont");
 const noneQuizElem = document.getElementById("none-quiz");
 const noneQuizTxtElem = document.getElementById("none-quiz-txt");
-const delAllQuizzesBtns = document.querySelectorAll(".del-all-quizzes-btn");
+const delAllQuizzesCont = qListPage.querySelector(".del-all-cont");
 /** @type {Quiz[]} */
 const defaultQuizzes = [
   commonSenseQuiz,
@@ -244,9 +244,7 @@ searchQInput.addEventListener("input", handleSearchQuizzes);
 function handleSearchQuizzes() {
   const query = searchQInput.value;
 
-  delAllQuizzesBtns.forEach((btn) => {
-    btn.classList.toggle("hidden-del-all-btn", query); // 検索バーが空のときのみ表示する
-  });
+  delAllQuizzesCont.classList.toggle("hidden-del-all-cont", query); // 検索バーが空のときのみ表示する
 
   if (!query) {
     displayQuizList();
@@ -263,8 +261,8 @@ function handleSearchQuizzes() {
     </div>
     「${query}」に当てはまるクイズは見つかりませんでした。他のキーワードで検索するか、自分でクイズを作成、または他の人のクイズで遊んでみましょう！`;
     toggleElem(headerBtnCont, noneResult);
-    toggleBtnsByScrollability("quizList");
     quizzesCont.innerHTML = "";
+    toggleBtnsByScrollability("quizList");
     return;
   }
   displayQuizList(quizList, query);
@@ -302,9 +300,8 @@ export function displayQuizList(obj = null, highlight = "") {
   toggleElem(noneQuizElem, !noneQuiz);
   toggleElem(searchQInput, noneQuiz);
   toggleElem(headerBtnCont, noneQuiz);
-  delAllQuizzesBtns.forEach((btn) => {
-    btn.classList.toggle("hidden-del-all-btn", noneQuiz || highlight); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
-  });
+  delAllQuizzesCont.classList.toggle("hidden-del-all-cont", noneQuiz || highlight); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
+
   // テンプレートの中身をクイズのデータで置き換え手表示する
   Object.values(qListObjToUse).forEach((quiz) => {
     if (!isValidQuizObj(quiz)) return;

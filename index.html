@@ -140,7 +140,7 @@
                   d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
               </svg>
             </button>
-            <input id="audio-volume-input" type="range" min="0" max="100" value="50" class="input-range">
+            <input id="audio-volume-input" type="range" min="0" max="1" value="0.5" step="0.01" class="input-range">
           </div>
         </div>
         <div id="title-screen" class="card-body d-none">
@@ -165,7 +165,7 @@
             <h2 class="card-title question-index mb-0 mb-sm-2">{questionIndex}問目</h2>
             <div id="timer-group" class="d-none">
               <div class="card-text text-center fs-5" id="timer-txt">残り: {timer-val}秒</div>
-              <div id="timer-cont" class="bg-secondary-subtle rounded-4 mt-1 border border-1 border-secondary">
+              <div id="timer-cont" class="bg-secondary-subtle rounded-4 mt-1 border border-1 border-secondary overflow-hidden">
                 <div id="timer-bar" class="py-2 bg-primary rounded-3"></div>
               </div>
             </div>
@@ -407,7 +407,7 @@
           </div>
         </div>
       </div>
-      <div class="d-grid container del-all-cont">
+      <div class="d-grid container del-all-cont"><!-- 画面幅に応じて適切な位置に配置される方のボタンのみ表示 -->
         <button type="button"
           class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>

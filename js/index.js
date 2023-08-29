@@ -14,7 +14,7 @@ import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft, initCrtQuizPage } from "./createQuiz.js";
-import { hideElem, toggleElem } from "../utils/elemManipulation.js";
+import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
 import { openModal } from "../utils/modal.js";
 
 const topPage = document.getElementById("top-page");
@@ -410,23 +410,28 @@ function monitorStorageCapacity() {
  * @returns {void} なし
  */
 export function toggleBtnsByScrollability(pageName) {
+  const delAllConts = document.querySelectorAll(".del-all-cont");
+  
+  delAllConts.forEach((btnCont) => {
+    showElem(btnCont); // ボタンの高さを含めてスクロール可能かどうか判断したいため
+  });
+  showElem(pages[pageName].querySelector(".visible-on-scrollable")); // ボタンの高さを含めてスクロール可能かどうか判断したいため
+
   const body = document.body;
   const isScrollable = body.scrollHeight > body.clientHeight;
+  console.log(isScrollable);
   const screenWidth = window.innerWidth;
   const isScreenSMOrWider = screenWidth > 575.98;
 
-  document.querySelectorAll(".del-all-cont").forEach((btnCont) => {
-    if (btnCont) btnCont.classList.toggle("container", isScreenSMOrWider); //クイズ・下書き全削除ボタンをsm未満では画面幅いっぱいにするため
+  let hasHiddenContClass = false;
+  delAllConts.forEach((btnCont) => {
+    if (btnCont) {
+      btnCont.classList.toggle("container", isScreenSMOrWider); //クイズ・下書き全削除ボタンをsm未満では画面幅いっぱいにするため
+      hasHiddenContClass = btnCont.classList.contains("hidden-del-all-cont");
+      toggleElem(btnCont, hasHiddenContClass);
+    }
   });
-
-  const page = pages[pageName];
-  const hiddenDelAllBtns = page.querySelectorAll(".hidden-del-all-btn");
-  if (hiddenDelAllBtns.length) {
-    hiddenDelAllBtns.forEach((btn) => {
-      hideElem(btn);
-    });
-    return;
-  }
+  if (hasHiddenContClass) return;
 
   const delAllBtnClass =
     pageName === "createQuiz"

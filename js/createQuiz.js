@@ -14,6 +14,7 @@ import {
   getQuizDraftsFromStorage,
   updateQuizDraftToStorage,
   removeQuizDraftsFromStorage,
+  getQuizFromStorage,
 } from "../utils/storage.js";
 import {
   LAST_ACCESS_KEY_NAME,
@@ -576,6 +577,13 @@ function createQuiz(existsId, quizType = "new") {
   }
 
   if (quizType === "edit") {
+    const prevQuiz = getQuizFromStorage(id);
+    if (areQuizzesEqual(prevQuiz, quiz)) {// 編集前と変化がないときは保存とトースト表示をしない
+      initCrtQuizPage();
+      navigateToPage("quizList");
+      displayQuizList();
+      return;
+    }
     updateQuizToStorage(quiz);
   } else if (quizType === "draft") {
     addQuizToStorage(quiz);
@@ -991,7 +999,7 @@ export function saveQuizDraft() {
   const crtQuizContId = document.querySelector(".crt-quiz-cont").id;
   let quizDraftId;
   if (crtQuizContId.startsWith("edit")) {
-    // 編集画面だった場合は下書きとして保存しない
+    // 編集画面だった場合はそのクイズデータを下書きとして保存しない
     initCrtQuizPage();
     return;
   } else if (crtQuizContId.startsWith("draft")) {
@@ -1180,7 +1188,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
       showElem(crtQuizObj.elem.crtQuizSection);
       crtQuizObj.elem.searchQDInput.removeEventListener(
         "input",
-        handleSearchInput
+        handleSearchQuizDrafts
       );
       return;
     } else {
@@ -1201,7 +1209,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
       showElem(crtQuizObj.elem.crtQuizSection);
       crtQuizObj.elem.searchQDInput.removeEventListener(
         "input",
-        handleSearchInput
+        handleSearchQuizDrafts
       );
       setCookie(LAST_ACCESS_KEY_NAME, `createQuiz?draftId=${quiz.id}`);
       return;
@@ -1219,7 +1227,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
     showElem(crtQuizObj.elem.crtQuizSection);
     crtQuizObj.elem.searchQDInput.removeEventListener(
       "input",
-      handleSearchInput
+      handleSearchQuizDrafts
     );
     return;
   }
@@ -1235,7 +1243,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
     displayQuizDraftList();
   }
 
-  crtQuizObj.elem.searchQDInput.addEventListener("input", handleSearchInput);
+  crtQuizObj.elem.searchQDInput.addEventListener("input", handleSearchQuizDrafts);
 }
 /**
  * @description クイズ作成のフォームに、渡されたクイズの値をセットする
@@ -1447,13 +1455,11 @@ function displayQuizDraftList(obj = null, highlight = "") {
  * @param {Event} e inputイベント
  * @returns {void} なし
  */
-function handleSearchInput(e) {
+function handleSearchQuizDrafts(e) {
   const query = e.target.value;
   const noneQuizDraftEl = document.getElementById("none-quiz-draft");
 
-  document.querySelectorAll(".del-all-quiz-drafts-btn").forEach((btn) => {
-    btn.classList.toggle("hidden-del-all-btn", query);
-  }); // 検索バーが空のときのみ下書き全削除ボタン(2つ)表示する
+  crtQPage.querySelector(".del-all-cont").classList.toggle("hidden-del-all-cont", query);// 検索バーが空のときのみ下書き全削除ボタンを表示する
 
   if (!query) {
     hideElem(noneQuizDraftEl);

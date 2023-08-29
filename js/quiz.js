@@ -2,12 +2,12 @@
 import { getVolumeFromStorage, setVolumeToStorage } from "../utils/storage.js";
 import { isNumNotNaN } from "../utils/isNumNotNaN.js";
 import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
-import { iOS } from "../utils/isIOS.js";
 
 const answerGuide = document.getElementById("answer-guide");
 const choiceChecks = document.querySelectorAll(".choice-check");
 const choicesGroup = document.getElementById("choices-group");
 const typeTextInput = document.getElementById("type-text-input");
+const startQuizBtn = document.getElementById("start-quiz");
 const decisionBtn = document.getElementById("decision-btn");
 const nextQuestionBtn = document.getElementById("next-question-btn");
 const correctOrWrongGroup = document.getElementById("correct-or-wrong-group");
@@ -17,22 +17,12 @@ const audioVolumeInput = document.getElementById("audio-volume-input");
 const toggleVolumeBtn = document.getElementById("toggle-volume");
 const confettiCanvas = document.getElementById("confetti");
 const resultMessageCont = document.getElementById("result-message-cont");
-const volumeBtnCont = document.getElementById("volume-btn-cont");
 const screens = {
   title: document.getElementById("title-screen"),
   countdown: document.getElementById("countdown-screen"),
   quiz: document.getElementById("quiz-screen"),
   result: document.getElementById("result-screen"),
 };
-const audio = {
-  correct: new Audio("audios/correct.mp3"),
-  wrong: new Audio("audios/wrong.mp3"),
-  timer: new Audio("audios/timer.mp3"),
-  countdown: new Audio("audios/countdown.mp3"),
-  drumroll: new Audio("audios/drumroll.mp3"),
-  cymbal: new Audio("audios/cymbal.mp3"),
-};
-const isIOS = iOS();
 const quizObj = {
   /**@type {Quiz} */
   quiz: null,
@@ -41,26 +31,23 @@ const quizObj = {
   countdownTimeout: null,
   waitTImeout: null,
   correctLength: 0,
-  volume: isIOS
-    ? getVolumeFromStorage() ?? 1
-    : getVolumeFromStorage() ?? audioVolumeInput.value / 100, // iOSではミュート/ミュート解除しかできないので、ストレージに保存されていない場合は1を代入する
+  volume: getVolumeFromStorage() ?? audioVolumeInput.value,
   confettiFrameId: 0,
   confettiTimeout: null,
+  audioCtx: null,
+  gainNode: null,
 };
+const audioBuffers = {
+  correct: null,
+  wrong: null,
+  timer: null,
+  countdown: null,
+  drumroll: null,
+  cymbal: null,
+};
+const audioSources = [];
 
-// iOSではミュート/ミュート解除しかできないので、音量トグルボタンのみ適切なスタイルをつけて表示する
-toggleElem(audioVolumeInput, isIOS);
-volumeBtnCont.classList.toggle("col-6", !isIOS);
-volumeBtnCont.classList.toggle("col-sm-5", !isIOS);
-volumeBtnCont.classList.toggle("col-lg-4", !isIOS);
-volumeBtnCont.classList.toggle("px-3", !isIOS);
-volumeBtnCont.classList.toggle("px-2", isIOS);
-toggleVolumeBtn.classList.toggle("me-2", !isIOS);
-audioVolumeInput.value = quizObj.volume * 100;
-Object.values(audio).forEach((aud) => {
-  aud.load();
-  aud.volume = quizObj.volume;
-});
+audioVolumeInput.value = quizObj.volume;
 changeVolumeIcon(quizObj.volume);
 
 document.getElementById("quiz-page").addEventListener("click", (e) => {
@@ -96,13 +83,39 @@ typeTextInput.addEventListener("input", () => {
     decisionBtn.disabled = false;
   }
 });
-document.getElementById("start-quiz").addEventListener("click", () => {
+startQuizBtn.addEventListener("click", async () => {
+  startQuizBtn.disabled = true;
+  quizObj.audioCtx = new window.AudioContext();
+  quizObj.gainNode = quizObj.audioCtx.createGain();
+  startQuizBtn.innerHTML = `
+  <div>
+    <div class="spinner-border-sm spinner-border text-light" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <span class="ms-2">読み込み中...</span>
+  </div>`;
+  // 初回のみ読み込む
+  audioBuffers.correct =
+    audioBuffers.correct || (await loadAudioBuffer("audios/correct.mp3"));
+  audioBuffers.wrong =
+    audioBuffers.wrong || (await loadAudioBuffer("audios/wrong.mp3"));
+  audioBuffers.timer =
+    audioBuffers.timer || (await loadAudioBuffer("audios/timer.mp3"));
+  audioBuffers.countdown =
+    audioBuffers.countdown || (await loadAudioBuffer("audios/countdown.mp3"));
+  audioBuffers.drumroll =
+    audioBuffers.drumroll || (await loadAudioBuffer("audios/drumroll.mp3"));
+  audioBuffers.cymbal =
+    audioBuffers.cymbal || (await loadAudioBuffer("audios/cymbal.mp3"));
+  changeVolume(quizObj.volume);
   startQuiz();
+  startQuizBtn.innerHTML = "スタート";
+  startQuizBtn.disabled = false;
 });
 document.getElementById("replay-quiz").addEventListener("click", () => {
   initQuizPage();
 });
-nextQuestionBtn.addEventListener("click", () => {
+nextQuestionBtn.addEventListener("click", async () => {
   const quizLength = quizObj.quiz.length;
 
   if (quizObj.questionIndex === quizLength) {
@@ -140,7 +153,7 @@ nextQuestionBtn.addEventListener("click", () => {
 decisionBtn.addEventListener("click", async () => {
   decisionBtn.disabled = true;
   clearInterval(quizObj.timerInterval);
-  pauseAudio(audio.timer);
+  pauseAllAudio();
 
   const q = getCurrentQuestion();
   // 回答形式ごとに設定されている回答と、ユーザの回答が一致しているかを調べ、その後の処理を行う
@@ -201,40 +214,36 @@ decisionBtn.addEventListener("click", async () => {
   }
 });
 toggleVolumeBtn.addEventListener("click", () => {
-  if (parseInt(audioVolumeInput.value) > 0) {
+  if (quizObj.audioCtx === null && quizObj.gainNode === null) {
+    quizObj.audioCtx = new window.AudioContext();
+    quizObj.gainNode = quizObj.audioCtx.createGain();
+  }
+
+  if (audioVolumeInput.value > 0) {
     audioVolumeInput.value = 0;
-    Object.values(audio).forEach((aud) => {
-      aud.muted = true;
-      setVolumeToStorage(0);
-    });
+    changeVolume(0);
     changeVolumeIcon(0);
   } else {
     const volume = quizObj.volume || 1; // 1 はローカルストレージにvolumeが0で保存されている(quizObj.volumeが0)時、1を代入することで、このボタンを押しても音量が0のまま変わらなくなるのを防ぐ
-    audioVolumeInput.value = volume * 100;
-    Object.values(audio).forEach((aud) => {
-      aud.muted = false;
-      aud.volume = volume;
-      setVolumeToStorage(volume);
-    });
-
+    audioVolumeInput.value = volume;
+    setVolumeToStorage(volume);
+    changeVolume(volume);
     changeVolumeIcon(volume);
   }
 });
 audioVolumeInput.addEventListener("input", () => {
-  const volume = parseInt(audioVolumeInput.value) / 100;
+  if (quizObj.audioCtx === null && quizObj.gainNode === null) {
+    quizObj.audioCtx = new window.AudioContext();
+    quizObj.gainNode = quizObj.audioCtx.createGain();
+  }
+
+  const volume = audioVolumeInput.value;
   if (volume !== 0) {
     quizObj.volume = volume;
   }
-  Object.values(audio).forEach((aud) => {
-    if (volume === 0) {
-      aud.muted = true;
-    } else {
-      aud.muted = false;
-      aud.volume = volume;
-    }
-    setVolumeToStorage(volume);
-  });
 
+  changeVolume(volume);
+  setVolumeToStorage(volume);
   changeVolumeIcon(volume);
 });
 /**
@@ -300,10 +309,7 @@ export function endQuiz() {
   clearTimeout(quizObj.pieChartTimeout);
 
   stopAndClearConfetti();
-
-  Object.values(audio).forEach((aud) => {
-    pauseAudio(aud);
-  });
+  pauseAllAudio();
 }
 /**
  * @description 正解(丸)または不正解(バツ)をクイズ画面に表示する
@@ -311,7 +317,8 @@ export function endQuiz() {
  * @returns {Promise<void>} なし
  */
 async function showCorrectOrWrong(isAnswerCorrect) {
-  playAudio(isAnswerCorrect ? audio.correct : audio.wrong);
+  const buf = isAnswerCorrect ? audioBuffers.correct : audioBuffers.wrong;
+  playAudio(buf);
   showElem(correctOrWrongGroup);
   toggleElem(document.getElementById("correct"), !isAnswerCorrect);
   toggleElem(document.getElementById("wrong"), isAnswerCorrect);
@@ -330,10 +337,9 @@ function getCurrentQuestion() {
  * @returns {void} なし
  */
 async function startQuiz() {
-  showScreen("countdown");
   await countdown(); // デフォルトの3秒カウントダウンする
-  showScreen("quiz");
   showQuestion();
+  showScreen("quiz");
 }
 /**
  * @description 問題を表示する
@@ -347,6 +353,11 @@ function showQuestion() {
   decisionBtn.disabled = true;
   const time = quizObj.quiz?.options?.timer;
   const isNum = isNumNotNaN(time);
+
+  if (isNum) {
+    startTimer(time);
+  }
+
   toggleElem(document.getElementById("timer-group"), !isNum);
   const q = getCurrentQuestion();
   const { answerType } = q;
@@ -397,10 +408,6 @@ function showQuestion() {
     }
   }
 
-  if (isNum) {
-    startTimer(time);
-  }
-
   toggleElem(choicesGroup, answerType === "type-text");
   toggleElem(typeTextInput, answerType !== "type-text");
   showElem(decisionBtn);
@@ -413,22 +420,22 @@ function showQuestion() {
 /**
  * @description 引数に指定された秒間、タイマーをカウントし、残り時間のバーの見た目を変える
  * @param {number} seconds タイマーの秒数
- * @returns {void} なし
+ * @returns {Promise<void>} なし
  */
 function startTimer(seconds) {
+  const source = playAudio(audioBuffers.timer, true);
   const timerBar = document.getElementById("timer-bar");
   const timerTxt = document.getElementById("timer-txt");
   const interval = 10;
   let startTime = null;
   let lastLoggedSeconds = seconds;
   timerTxt.innerText = `残り: ${seconds}秒`;
-  playAudio(audio.timer, true);
 
   /**
    * @description タイマーを更新し、残り時間のバーの長さを変える。また、時間切れになったときにクイズを進行する
    * @returns {void} なし
    */
-  async function updateTimer() {
+  function updateTimer() {
     const currentTime = Date.now();
     const elapsedTime = currentTime - startTime;
     const remainingTime = Math.max(0, seconds * 1000 - elapsedTime);
@@ -451,7 +458,7 @@ function startTimer(seconds) {
 
     if (remainingTime <= 0) {
       clearInterval(quizObj.timerInterval);
-      pauseAudio(audio.timer);
+      pauseAudio(source);
       const q = getCurrentQuestion();
 
       if (q.answerType === "type-text") {
@@ -502,7 +509,9 @@ function startTimer(seconds) {
  * @returns {Promise<void>} プロミス
  */
 async function countdown(seconds = 3) {
-  playAudio(audio.countdown);
+  const source = playAudio(audioBuffers.countdown);
+
+  showScreen("countdown");
 
   const countdownElem = document.getElementById("countdown");
 
@@ -513,8 +522,7 @@ async function countdown(seconds = 3) {
     });
   }
 
-  countdownElem.innerText = "";
-  pauseAudio(audio.countdown);
+  pauseAudio(source);
 }
 /**
  * @description 引数に渡された名前のスクリーンのみを表示する
@@ -535,9 +543,7 @@ export function initQuizPage(quizData = null) {
   if (quizData) {
     quizObj.quiz = quizData;
   }
-  Object.values(audio).forEach((aud) => {
-    pauseAudio(aud);
-  });
+  pauseAllAudio();
   // もう一度遊ぶときに、前回に出ていたアニメーションやtimeoutを解除する
   stopAndClearConfetti();
   clearInterval(quizObj.pieChartTimeout);
@@ -555,7 +561,8 @@ export function initQuizPage(quizData = null) {
   const quiz = quizObj.quiz;
   document.querySelector(".has-quiz-id").id = `quiz-${quiz.id}`;
   document.getElementById("quiz-title").innerText = quiz.title;
-  document.getElementById("quiz-description").innerText = quiz.description || "説明なし";
+  document.getElementById("quiz-description").innerText =
+    quiz.description || "説明なし";
   nextQuestionBtn.innerText = "次の問題";
   showScreen("title");
   showElem(questionSection);
@@ -585,25 +592,66 @@ function wait(seconds) {
   });
 }
 /**
- * @description オーディオを再生する
- * @param {HTMLAudioElement} audio audioオブジェクトのプロパティのオーディオ
- * @param {boolean} [isLoop=false] ループさせるならtrue,そうでないならfalse
- * @returns {void} なし
+ * @description オーディオバッファを読み込む
+ * @param {string} url オーディオのURL
+ * @param {(buf: AudioBuffer) => void} callback オーディオバッファを読み込み終わった後に実行したい関数(引数にオーディオバッファが入る)
+ * @returns {Promise<AudioBuffer | void>} オーディオバッファ(コールバック関数が渡されていない場合)
  */
-function playAudio(audio, isLoop = false) {
-  audio.load();
-  audio.currentTime = 0;
-  audio.loop = isLoop;
-  audio.play();
+async function loadAudioBuffer(url, callback = null) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await quizObj.audioCtx.decodeAudioData(arrayBuffer);
+
+  if (typeof callback !== "function") {
+    return audioBuffer;
+  }
+
+  callback(audioBuffer);
 }
 /**
- * @description オーディオを再生停止する
- * @param {HTMLAudioElement} audio audioオブジェクトのプロパティのオーディオ
+ * @description オーディオを再生する関数
+ * @param {AudioBuffer} audioBuffer
+ * @param {boolean} [isLoop=false] ループさせるかどうか
+ * @returns {AudioBufferSourceNode} オーディオのソース
+ */
+function playAudio(audioBuffer, isLoop = false) {
+  const source = quizObj.audioCtx.createBufferSource();
+  audioSources.push(source);
+  source.buffer = audioBuffer;
+
+  source.connect(quizObj.gainNode);
+  quizObj.gainNode.connect(quizObj.audioCtx.destination);
+
+  source.loop = isLoop;
+
+  source.start(0);
+  return source;
+}
+/**
+ * @description 引数に渡されたオーディオを停止する
+ * @param {AudioBufferSourceNode} audioSource オーディオのソース
  * @returns {void} なし
  */
-function pauseAudio(audio) {
-  audio.pause();
-  audio.currentTime = 0;
+function pauseAudio(audioSource) {
+  audioSource.stop(0);
+}
+/**
+ * @description オーディオをすべて停止する
+ * @returns {void} なし
+ */
+function pauseAllAudio() {
+  for (const source of audioSources) {
+    pauseAudio(source);
+  }
+  audioSources.splice(0, audioSources.length); // すべて止めたら止めたオーディオのソースをすべて削除する
+}
+/**
+ * @description オーディオのボリュームを変更する
+ * @param {number} volume 0~1までの値
+ * @returns {void} なし
+ */
+function changeVolume(volume) {
+  quizObj.gainNode.gain.value = volume;
 }
 /**
  * @description 二つの複数回答の配列(ユーザが選んだ回答と、問題に設定されている回答)が等しければtrue,そうでなければfalseを返す
@@ -665,12 +713,13 @@ function drawPieChart(startPercentage, endPercentage) {
     context.fillText(`${percentage}%`, centerX, centerY);
   }
 
+  let drumrollSource;
   if (endPercentage !== 0) {
     // 正答率が0%の時は音を流さない
-    playAudio(audio.drumroll);
+    drumrollSource = playAudio(audioBuffers.drumroll);
   }
 
-  function animate(startPercentage) {
+  async function animate(startPercentage) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     let color = "";
@@ -697,8 +746,8 @@ function drawPieChart(startPercentage, endPercentage) {
     } else {
       if (endPercentage !== 0) {
         // 正答率が0%の時は音を流さない
-        pauseAudio(audio.drumroll);
-        playAudio(audio.cymbal);
+        pauseAudio(drumrollSource);
+        playAudio(audioBuffers.cymbal);
       }
       showElem(resultMessageCont);
     }
