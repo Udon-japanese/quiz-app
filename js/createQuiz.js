@@ -37,8 +37,6 @@ const answerTypeInitialState = null;
 const createChoiceCallLimit = 4;
 const createQuestionCallLimit = 10;
 const crtQuizObj = {};
-const existsCryptoRandomUUID =
-  "crypto" in window && "randomUUID" in window.crypto;
 
 crtQPage.addEventListener("click", (e) => {
   const elems = e.composedPath();
@@ -393,9 +391,7 @@ function createQuiz(existsId, quizType = "new") {
   // 必要な値が入っていなければ、トーストとフォームの色を変えて警告する
   let invalidForm = null;
   const crtQuizHeader = document.getElementById("crt-quiz-title");
-  const id =
-    existsId ||
-    (existsCryptoRandomUUID ? crypto.randomUUID() : generateUUIDv4());
+  const id = existsId || randomUUID();
   const titleElem = document.getElementById("title");
   const title = titleElem.value;
   if (!title) {
@@ -578,7 +574,8 @@ function createQuiz(existsId, quizType = "new") {
 
   if (quizType === "edit") {
     const prevQuiz = getQuizFromStorage(id);
-    if (areQuizzesEqual(prevQuiz, quiz)) {// 編集前と変化がないときは保存とトースト表示をしない
+    if (areQuizzesEqual(prevQuiz, quiz)) {
+      // 編集前と変化がないときは保存とトースト表示をしない
       initCrtQuizPage();
       navigateToPage("quizList");
       displayQuizList();
@@ -1009,9 +1006,7 @@ export function saveQuizDraft() {
   // 一つもフォームが入力されていなかったら保存しない
   let isEmptyQuiz = true;
   // フォームに入力されている値をオブジェクトに保存し、ローカルストレージに保存する
-  const id =
-    quizDraftId ||
-    (existsCryptoRandomUUID ? crypto.randomUUID() : generateUUIDv4());
+  const id = quizDraftId || randomUUID();
   const title = document.getElementById("title").value;
   const descriptionElem = document.getElementById("description");
   const description = descriptionElem.value;
@@ -1243,7 +1238,10 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
     displayQuizDraftList();
   }
 
-  crtQuizObj.elem.searchQDInput.addEventListener("input", handleSearchQuizDrafts);
+  crtQuizObj.elem.searchQDInput.addEventListener(
+    "input",
+    handleSearchQuizDrafts
+  );
 }
 /**
  * @description クイズ作成のフォームに、渡されたクイズの値をセットする
@@ -1459,7 +1457,9 @@ function handleSearchQuizDrafts(e) {
   const query = e.target.value;
   const noneQuizDraftEl = document.getElementById("none-quiz-draft");
 
-  crtQPage.querySelector(".del-all-cont").classList.toggle("hidden-del-all-cont", query);// 検索バーが空のときのみ下書き全削除ボタンを表示する
+  crtQPage
+    .querySelector(".del-all-cont")
+    .classList.toggle("hidden-del-all-cont", query); // 検索バーが空のときのみ下書き全削除ボタンを表示する
 
   if (!query) {
     hideElem(noneQuizDraftEl);
@@ -1526,7 +1526,16 @@ function areQuizzesEqual(quiz1, quiz2) {
   // タイプがオブジェクト以外の場合は値を比較
   return quiz1 === quiz2;
 }
+/**
+ * @description 環境に合わせてUUIDを生成する関数を実行する
+ * @returns {string} UUIDv4の文字列
+ */
+export function randomUUID() {
+  const existsCryptoRandomUUID =
+    "crypto" in window && "randomUUID" in window.crypto;
 
+  return existsCryptoRandomUUID ? crypto.randomUUID() : generateUUIDv4();
+}
 // https://github.com/googlearchive/chrome-platform-analytics/blob/master/src/internal/identifier.js
 // Copyright 2013 Google Inc. All Rights Reserved.
 //
@@ -1545,8 +1554,7 @@ function areQuizzesEqual(quiz1, quiz2) {
  * @description webkit系ブラウザで、crypto.randomUUID()が使用できないときに、代用で使用する
  * @returns {string} UUIDv4の文字列
  */
-function generateUUIDv4() {
-  // 元コード analytics.internal.Identifier.generateUuid = function() {
+function generateUUIDv4() {// 元コード analytics.internal.Identifier.generateUuid = function() {
   let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split(""); // 元コード var chars = analytics.internal.Identifier.UUID_FMT_.split('');
   for (let i = 0, len = chars.length; i < len; i++) {
     // 元コード for (var i = 0, len = chars.length; i < len; i++) {

@@ -4,6 +4,7 @@ import {
   getIsFirstVisitFromStorage,
   getQuizDraftFromStorage,
   getQuizFromStorage,
+  getQuizzesFromStorage,
   getThemeFromStorage,
   setIsFirstVisitToStorage,
   setThemeToStorage,
@@ -13,7 +14,7 @@ import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
-import { saveQuizDraft, initCrtQuizPage } from "./createQuiz.js";
+import { saveQuizDraft, initCrtQuizPage, randomUUID } from "./createQuiz.js";
 import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
 import { openModal } from "../utils/modal.js";
 
@@ -127,6 +128,10 @@ document.addEventListener("change", (e) => {
           if (!isValidQuizObj(obj)) {
             showToast("red", "無効なクイズデータです");
             return;
+          }
+          const quizzes = getQuizzesFromStorage();
+          if (Object.keys(quizzes).includes(obj.id)) {
+            obj.id = randomUUID();
           }
           addQuizToStorage(obj);
           showToast("green", "クイズが保存されました");
@@ -419,7 +424,6 @@ export function toggleBtnsByScrollability(pageName) {
 
   const body = document.body;
   const isScrollable = body.scrollHeight > body.clientHeight;
-  console.log(isScrollable);
   const screenWidth = window.innerWidth;
   const isScreenSMOrWider = screenWidth > 575.98;
 
