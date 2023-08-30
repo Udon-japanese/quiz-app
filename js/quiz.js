@@ -164,7 +164,7 @@ decisionBtn.addEventListener("click", async () => {
         if (choiceCheck.checked) {
           userAnswer = document.querySelector(
             `[for="${choiceCheck.id}"]`
-          ).innerText; // 紐づいたinputのチェックが入っているボタンのテキスト(ユーザが選んだ回答)を取得する
+          ).textContent; // 紐づいたinputのチェックが入っているボタンのテキスト(ユーザが選んだ回答)を取得する
         }
       });
       const isAnswerCorrect = userAnswer === correctAnswer;
@@ -183,7 +183,7 @@ decisionBtn.addEventListener("click", async () => {
         choiceCheck.disabled = true;
         if (choiceCheck.checked) {
           userAnswers.push(
-            document.querySelector(`[for="${choiceCheck.id}"]`).innerText
+            document.querySelector(`[for="${choiceCheck.id}"]`).textContent
           );
         }
       });

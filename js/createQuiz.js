@@ -639,15 +639,15 @@ function createChoice(questionN, isInit = false) {
   replaceAttrVals(selectAllElsHasAttrQN, "{q-num}", questionN);
 
   if (isInit) {
-    const selectSetCorrect = selectChoice.querySelector(".set-correct");
-    const selectAllSetCorrect = selectAllChoice.querySelector(".set-correct");
-    selectSetCorrect.setAttribute("data-bs-toggle", "tooltip");
-    selectSetCorrect.setAttribute(
+    const selectSetCorrectLabel = selectChoice.querySelector(`[for="q${questionN}-set-select-c${choiceN}"]`);
+    const selectAllSetCorrectLabel = selectAllChoice.querySelector(`[for="q${questionN}-set-select-all-c${choiceN}"]`);
+    selectSetCorrectLabel.setAttribute("data-bs-toggle", "tooltip");
+    selectSetCorrectLabel.setAttribute(
       "title",
       "ここをクリックして、正解を設定します(1つまで)"
     );
-    selectAllSetCorrect.setAttribute("data-bs-toggle", "tooltip");
-    selectAllSetCorrect.setAttribute(
+    selectAllSetCorrectLabel.setAttribute("data-bs-toggle", "tooltip");
+    selectAllSetCorrectLabel.setAttribute(
       "title",
       "ここをクリックして、正解を設定します(1つ以上)"
     );

@@ -170,7 +170,7 @@
               </div>
             </div>
             <div class="d-flex flex-column align-items-center justify-content-center my-3 my-sm-5">
-              <p id="question-statement" class="card-text fs-4 fw-semibold text-wrap text-break mw-100">{statement}</p>
+              <p id="question-statement" class="card-text fs-4 fw-semibold text-pre-wrap text-break mw-100">{statement}</p>
             </div>
             <div id="answer-guide" class="text-center mb-1 small">正しいと思うものを一つ選んでください</div>
             <div id="choices-group" class="row g-2 g-sm-3 justify-content-center">
@@ -331,7 +331,7 @@
                     <hr class="dropdown-divider">
                   </li>
                   <li>
-                    <button id="del-{quiz-id}" class="dropdown-item px-2 open-del-q-m" type="button">
+                    <button id="del-{quiz-id}" class="dropdown-item px-2 open-del-q-m" type="button" tabindex="-1">
                       <i class="bi bi-x-circle-fill text-danger me-3"></i>
                       <span>このクイズを削除する</span>
                     </button>
@@ -367,7 +367,7 @@
             </div>
             <div class="ms-auto">
               <button type="button" id="del-draft-{quiz-draft-id}"
-                class="btn btn-default text-danger border-0 text-break text-nowrap open-del-q-d-m">
+                class="btn btn-default text-danger border-0 text-break text-nowrap open-del-q-d-m" tabindex="-1">
                 <i class="bi bi-x-lg me-1"></i>削除
               </button>
             </div>
@@ -409,12 +409,12 @@
       </div>
       <div class="d-grid container del-all-cont"><!-- 画面幅に応じて適切な位置に配置される方のボタンのみ表示 -->
         <button type="button"
-          class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn">
+          class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn" tabindex="-1">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
           下書きをすべて削除する
         </button>
         <button type="button"
-          class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qds-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quiz-drafts-btn">
+          class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qds-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quiz-drafts-btn" tabindex="-1">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
           下書きをすべて削除する
         </button>
@@ -512,7 +512,7 @@
       </label>
       <input type="text" id="q{q-num}-type-select-c{c-num}" class="form-control rounded-end type-choice"
         placeholder="{c-num}つ目の選択肢" required>
-      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice">
+      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice" tabindex="-1">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
       <div class="invalid-feedback">選択肢を設定してください</div>
@@ -526,8 +526,9 @@
       </label>
       <input type="text" id="q{q-num}-type-select-all-c{c-num}" class="form-control rounded-end type-choice"
         placeholder="{c-num}つ目の選択肢" required>
-      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice"><i class="bi bi-x-lg"
-          aria-hidden="true"></i></button>
+      <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice" tabindex="-1">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
       <div class="invalid-feedback">選択肢を設定してください</div>
     </div>
   </template>
@@ -536,14 +537,14 @@
       <div class="row">
         <h3 class="col-sm-6 col-md-8 col-lg-9 order-1 mx-sm-auto q-header">1問目</h3>
         <div class="col-sm-6 col-md-4 col-lg-3 order-2">
-          <button class="d-none w-100 btn btn-danger del-q"><i class="bi bi-x-lg float-start"
+          <button class="d-none w-100 btn btn-danger del-q" tabindex="-1"><i class="bi bi-x-lg float-start"
               aria-hidden="true"></i>この問題を削除</button>
         </div>
       </div>
       <div>
         <label class="form-label" for="q{num}-statement">問題文</label>
         <div class="input-group has-validation">
-          <input type="text" id="q{num}-statement" class="form-control" placeholder="例: パから始まってダで終わる動物の名前は？" required>
+          <textarea id="q{num}-statement" rows="3" class="form-control" placeholder="例: パから始まってダで終わる動物の名前は？" required></textarea>
           <div class="invalid-feedback">問題文を入力してください</div>
         </div>
       </div>

@@ -124,6 +124,11 @@ input:checked + .toggle-label::before {
   z-index: 9999;
 }
 
+/* pre-wrap */
+.text-pre-wrap {
+  white-space: pre-wrap;
+}
+
 /* クイズの正誤判定のマーク */
 .circle {
   width: 12rem;
