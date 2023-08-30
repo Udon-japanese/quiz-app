@@ -880,8 +880,11 @@ function checkQuestionsState() {
     questionsLength + 1
   );
 
-  const infoTextId = "questions-info-text";
+  const infoTextId = "questions-info-txt";
+  const existsInfoText = document.getElementById(infoTextId);
+
   if (isReachedLimit) {
+    if (existsInfoText) return;
     const infoText = createElement(
       "p",
       { id: infoTextId },
@@ -892,9 +895,8 @@ function checkQuestionsState() {
       crtQuizObj.elem.addQBtn.parentNode.nextSibling
     );
   } else {
-    const infoText = document.getElementById(infoTextId);
-    if (!infoText) return;
-    infoText.remove();
+    if (!existsInfoText) return;
+    existsInfoText.remove();
   }
 }
 /**
