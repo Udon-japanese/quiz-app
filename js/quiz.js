@@ -46,9 +46,7 @@ const audioBuffers = {
   cymbal: null,
 };
 const audioSources = [];
-setInterval(() => {
-  console.log(quizObj.volume, audioVolumeInput.value)
-}, 100);
+
 audioVolumeInput.value = quizObj.volume * 100;
 changeVolumeIcon(quizObj.volume);
 
