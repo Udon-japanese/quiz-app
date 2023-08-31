@@ -1186,7 +1186,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
   createQuestion(true);
 
   const crtQuizCont = document.querySelector(".crt-quiz-cont");
-  const validQuizParam = quiz && isValidQuizObj(quiz);
+  const validQuizParam = isValidQuizObj(quiz);
 
   if (quizType === "edit") {
     if (validQuizParam) {
@@ -1205,6 +1205,7 @@ export function initCrtQuizPage(quiz = null, quizType = null) {
         "input",
         handleSearchQuizDrafts
       );
+      setCookie(LAST_ACCESS_KEY_NAME, "quizList"); // クイズの編集を破棄しても変更は保存されないため、編集の前にいたクイズ一覧ページに遷移するようにする
       return;
     } else {
       showToast("red", "無効なクイズデータです");
