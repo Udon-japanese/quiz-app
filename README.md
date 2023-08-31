@@ -1,4 +1,4 @@
-# quiz-app
+# クイズビルダー
 vanilla JS,HTML,CSS(+Bootstrap5)で作成されたクイズアプリ
 
 
