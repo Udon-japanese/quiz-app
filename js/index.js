@@ -160,7 +160,8 @@ function showWelcomeTour(imageMap, pageName) {
   openModal({
     title: "説明",
     body: `
-  <div id="welcome-tour-carousel" class="carousel slide" data-bs-interval="0" data-bs-touch="true">
+<div class="d-flex justify-content-center">
+  <div id="welcome-tour-carousel" class="carousel slide col-lg-9" data-bs-interval="0" data-bs-touch="true">
     <div class="carousel-indicators">
       <button type="button" data-bs-target="#welcome-tour-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
       <button type="button" data-bs-target="#welcome-tour-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -177,7 +178,8 @@ function showWelcomeTour(imageMap, pageName) {
         <img src="${images[2]}" class="d-block w-100" alt="${alts[2]}">
       </div>
     </div>
-  </div>`,
+  </div>
+</div>`,
     colorClass: "bg-light",
     modalCont: pages[pageName],
     header: {
