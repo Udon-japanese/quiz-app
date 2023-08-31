@@ -15,7 +15,7 @@ import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft, initCrtQuizPage, randomUUID } from "./createQuiz.js";
-import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
+import { showElem, toggleElem } from "../utils/elemManipulation.js";
 import { openModal } from "../utils/modal.js";
 
 const topPage = document.getElementById("top-page");

@@ -124,11 +124,28 @@ crtQPage.addEventListener("click", (e) => {
       const question = elem.closest(".question");
       const questionN = parseInt(question.id.match(/q(\d+)/)[1]);
       createChoice(questionN);
+    } else if (classList.contains("open-del-q-m")) {
+      const questionN = parseInt(elem.closest(".question").id.match(/q(\d+)/)[1]);
+      openModal({
+        title: `${questionN}問目を削除`,
+        body: `${questionN}問目を削除します。よろしいですか？`,
+        colorClass: "bg-light",
+        modalCont: crtQPage,
+        actionBtn: {
+          text: "削除",
+          HTMLAttributes: {
+            id: `del-q-${questionN}`,
+            class: "del-q",
+          },
+          color: "red",
+        },
+      });
     } else if (classList.contains("del-q")) {
       const prevQuestions = getQuestions();
       if (prevQuestions.length === 1) return;
 
-      const delQ = elem.closest(".question");
+      const delQN = elem.id.split("del-q-")[1];
+      const delQ = document.getElementById(`q${delQN}`);
       delQ.remove();
 
       const currentQuestions = getQuestions();
@@ -190,6 +207,7 @@ crtQPage.addEventListener("click", (e) => {
       }
 
       checkQuestionsState();
+      closeModal();
     } else if (classList.contains("continue-quiz-draft")) {
       const quizDraftId = elem.id.split("continue-quiz-draft-")[1];
       const quizDraft = getQuizDraftFromStorage(quizDraftId);
@@ -866,7 +884,7 @@ function checkQuestionsState() {
   const questions = getQuestions();
   const questionsLength = questions.length;
   questions.forEach((q) => {
-    const delBtn = q.querySelector(".del-q");
+    const delBtn = q.querySelector(".open-del-q-m");
     toggleElem(delBtn, questionsLength === 1);
   });
 
