@@ -1,0 +1,109 @@
+{
+  "id": "0dd85b36-7bc9-45d1-97d1-56b2749be9c1",
+  "title": "マルバツクイズ",
+  "description": "マルバツクイズです(ChatGPT作問)",
+  "length": 10,
+  "options": { "timer": 25, "tf": ["〇", "✕"] },
+  "questions": {
+    "q1": {
+      "options": {},
+      "statement": "ピタゴラスの定理は、直角三角形に関する定理である。",
+      "answerType": "select",
+      "choices": [
+        { "f87b7fe4-f520-4461-a885-e3ba4cec82ea": "〇" },
+        { "d68e3669-8620-4c67-9fec-1cfa26e7807a": "✕" }
+      ],
+      "correctAnswer": "f87b7fe4-f520-4461-a885-e3ba4cec82ea"
+    },
+    "q2": {
+      "options": {},
+      "statement": "アルバイトやパートタイムの仕事においても、労働者は法定の有給休暇を取得できる。",
+      "answerType": "select",
+      "choices": [
+        { "eca2dbdd-a094-4824-a3e2-c46330a08cd3": "〇" },
+        { "112b4efe-12f6-437e-8a53-a63f148a45fd": "✕" }
+      ],
+      "correctAnswer": "eca2dbdd-a094-4824-a3e2-c46330a08cd3"
+    },
+    "q3": {
+      "options": {},
+      "statement": "酸素は元素周期表で酸素系元素に分類される。",
+      "answerType": "select",
+      "choices": [
+        { "c9569bac-de55-456c-b919-716c867961c5": "〇" },
+        { "3e825864-0b9c-45cb-b24c-6ccdc6c3dd46": "✕" }
+      ],
+      "correctAnswer": "c9569bac-de55-456c-b919-716c867961c5"
+    },
+    "q4": {
+      "options": {},
+      "statement": "シェイクスピアが書いた「ハムレット」は実在の王子に基づいている。",
+      "answerType": "select",
+      "choices": [
+        { "5d6e6e33-5518-4325-9b38-196adebe7ef4": "〇" },
+        { "7c677295-d1cc-42c4-bb9e-34cb4f899d3a": "✕" }
+      ],
+      "correctAnswer": "7c677295-d1cc-42c4-bb9e-34cb4f899d3a"
+    },
+    "q5": {
+      "options": {},
+      "statement": "ニュートンが発表した万有引力の法則は、地球上の物体にも適用される。",
+      "answerType": "select",
+      "choices": [
+        { "83ccfc64-15b0-4995-90d9-58f70b98c3a7": "〇" },
+        { "e802e12b-9305-4ad6-af0b-4eaa0e40991e": "✕" }
+      ],
+      "correctAnswer": "83ccfc64-15b0-4995-90d9-58f70b98c3a7"
+    },
+    "q6": {
+      "options": {},
+      "statement": "アインシュタインの相対性理論は、速度が光速に近づくほど時間が遅くなることを示している。",
+      "answerType": "select",
+      "choices": [
+        { "85fc7bfc-2d8a-4161-8d8e-e183e057a0ac": "〇" },
+        { "30ed1288-0fad-444c-b41e-72c3227e069b": "✕" }
+      ],
+      "correctAnswer": "85fc7bfc-2d8a-4161-8d8e-e183e057a0ac"
+    },
+    "q7": {
+      "options": {},
+      "statement": "モーツァルトは「交響曲第40番」を書いたが、その曲は未完成である。",
+      "answerType": "select",
+      "choices": [
+        { "5cac05f3-20ed-426f-9c3e-73a7c973303a": "〇" },
+        { "29221618-6f89-4ef2-8541-22e9aa66a727": "✕" }
+      ],
+      "correctAnswer": "29221618-6f89-4ef2-8541-22e9aa66a727"
+    },
+    "q8": {
+      "options": {},
+      "statement": "アメリカ合衆国の憲法は1776年に制定された。",
+      "answerType": "select",
+      "choices": [
+        { "6f010314-91db-4725-b1a6-95fd8deb80d8": "〇" },
+        { "06416632-5b0e-4636-b749-9fa4075e663c": "✕" }
+      ],
+      "correctAnswer": "06416632-5b0e-4636-b749-9fa4075e663c"
+    },
+    "q9": {
+      "options": {},
+      "statement": "化学元素の周期表には118の元素がある。",
+      "answerType": "select",
+      "choices": [
+        { "b88e58d6-1bd8-4b58-b32f-8b1aedc84c13": "〇" },
+        { "4e9d399c-2890-4b86-be98-2665944cc942": "✕" }
+      ],
+      "correctAnswer": "b88e58d6-1bd8-4b58-b32f-8b1aedc84c13"
+    },
+    "q10": {
+      "options": {},
+      "statement": "地球の最も高い山はエベレストで、標高は8848メートルである。",
+      "answerType": "select",
+      "choices": [
+        { "dea3401b-36e2-4b41-914b-78f8d01b23c4": "〇" },
+        { "da08b9fa-179b-4f08-b606-63a3da28fa7f": "✕" }
+      ],
+      "correctAnswer": "da08b9fa-179b-4f08-b606-63a3da28fa7f"
+    }
+  }
+}

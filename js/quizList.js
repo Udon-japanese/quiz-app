@@ -43,6 +43,25 @@ const { default: japanQuiz } = await import("../quizzes/japan-quiz.json", {
 const { default: wordQuiz } = await import("../quizzes/word-quiz.json", {
   assert: { type: "json" },
 });
+const { default: animeQuiz } = await import("../quizzes/anime-quiz.json", {
+  assert: { type: "json" },
+});
+const { default: mangaQuiz } = await import("../quizzes/manga-quiz.json", {
+  assert: { type: "json" },
+});
+const { default: difficultSportsQuiz } = await import(
+  "../quizzes/difficult-sports-quiz.json",
+  {
+    assert: { type: "json" },
+  }
+);
+const { default: trueOrFalseQuiz } = await import(
+  "../quizzes/true-or-false-quiz.json",
+  { assert: { type: "json" } }
+);
+const { default: tryYourLuck } = await import("../quizzes/try-your-luck.json", {
+  assert: { type: "json" },
+});
 const qListPage = document.getElementById("quiz-list-page");
 const quizzesCont = document.getElementById("quizzes");
 const searchQInput = document.getElementById("search-q");
@@ -58,6 +77,11 @@ const defaultQuizzes = [
   sportsQuiz,
   japanQuiz,
   wordQuiz,
+  animeQuiz,
+  mangaQuiz,
+  difficultSportsQuiz,
+  trueOrFalseQuiz,
+  tryYourLuck,
 ];
 const qListObj = {
   /**@type {Object<string, Quiz> | {}} */
@@ -300,7 +324,10 @@ export function displayQuizList(obj = null, highlight = "") {
   toggleElem(noneQuizElem, !noneQuiz);
   toggleElem(searchQInput, noneQuiz);
   toggleElem(headerBtnCont, noneQuiz);
-  delAllQuizzesCont.classList.toggle("hidden-del-all-cont", noneQuiz || highlight); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
+  delAllQuizzesCont.classList.toggle(
+    "hidden-del-all-cont",
+    noneQuiz || highlight
+  ); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
 
   // テンプレートの中身をクイズのデータで置き換え手表示する
   Object.values(qListObjToUse).forEach((quiz) => {

@@ -125,7 +125,9 @@ crtQPage.addEventListener("click", (e) => {
       const questionN = parseInt(question.id.match(/q(\d+)/)[1]);
       createChoice(questionN);
     } else if (classList.contains("open-del-q-m")) {
-      const questionN = parseInt(elem.closest(".question").id.match(/q(\d+)/)[1]);
+      const questionN = parseInt(
+        elem.closest(".question").id.match(/q(\d+)/)[1]
+      );
       openModal({
         title: `${questionN}問目を削除`,
         body: `${questionN}問目を削除します。よろしいですか？`,
@@ -493,18 +495,22 @@ function createQuiz(existsId, quizType = "new") {
       case "select": {
         quiz.questions[questionKey].choices = [];
         if (isTFQuiz) {
-          quiz.questions[questionKey].choices = quiz.options?.tf;
           let noneChecked = true;
           const setCorrects = [];
           const choices = question.querySelectorAll(".tf-choice");
           choices.forEach((choice, i) => {
             const correctAnswerElem = choice.querySelector(".set-correct");
+            const tfChoice = quiz.options.tf[i];
+            const choiceUUID = randomUUID();
+
+            quiz.questions[questionKey].choices.push({
+              [choiceUUID]: tfChoice,
+            });
             setCorrects.push(correctAnswerElem);
             const isCorrectAnswer = correctAnswerElem.checked;
             if (isCorrectAnswer) {
               noneChecked = false;
-              const choiceVal = choice.querySelector(".type-choice").value;
-              quiz.questions[questionKey].correctAnswer = choiceVal;
+              quiz.questions[questionKey].correctAnswer = choiceUUID;
             }
             if (i + 1 === choices.length && noneChecked) {
               if (!invalidForm) invalidForm = question;
@@ -518,20 +524,23 @@ function createQuiz(existsId, quizType = "new") {
           let noneChecked = true;
           const setCorrects = [];
           choices.forEach((choice, i) => {
+            const choiceUUID = randomUUID();
             const choiceValElem = choice.querySelector(".type-choice");
             const choiceVal = choiceValElem.value;
             if (!choiceVal) {
               addValidatedClass(choiceValElem);
               if (!invalidForm) invalidForm = question;
             }
-            quiz.questions[questionKey].choices.push(choiceVal);
+            quiz.questions[questionKey].choices.push({
+              [choiceUUID]: choiceVal,
+            });
 
             const correctAnswerElem = choice.querySelector(".set-correct");
             setCorrects.push(correctAnswerElem);
             const isCorrectAnswer = correctAnswerElem.checked;
             if (isCorrectAnswer) {
               noneChecked = false;
-              quiz.questions[questionKey].correctAnswer = choiceVal;
+              quiz.questions[questionKey].correctAnswer = choiceUUID;
             }
             if (i + 1 === choices.length && noneChecked) {
               if (!invalidForm) invalidForm = question;
@@ -550,19 +559,22 @@ function createQuiz(existsId, quizType = "new") {
         let noneChecked = true;
         const setCorrects = [];
         choices.forEach((choice, i) => {
-          const choiceElem = choice.querySelector(".type-choice");
-          const choiceVal = choiceElem.value;
+          const choiceElemem = choice.querySelector(".type-choice");
+          const choiceVal = choiceElemem.value;
+          const choiceUUID = randomUUID();
           if (!choiceVal) {
-            addValidatedClass(choiceElem);
+            addValidatedClass(choiceElemem);
             if (!invalidForm) invalidForm = question;
           }
-          quiz.questions[questionKey].choices.push(choiceVal);
+          quiz.questions[questionKey].choices.push({
+            [choiceUUID]: choiceVal,
+          });
           const correctAnswerElem = choice.querySelector(".set-correct");
           setCorrects.push(correctAnswerElem);
           const isCorrectAnswer = correctAnswerElem.checked;
           if (isCorrectAnswer) {
             noneChecked = false;
-            quiz.questions[questionKey].correctAnswers.push(choiceVal);
+            quiz.questions[questionKey].correctAnswers.push(choiceUUID);
           }
           if (i + 1 === choices.length && noneChecked) {
             if (!invalidForm) invalidForm = question;
@@ -657,8 +669,12 @@ function createChoice(questionN, isInit = false) {
   replaceAttrVals(selectAllElsHasAttrQN, "{q-num}", questionN);
 
   if (isInit) {
-    const selectSetCorrectLabel = selectChoice.querySelector(`[for="q${questionN}-set-select-c${choiceN}"]`);
-    const selectAllSetCorrectLabel = selectAllChoice.querySelector(`[for="q${questionN}-set-select-all-c${choiceN}"]`);
+    const selectSetCorrectLabel = selectChoice.querySelector(
+      `[for="q${questionN}-set-select-c${choiceN}"]`
+    );
+    const selectAllSetCorrectLabel = selectAllChoice.querySelector(
+      `[for="q${questionN}-set-select-all-c${choiceN}"]`
+    );
     selectSetCorrectLabel.setAttribute("data-bs-toggle", "tooltip");
     selectSetCorrectLabel.setAttribute(
       "title",
@@ -1023,6 +1039,8 @@ export function saveQuizDraft() {
     quizDraftId = crtQuizContId.split("draft-")[1];
   }
 
+  const prevQuizDraft = getQuizDraftFromStorage(quizDraftId);
+
   // 一つもフォームが入力されていなかったら保存しない
   let isEmptyQuiz = true;
   // フォームに入力されている値をオブジェクトに保存し、ローカルストレージに保存する
@@ -1095,29 +1113,41 @@ export function saveQuizDraft() {
       case "select": {
         quizDraft.questions[questionKey].correctAnswer = "";
         quizDraft.questions[questionKey].choices = [];
+        const prevQuizDraftChoices = isValidQuizObj(prevQuizDraft)
+          ? prevQuizDraft.questions[questionKey].choices
+          : [];
         if (isTFQuiz) {
-          quizDraft.questions[questionKey].choices = quizDraft.options.tf;
           const choices = question.querySelectorAll(".tf-choice");
-          choices.forEach((choice) => {
-            const c = choice.querySelector(".type-choice").value;
-            if (c) isEmptyQuiz = false;
+          choices.forEach((choice, i) => {
+            const tfChoice = quizDraft.options.tf[i];
+            const choiceUUID = prevQuizDraftChoices[i]
+              ? Object.keys(prevQuizDraftChoices[i])[0]
+              : randomUUID();
+            quizDraft.questions[questionKey].choices.push({
+              [choiceUUID]: tfChoice,
+            });
             const isCorrectAnswer =
               choice.querySelector(".set-correct").checked;
             if (isCorrectAnswer) {
-              quizDraft.questions[questionKey].correctAnswer = c;
+              quizDraft.questions[questionKey].correctAnswer = choiceUUID;
               isEmptyQuiz = false;
             }
           });
         } else {
           const { selectChoices: choices } = getChoices(questionN);
-          choices.forEach((choice) => {
-            const c = choice.querySelector(".type-choice").value;
-            quizDraft.questions[questionKey].choices.push(c);
-            if (c) isEmptyQuiz = false;
+          choices.forEach((choice, i) => {
+            const choiceUUID = prevQuizDraftChoices[i]
+              ? Object.keys(prevQuizDraftChoices[i])[0]
+              : randomUUID();
+            const choiceVal = choice.querySelector(".type-choice").value;
+            quizDraft.questions[questionKey].choices.push({
+              [choiceUUID]: choiceVal,
+            });
+            if (choiceVal) isEmptyQuiz = false;
             const isCorrectAnswer =
               choice.querySelector(".set-correct").checked;
             if (isCorrectAnswer) {
-              quizDraft.questions[questionKey].correctAnswer = c;
+              quizDraft.questions[questionKey].correctAnswer = choiceUUID;
               isEmptyQuiz = false;
             }
           });
@@ -1127,14 +1157,22 @@ export function saveQuizDraft() {
       case "select-all": {
         quizDraft.questions[questionKey].choices = [];
         quizDraft.questions[questionKey].correctAnswers = [];
+        const prevQuizDraftChoices = isValidQuizObj(prevQuizDraft)
+          ? prevQuizDraft.questions[questionKey].choices
+          : [];
         const { selectAllChoices: choices } = getChoices(questionN);
-        choices.forEach((choice) => {
-          const c = choice.querySelector(".type-choice").value;
-          quizDraft.questions[questionKey].choices.push(c);
-          if (c) isEmptyQuiz = false;
+        choices.forEach((choice, i) => {
+          const choiceUUID = prevQuizDraftChoices[i]
+            ? Object.keys(prevQuizDraftChoices[i])[0]
+            : randomUUID();
+          const choiceVal = choice.querySelector(".type-choice").value;
+          quizDraft.questions[questionKey].choices.push({
+            [choiceUUID]: choiceVal,
+          });
+          if (choiceVal) isEmptyQuiz = false;
           const isCorrectAnswer = choice.querySelector(".set-correct").checked;
           if (isCorrectAnswer) {
-            quizDraft.questions[questionKey].correctAnswers.push(c);
+            quizDraft.questions[questionKey].correctAnswers.push(choiceUUID);
             isEmptyQuiz = false;
           }
         });
@@ -1155,7 +1193,6 @@ export function saveQuizDraft() {
 
   if (!isEmptyQuiz) {
     if (quizDraftId) {
-      const prevQuizDraft = getQuizDraftFromStorage(quizDraftId);
       if (areQuizzesEqual(prevQuizDraft, quizDraft)) return; // 下書きに変化がないときは保存とトースト表示をしない
 
       updateQuizDraftToStorage(quizDraft);
@@ -1303,60 +1340,61 @@ function setQuizVals(quiz) {
     const questionN = i + 1;
     const question = questions[`q${questionN}`];
     const { answerType, statement } = question;
-    let questionEl = crtQPage.querySelector(`#q${questionN}`);
+    let questionElem = crtQPage.querySelector(`#q${questionN}`);
 
-    if (!questionEl) {
+    if (!questionElem) {
       createQuestion(false, false);
-      questionEl = crtQPage.querySelector(`#q${questionN}`);
+      questionElem = crtQPage.querySelector(`#q${questionN}`);
     }
 
-    questionEl.querySelector(`#q${questionN}-statement`).value = statement;
-    questionEl.querySelector(`#q${questionN}-answer-type`).value = answerType;
+    questionElem.querySelector(`#q${questionN}-statement`).value = statement;
+    questionElem.querySelector(`#q${questionN}-answer-type`).value = answerType;
     toggleAnswerType(questionN);
 
     switch (answerType) {
       case "select":
       case "select-all": {
         if (optionTF) {
-          const choices = questionEl.querySelectorAll(".tf-choice");
-          choices.forEach((choice) => {
-            const choiceVal = choice.querySelector(".type-choice").value;
-            if (choiceVal === question.correctAnswer) {
-              choice.querySelector(".set-correct").checked = true;
+          const choiceElemems = questionElem.querySelectorAll(".tf-choice");
+          choiceElemems.forEach((choiceElemem, i) => {
+            const choiceUUID = Object.keys(question.choices[i])[0];
+            if (choiceUUID === question.correctAnswer) {
+              choiceElemem.querySelector(".set-correct").checked = true;
             }
           });
         } else {
           const { choices } = question;
           const choicesCont =
             answerType === "select-all"
-              ? questionEl.querySelector(".select-alls")
-              : questionEl.querySelector(".selects");
+              ? questionElem.querySelector(".select-alls")
+              : questionElem.querySelector(".selects");
           const correctArrayOrStr =
             answerType === "select-all"
               ? question.correctAnswers
               : question.correctAnswer;
-          let choiceEls = choicesCont.querySelectorAll(".choice");
+          let choiceElemems = choicesCont.querySelectorAll(".choice");
           for (let i = 0; i < choices.length; i++) {
-            const choice = choices[i];
-            let choiceEl = choiceEls[i];
+            const choice = Object.values(choices[i])[0];
+            const choiceUUID = Object.keys(choices[i])[0];
+            let choiceElem = choiceElemems[i];
 
-            if (!choiceEl) {
+            if (!choiceElem) {
               createChoice(questionN);
-              choiceEls = choicesCont.querySelectorAll(".choice");
-              choiceEl = choiceEls[i];
+              choiceElemems = choicesCont.querySelectorAll(".choice");
+              choiceElem = choiceElemems[i];
             }
 
-            const typeChoice = choiceEl.querySelector(".type-choice");
+            const typeChoice = choiceElem.querySelector(".type-choice");
             typeChoice.value = choice;
 
             if (
               ((Array.isArray(correctArrayOrStr) &&
-                correctArrayOrStr.includes(choice)) ||
+                correctArrayOrStr.includes(choiceUUID)) ||
                 (!Array.isArray(correctArrayOrStr) &&
-                  choice === correctArrayOrStr)) &&
+                  choiceUUID === correctArrayOrStr)) &&
               correctArrayOrStr
             ) {
-              choiceEl.querySelector(".set-correct").checked = true;
+              choiceElem.querySelector(".set-correct").checked = true;
             }
           }
         }
@@ -1364,17 +1402,17 @@ function setQuizVals(quiz) {
       }
       case "type-text": {
         const { correctAnswer } = question;
-        questionEl.querySelector(`#q${questionN}-type-txt-correct`).value =
+        questionElem.querySelector(`#q${questionN}-type-txt-correct`).value =
           correctAnswer;
         break;
       }
     }
 
     if (question?.options?.explanation) {
-      const explToggle = questionEl.querySelector(".expl-toggle");
+      const explToggle = questionElem.querySelector(".expl-toggle");
       explToggle.checked = true;
       toggleOnchange(explToggle, "type-expl-cont", "expl-textarea");
-      questionEl.querySelector(`#q${questionN}-explanation`).value =
+      questionElem.querySelector(`#q${questionN}-explanation`).value =
         question.options.explanation;
     }
   }
@@ -1575,7 +1613,8 @@ export function randomUUID() {
  * @description webkit系ブラウザで、crypto.randomUUID()が使用できないときに、代用で使用する
  * @returns {string} UUIDv4の文字列
  */
-function generateUUIDv4() {// 元コード analytics.internal.Identifier.generateUuid = function() {
+function generateUUIDv4() {
+  // 元コード analytics.internal.Identifier.generateUuid = function() {
   let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split(""); // 元コード var chars = analytics.internal.Identifier.UUID_FMT_.split('');
   for (let i = 0, len = chars.length; i < len; i++) {
     // 元コード for (var i = 0, len = chars.length; i < len; i++) {

@@ -11,8 +11,17 @@
       },
       "answerType": "select",
       "statement": "ファイナルファンタジーシリーズの第7作目のタイトルは？",
-      "choices": ["ファイナルファンタジー VI", "ファイナルファンタジー VII", "ファイナルファンタジー VIII", "ファイナルファンタジー IX"],
-      "correctAnswer": "ファイナルファンタジー VII"
+      "choices": [
+        { "c92cbf39-9b0a-4ad9-8460-5b7a16d56e8f": "ファイナルファンタジー VI" },
+        {
+          "b292d138-26a4-4163-b5c7-389d4b48606e": "ファイナルファンタジー VII"
+        },
+        {
+          "c3615f3d-d623-4df6-a4b5-56d4aa646439": "ファイナルファンタジー VIII"
+        },
+        { "f8a485e7-76f3-49cd-8e1a-2b9291b4998b": "ファイナルファンタジー IX" }
+      ],
+      "correctAnswer": "b292d138-26a4-4163-b5c7-389d4b48606e"
     },
     "q2": {
       "options": {
@@ -20,8 +29,13 @@
       },
       "answerType": "select",
       "statement": "マリオカートシリーズで使われているアイテム「スター」は何の効果を持つ？",
-      "choices": ["無敵", "加速", "逆走", "ジャンプ"],
-      "correctAnswer": "無敵"
+      "choices": [
+        { "f1761e65-32c3-47c4-946d-58d2ee3c59ea": "無敵" },
+        { "3b1da2c0-430a-41db-9ca7-655151c8e065": "加速" },
+        { "d948a4bf-ef31-4e1d-b2a6-7d7741697e9f": "逆走" },
+        { "f1cc44ec-0bf0-4f25-9f4c-87c4fb079f6e": "ジャンプ" }
+      ],
+      "correctAnswer": "f1761e65-32c3-47c4-946d-58d2ee3c59ea"
     },
     "q3": {
       "options": {
@@ -37,8 +51,13 @@
       },
       "answerType": "select",
       "statement": "「The Elder Scrolls V: Skyrim」の略称は？",
-      "choices": ["TESV", "Skyrim", "TES5", "ES5"],
-      "correctAnswer": "TESV"
+      "choices": [
+        { "c3e46241-59d0-4ff1-b9c7-52de3eb4237f": "TESV" },
+        { "5ee6d9c7-9e46-4786-a3c3-d139da03ca99": "Skyrim" },
+        { "2a4e717e-efed-4f4f-80b5-1e67e1eeed44": "TES5" },
+        { "cb0ff750-7a0a-4f57-9d75-ff58e7610d27": "ES5" }
+      ],
+      "correctAnswer": "c3e46241-59d0-4ff1-b9c7-52de3eb4237f"
     },
     "q5": {
       "options": {

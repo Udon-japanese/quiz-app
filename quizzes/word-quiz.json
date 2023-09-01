@@ -11,8 +11,13 @@
       },
       "answerType": "select",
       "statement": "世界最大の大陸は何？",
-      "choices": ["アフリカ", "ヨーロッパ", "アジア", "南アメリカ"],
-      "correctAnswer": "アジア"
+      "choices": [
+        { "b97d06b2-8927-44ab-a771-8c1ed61df3c2": "アフリカ" },
+        { "15a1600e-8885-4c7e-bc3a-c4644b0a17f0": "ヨーロッパ" },
+        { "4d53b850-3c3e-4c96-a81d-ee4a7f9e4e67": "アジア" },
+        { "aece6e96-68c1-44b0-8dd9-44e7f4f0fe06": "南アメリカ" }
+      ],
+      "correctAnswer": "4d53b850-3c3e-4c96-a81d-ee4a7f9e4e67"
     },
     "q2": {
       "options": {
@@ -20,8 +25,13 @@
       },
       "answerType": "select",
       "statement": "世界で最も広い国はどこ？",
-      "choices": ["アメリカ", "カナダ", "ロシア", "中国"],
-      "correctAnswer": "ロシア"
+      "choices": [
+        { "3924eb5b-e075-4b5f-a1e2-6c948a6d2cfb": "アメリカ" },
+        { "3ef73268-1936-4a90-b94d-ebdd78a5416d": "カナダ" },
+        { "d28dbcc3-23c9-4d11-af8c-8d1100d93235": "ロシア" },
+        { "34fda1a1-e607-41dd-916e-9c7ebc3c5e0a": "中国" }
+      ],
+      "correctAnswer": "d28dbcc3-23c9-4d11-af8c-8d1100d93235"
     },
     "q3": {
       "options": {
@@ -37,8 +47,13 @@
       },
       "answerType": "select",
       "statement": "エッフェル塔がある都市はどこ？",
-      "choices": ["ローマ", "パリ", "ベルリン", "ロンドン"],
-      "correctAnswer": "パリ"
+      "choices": [
+        { "71a19b10-8f17-4a73-8f4d-cad953130af5": "ローマ" },
+        { "f8c20f02-e8a3-42c8-9f97-9f4c6b9566b5": "パリ" },
+        { "0e3dbb9f-6596-4f7a-b468-6849ebe769e4": "ベルリン" },
+        { "1104c518-04ef-4090-bae9-7a1583fcb5f5": "ロンドン" }
+      ],
+      "correctAnswer": "f8c20f02-e8a3-42c8-9f97-9f4c6b9566b5"
     },
     "q5": {
       "options": {
@@ -46,8 +61,13 @@
       },
       "answerType": "select-all",
       "statement": "以下の中でヨーロッパの国を選んでください。",
-      "choices": ["カナダ", "オーストラリア", "イギリス", "メキシコ"],
-      "correctAnswers": ["イギリス"]
+      "choices": [
+        { "13d102fc-6cc9-478c-8b44-5faff7c1ef7d": "カナダ" },
+        { "7ed894e3-1d20-4f25-8e8b-9d0e37c8d398": "オーストラリア" },
+        { "925f527c-73a9-4f2c-9f3d-dbb14b85ef2d": "イギリス" },
+        { "be9f850a-171b-4887-8e6b-90a91aaaf0db": "メキシコ" }
+      ],
+      "correctAnswers": ["925f527c-73a9-4f2c-9f3d-dbb14b85ef2d"]
     }
   }
 }

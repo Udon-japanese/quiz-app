@@ -11,8 +11,13 @@
       },
       "answerType": "select",
       "statement": "水の化学的な表記は何？",
-      "choices": ["H2O", "CO2", "O2", "CH4"],
-      "correctAnswer": "H2O"
+      "choices": [
+        { "a16a6a70-9966-44a2-9245-777dd56c1850": "H2O" },
+        { "e7b1c07d-fa61-44e1-b745-8f0b7c8b6aeb": "CO2" },
+        { "09db5c56-2f8e-448c-94d6-6e3d77a9479b": "O2" },
+        { "e38c4f2e-5a4e-4c66-91e3-eeed86e36e04": "CH4" }
+      ],
+      "correctAnswer": "a16a6a70-9966-44a2-9245-777dd56c1850"
     },
     "q2": {
       "options": {
@@ -20,8 +25,18 @@
       },
       "answerType": "select-all",
       "statement": "地球上の4つの要素とされるものは？",
-      "choices": ["風", "火", "水", "土"],
-      "correctAnswers": ["火", "水", "風", "土"]
+      "choices": [
+        { "45b6f734-8c72-4f89-8ac6-4198cb753d54": "風" },
+        { "6b23818b-5a49-4b4b-af33-85815ef01a76": "火" },
+        { "5e6ec6f4-d1f2-4a0f-b19e-1e78ed2a0850": "水" },
+        { "d0d43356-dbd9-4d63-8b4e-5ad0a82115f2": "土" }
+      ],
+      "correctAnswers": [
+        "6b23818b-5a49-4b4b-af33-85815ef01a76",
+        "5e6ec6f4-d1f2-4a0f-b19e-1e78ed2a0850",
+        "45b6f734-8c72-4f89-8ac6-4198cb753d54",
+        "d0d43356-dbd9-4d63-8b4e-5ad0a82115f2"
+      ]
     },
     "q3": {
       "options": {
@@ -37,8 +52,13 @@
       },
       "answerType": "select",
       "statement": "人間の体内で酸素を運ぶのは何？",
-      "choices": ["血液", "尿素", "唾液", "胆汁"],
-      "correctAnswer": "血液"
+      "choices": [
+        { "b0dab6da-4d4c-4ed9-b6ec-e902a4a34020": "血液" },
+        { "e13b61d6-c4b2-4d9e-bd4b-741a5ef159bb": "尿素" },
+        { "4d1990b3-96db-45ab-9a65-0f95aa824656": "唾液" },
+        { "ec759f19-9007-4d4d-95da-0359f5db5102": "胆汁" }
+      ],
+      "correctAnswer": "b0dab6da-4d4c-4ed9-b6ec-e902a4a34020"
     },
     "q5": {
       "options": {

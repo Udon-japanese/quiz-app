@@ -1,0 +1,129 @@
+{
+  "id": "acb61bd7-5049-40c7-beb4-5ec9b73171cc",
+  "title": "運試し",
+  "description": "選択肢のどれか一つだけ正解の、運試しです。(ChatGPT作)",
+  "length": 10,
+  "options": { "timer": 6 },
+  "questions": {
+    "q1": {
+      "options": {},
+      "statement": "世界で最も高い山は何でしょう？",
+      "answerType": "select",
+      "choices": [
+        { "6c80a85a-9fb2-4890-97e8-ae5b5c9b694d": "エベレスト" },
+        { "e05cd879-b5fa-4b6b-8f1e-b653cca469bb": "エベレスト" },
+        { "cadd56db-f46f-4c88-8a58-202bfbe69513": "エベレスト" },
+        { "f1cf1645-2ced-4a7a-92b6-976ab689c399": "エベレスト" }
+      ],
+      "correctAnswer": "cadd56db-f46f-4c88-8a58-202bfbe69513"
+    },
+    "q2": {
+      "options": {},
+      "statement": "日本の首都はどこでしょう？",
+      "answerType": "select",
+      "choices": [
+        { "dd1de92a-07fd-4c7a-9617-f3059e7c0de1": "東京" },
+        { "bbdeba85-d5d0-4e30-9acd-51fdb44da39c": "東京" },
+        { "d284d3a3-4cb8-4652-ab16-2bd27f5d815e": "東京" },
+        { "dc879019-312d-4274-956f-26f8423940c9": "東京" }
+      ],
+      "correctAnswer": "dd1de92a-07fd-4c7a-9617-f3059e7c0de1"
+    },
+    "q3": {
+      "options": {},
+      "statement": "最も多くの星がある星座は何でしょう？",
+      "answerType": "select",
+      "choices": [
+        { "322af311-d6e8-41b4-8da0-97b236fcf2a4": "ふたご座" },
+        { "8cfa1104-3796-42bf-b685-042164047127": "ふたご座" },
+        { "9498c73c-0aed-44a1-82c2-4f9b9881a029": "ふたご座" },
+        { "8adae160-c736-4c07-a9d8-9d95d3c59e19": "ふたご座" }
+      ],
+      "correctAnswer": "9498c73c-0aed-44a1-82c2-4f9b9881a029"
+    },
+    "q4": {
+      "options": {},
+      "statement": "アメリカの国旗は何色のストライプが含まれているでしょう？",
+      "answerType": "select",
+      "choices": [
+        { "0caebc4e-4385-400b-8824-6ae71a10d9aa": "50" },
+        { "1dcee382-f90a-4b43-9dd9-bad305647638": "50" },
+        { "276b7b12-8387-45f5-8893-fac1be336ae5": "50" },
+        { "be6f8141-b6ed-4a1f-9994-3932224e42a8": "50" }
+      ],
+      "correctAnswer": "be6f8141-b6ed-4a1f-9994-3932224e42a8"
+    },
+    "q5": {
+      "options": {},
+      "statement": "ペンギンは陸上を速く走ることができますか？",
+      "answerType": "select",
+      "choices": [
+        { "e913a1e4-74ab-4381-ab53-bae86ba94417": "できない" },
+        { "6ede8186-625a-46ec-9e07-6b7a764a3125": "できない" },
+        { "1d12f9b8-0aab-4b89-ab37-7c683023eb9b": "できない" },
+        { "fa0a4e93-6dc1-4b19-9b7b-2f8593f63610": "できない" }
+      ],
+      "correctAnswer": "6ede8186-625a-46ec-9e07-6b7a764a3125"
+    },
+    "q6": {
+      "options": {},
+      "statement": "サッカーボールは何面体でできているでしょう？",
+      "answerType": "select",
+      "choices": [
+        { "33381421-fc61-4900-ae2d-d99ccc213d86": "6" },
+        { "4ad48406-2ffb-4e04-94cc-b61f49346a51": "6" },
+        { "062e4d76-a247-42b5-814c-085bbc790e1b": "6" },
+        { "cb603770-7960-40f2-a105-e3ad401e3697": "6" }
+      ],
+      "correctAnswer": "062e4d76-a247-42b5-814c-085bbc790e1b"
+    },
+    "q7": {
+      "options": {},
+      "statement": "地球上でもっとも大きな惑星は何でしょう？",
+      "answerType": "select",
+      "choices": [
+        { "e1153168-16de-4e73-9582-752cea7d3503": "木星" },
+        { "8649a9d9-d5c7-4ef5-a401-241787b32512": "木星" },
+        { "5520bab4-1a3b-47d4-b35d-872367e00b83": "木星" },
+        { "ca16c36b-4722-4daa-8359-c3a4040b8b55": "木星" }
+      ],
+      "correctAnswer": "5520bab4-1a3b-47d4-b35d-872367e00b83"
+    },
+    "q8": {
+      "options": {},
+      "statement": "最も多くの葉をもつ動物は何でしょう？",
+      "answerType": "select",
+      "choices": [
+        { "589da19a-7e6d-47c3-a9c2-e97719bb3006": "シャチ" },
+        { "e1336d8c-f770-4985-ab2b-84c6970506db": "シャチ" },
+        { "83b32890-6c2a-4297-b83b-e62a68ccf502": "シャチ" },
+        { "8b40fcbe-d2fd-4841-9327-eadf80fb00cb": "シャチ" }
+      ],
+      "correctAnswer": "83b32890-6c2a-4297-b83b-e62a68ccf502"
+    },
+    "q9": {
+      "options": {},
+      "statement": "フランスの首都は何でしょう？",
+      "answerType": "select",
+      "choices": [
+        { "3bf9308a-6000-4032-aa09-443dbf7a9b02": "パリ" },
+        { "5a8aa26f-c1c7-4268-b102-d3b78f722fc5": "パリ" },
+        { "b1115ff2-d4f6-4acc-bdde-e63d422fbb07": "パリ" },
+        { "d244e437-c85a-4ef9-b816-f35052e97d8c": "パリ" }
+      ],
+      "correctAnswer": "b1115ff2-d4f6-4acc-bdde-e63d422fbb07"
+    },
+    "q10": {
+      "options": {},
+      "statement": "最も速い陸上動物は何でしょう？",
+      "answerType": "select",
+      "choices": [
+        { "d403633d-d316-4065-b4b7-2a5576bc98f5": "チーター" },
+        { "6cdfb735-6673-4c8f-98de-2acdbaf99ef7": "チーター" },
+        { "7488b543-7abd-45bb-b5a0-b88159f8c944": "チーター" },
+        { "9feada82-0707-43cd-b12c-0af137239f83": "チーター" }
+      ],
+      "correctAnswer": "9feada82-0707-43cd-b12c-0af137239f83"
+    }
+  }
+}

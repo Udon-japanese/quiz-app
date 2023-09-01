@@ -57,7 +57,13 @@ function isValidQuestionObj(question) {
   const validateChoices = () =>
     Array.isArray(question.choices) &&
     question.choices.length > 0 &&
-    question.choices.every((choice) => typeof choice === "string");
+    question.choices.every(
+      (choiceObj) =>
+        typeof choiceObj === "object" &&
+        Object.keys(choiceObj).every(
+          (key) => isUUID(key) && typeof choiceObj[key] === "string"
+        )
+    );
 
   if (
     !requiredKeys.every(

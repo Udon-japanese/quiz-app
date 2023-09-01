@@ -162,17 +162,16 @@ decisionBtn.addEventListener("click", async () => {
       choiceChecks.forEach((choiceCheck) => {
         choiceCheck.disabled = true;
         if (choiceCheck.checked) {
-          userAnswer = document.querySelector(
-            `[for="${choiceCheck.id}"]`
-          ).textContent; // 紐づいたinputのチェックが入っているボタンのテキスト(ユーザが選んだ回答)を取得する
+          userAnswer = document.querySelector(`[for="${choiceCheck.id}"]`).id; // 紐づいたinputのチェックが入っているボタンのid(ユーザが選んだ回答のUUID)を取得する
         }
       });
       const isAnswerCorrect = userAnswer === correctAnswer;
+      const choices = q.choices;
       handleQuizAnswerAndShowExpl(
         q?.options?.explanation,
         isAnswerCorrect,
-        userAnswer,
-        correctAnswer
+        getAnswerTxtByKey(choices, userAnswer),
+        getAnswerTxtByKey(choices, correctAnswer)
       );
       break;
     }
@@ -183,16 +182,17 @@ decisionBtn.addEventListener("click", async () => {
         choiceCheck.disabled = true;
         if (choiceCheck.checked) {
           userAnswers.push(
-            document.querySelector(`[for="${choiceCheck.id}"]`).textContent
+            document.querySelector(`[for="${choiceCheck.id}"]`).id
           );
         }
       });
       const isAnswerCorrect = areAnswersEqual(userAnswers, correctAnswers);
+      const choices = q.choices;
       handleQuizAnswerAndShowExpl(
         q?.options?.explanation,
         isAnswerCorrect,
-        userAnswers.join(", "), // 配列をカンマと空白でつなげて読みやすく
-        correctAnswers.join(", ") // 同上
+        getJoinedAnswersByKey(choices, userAnswers), // 配列をカンマと空白でつなげて読みやすく
+        getJoinedAnswersByKey(choices, correctAnswers) // 同上
       );
       break;
     }
@@ -209,6 +209,41 @@ decisionBtn.addEventListener("click", async () => {
       );
       break;
     }
+  }
+
+  /**
+   * @description 選択肢のキーから、それに対応するテキストを取得する
+   * @param {string[]} choices 選択肢のオブジェクトの配列
+   * @param {string} keyToFind 選択肢を検索するキー(UUID)
+   * @returns {string | null} 選択肢のテキスト(見つからなければnullを返す)
+   */
+  function getAnswerTxtByKey(choices, keyToFind) {
+    for (const choice of choices) {
+      const keys = Object.keys(choice);
+      if (keys.includes(keyToFind)) {
+        return choice[keyToFind];
+      }
+    }
+    return null;
+  }
+  /**
+   * @description 複数のキーから複数の選択肢を取得し、", "で連結して返す
+   * @param {Object<string, string>[]} choices 選択肢のオブジェクトの配列
+   * @param {string[]} keys 選択肢のオブジェクトのキーの配列
+   * @returns {string} 選択肢を", "でつなげた文字列
+   */
+  function getJoinedAnswersByKey(choices, keys) {
+    const valuesArray = [];
+  
+    choices.forEach(obj => {
+      keys.forEach(key => {
+        if (obj.hasOwnProperty(key)) {
+          valuesArray.push(obj[key]);
+        }
+      });
+    });
+  
+    return valuesArray.join(', ');
   }
 });
 toggleVolumeBtn.addEventListener("click", () => {
@@ -244,7 +279,7 @@ function handleChangeVolumeInput() {
   }
 
   const volume = parseInt(audioVolumeInput.value) / 100;
-  if ((volume * 100) !== 0) {
+  if (volume * 100 !== 0) {
     quizObj.volume = volume;
   }
 
@@ -399,10 +434,14 @@ function showQuestion() {
         choiceCheck.checked = false;
         choiceCheck.setAttribute("type", inputType);
       });
+
       const shuffledChoices = shuffleChoices(q.choices);
       const choiceBtns = document.querySelectorAll(".choice-btn");
-      choiceBtns.forEach((b, i) => {
-        b.innerText = shuffledChoices[i];
+      choiceBtns.forEach((choiceBtn, i) => {
+        if (i >= choicesLength) return;
+
+        choiceBtn.id = Object.keys(shuffledChoices[i])[0];
+        choiceBtn.innerText = Object.values(shuffledChoices[i])[0];
       });
       break;
     }

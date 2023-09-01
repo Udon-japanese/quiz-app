@@ -11,8 +11,13 @@
       },
       "answerType": "select",
       "statement": "日本の首都はどこ？",
-      "choices": ["東京", "京都", "大阪", "名古屋"],
-      "correctAnswer": "東京"
+      "choices": [
+        { "a4a6cc5f-3a61-4cd5-b9de-d8f73527c8e1": "東京" },
+        { "69fcf2bb-1f08-4bf9-9d07-4ff15435d5a3": "京都" },
+        { "fa5e5d0a-27ca-49e2-ae3e-c4c5bf0b24d4": "大阪" },
+        { "e25e0dd5-01ed-4d6a-9e0a-431e4e8d3d23": "名古屋" }
+      ],
+      "correctAnswer": "a4a6cc5f-3a61-4cd5-b9de-d8f73527c8e1"
     },
     "q2": {
       "options": {
@@ -20,8 +25,13 @@
       },
       "answerType": "select",
       "statement": "日本の国花は何？",
-      "choices": ["さくらんぼ", "すみれ", "桜", "菊"],
-      "correctAnswer": "桜"
+      "choices": [
+        { "8ff953df-1cf0-41b3-b6d0-259f0ef7a55c": "さくらんぼ" },
+        { "3183e947-8db4-4f92-874a-53f30850bfb2": "すみれ" },
+        { "0f1435f1-3f14-4ad4-b03a-8b740650c222": "桜" },
+        { "7c529e61-7a04-4ac6-9e78-98f9b5340019": "菊" }
+      ],
+      "correctAnswer": "0f1435f1-3f14-4ad4-b03a-8b740650c222"
     },
     "q3": {
       "options": {
@@ -29,8 +39,18 @@
       },
       "answerType": "select-all",
       "statement": "日本の四季を選んでください。",
-      "choices": ["春", "夏", "秋", "冬"],
-      "correctAnswers": ["春", "夏", "秋", "冬"]
+      "choices": [
+        { "1d78d6a0-40e4-4d66-97fc-d853a15d261b": "春" },
+        { "d295e8c7-743b-4e7d-9f34-5eb6b38db573": "夏" },
+        { "ea7b61c7-8f2f-45d7-bf0e-1ea2e8f053f0": "秋" },
+        { "0e951d2f-10e0-4b98-90b1-e751f5315550": "冬" }
+      ],
+      "correctAnswers": [
+        "1d78d6a0-40e4-4d66-97fc-d853a15d261b",
+        "d295e8c7-743b-4e7d-9f34-5eb6b38db573",
+        "ea7b61c7-8f2f-45d7-bf0e-1ea2e8f053f0",
+        "0e951d2f-10e0-4b98-90b1-e751f5315550"
+      ]
     },
     "q4": {
       "options": {
@@ -38,8 +58,13 @@
       },
       "answerType": "select",
       "statement": "日本の高速鉄道の愛称は何？",
-      "choices": ["スーパーエクスプレス", "しんかんせん", "のぞみ", "はやぶさ"],
-      "correctAnswer": "しんかんせん"
+      "choices": [
+        { "67a3cf2f-3e6f-42b3-89a1-328d83ab14b2": "スーパーエクスプレス" },
+        { "475d05a7-0499-4a25-8540-4c2d67b4a293": "しんかんせん" },
+        { "7544a3b7-9eaa-4654-86db-2853b63b1da7": "のぞみ" },
+        { "f3af437d-5ecb-44a7-88ce-6d356b055ca2": "はやぶさ" }
+      ],
+      "correctAnswer": "475d05a7-0499-4a25-8540-4c2d67b4a293"
     },
     "q5": {
       "options": {

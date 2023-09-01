@@ -37,7 +37,11 @@ export function removeQuizzesFromStorage() {
  */
 export function getQuizFromStorage(id) {
   const quizzes = getQuizzesFromStorage();
-  return quizzes[id] || {};
+  if (quizzes && quizzes[id]) {
+    return quizzes[id];
+  } else {
+    return {};
+  }
 }
 /**
  * @description 一つのクイズを保存する
@@ -151,7 +155,11 @@ export function removeQuizDraftsFromStorage() {
  */
 export function getQuizDraftFromStorage(id) {
   const quizDrafts = getQuizDraftsFromStorage();
-  return quizDrafts[id] || {};
+  if (quizDrafts && quizDrafts[id]) {
+    return quizDrafts[id];
+  } else {
+    return {};
+  }
 }
 /**
  * @description 一つのクイズの下書きを追加する

@@ -1,0 +1,67 @@
+{
+  "id": "f248aded-6e55-4475-967d-bd81585bba4b",
+  "title": "日本のアニメクイズセット",
+  "description": "人気の日本のアニメに関するクイズを解いて楽しんでください。(ChatGPT作)",
+  "length": 5,
+  "options": { "timer": 20 },
+  "questions": {
+    "q1": {
+      "options": {
+        "explanation": "「進撃の巨人」の主人公エレン・イェーガーの声優は梶裕貴さんです。"
+      },
+      "statement": "「進撃の巨人」の主人公エレン・イェーガーの声優は誰ですか？",
+      "answerType": "type-text",
+      "correctAnswer": "梶裕貴"
+    },
+    "q2": {
+      "options": {
+        "explanation": "「魔法少女まどか☆マギカ」はシャフト制作のアニメです。"
+      },
+      "statement": "アニメ「魔法少女まどか☆マギカ」の制作会社はどれですか？",
+      "answerType": "select",
+      "choices": [
+        { "99dd5a5e-a8ff-4465-b332-0cc1ea68a272": "京都アニメーション" },
+        { "ee1d38df-2d53-4c2c-8a2f-4f911ac723b6": "シャフト" },
+        { "6b72bb67-1db5-4a7e-86a9-a28b3b8c1bca": "マッドハウス" },
+        { "06b07350-9c7c-46c5-805f-a2d156b64181": "ゴンゾ" }
+      ],
+      "correctAnswer": "ee1d38df-2d53-4c2c-8a2f-4f911ac723b6"
+    },
+    "q3": {
+      "options": {
+        "explanation": "「ワンピース」の作者は尾田栄一郎さんです。"
+      },
+      "statement": "漫画「ワンピース」の作者は誰ですか？",
+      "answerType": "select",
+      "choices": [
+        { "51165db9-3f03-4962-909d-8e6a59e297fa": "尾田栄一郎" },
+        { "74bfd67d-2896-4cea-8340-c04e14c23066": "鳥山明" },
+        { "9cb52485-9437-4e68-8e74-9491735c74a1": "諸星大二郎" },
+        { "a2496fe6-0616-4f3f-945d-48b5f7a74d63": "手塚治虫" }
+      ],
+      "correctAnswer": "51165db9-3f03-4962-909d-8e6a59e297fa"
+    },
+    "q4": {
+      "options": {
+        "explanation": "「名探偵コナン」の主人公江戸川コナンの元の名前は工藤新一です。"
+      },
+      "statement": "「名探偵コナン」の主人公江戸川コナンの元の名前は何ですか？",
+      "answerType": "type-text",
+      "correctAnswer": "工藤新一"
+    },
+    "q5": {
+      "options": {
+        "explanation": "「鬼滅の刃」のヒロイン、竈門禰豆子の髪飾りの形は花です。"
+      },
+      "statement": "「鬼滅の刃」のヒロイン、竈門禰豆子の髪飾りの形は何ですか？",
+      "answerType": "select",
+      "choices": [
+        { "f1c51168-19f1-414d-9864-3067f842a11d": "蝶" },
+        { "fd2ac867-6349-44fc-9955-82e96c2b85b5": "花" },
+        { "b7e2a73f-4b2f-4bcf-85ba-93de4c000826": "星" },
+        { "3fb03e1b-1011-40a4-bf07-24bdb95ca39b": "月" }
+      ],
+      "correctAnswer": "fd2ac867-6349-44fc-9955-82e96c2b85b5"
+    }
+  }
+}

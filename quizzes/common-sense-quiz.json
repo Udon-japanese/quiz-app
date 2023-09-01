@@ -12,12 +12,12 @@
       "statement": "地球上で最も大きな大陸はどれですか？",
       "answerType": "select",
       "choices": [
-        "アフリカ大陸",
-        "アジア大陸",
-        "北アメリカ大陸",
-        "ヨーロッパ大陸"
+        { "3e5a9d7c-1659-4e57-81ef-82826eb38e9a": "アフリカ大陸" },
+        { "3070ca84-68d9-42c3-9c9a-15cbba97a5b3": "アジア大陸" },
+        { "ac7f8ed6-2182-4b22-97e4-7f618b59c650": "北アメリカ大陸" },
+        { "a1203e84-0844-45f6-8c0d-3e2427e4a83c": "ヨーロッパ大陸" }
       ],
-      "correctAnswer": "アジア大陸"
+      "correctAnswer": "3070ca84-68d9-42c3-9c9a-15cbba97a5b3"
     },
     "q2": {
       "options": {
@@ -26,12 +26,12 @@
       "statement": "モナリザという名前で知られる絵画は、誰によって描かれましたか？",
       "answerType": "select",
       "choices": [
-        "レオナルド・ダ・ヴィンチ",
-        "ミケランジェロ",
-        "ラファエロ・サンティ",
-        "サンドロ・ボッティチェリ"
+        { "fdc81f48-4e1e-4939-9730-9838b6b34a4e": "レオナルド・ダ・ヴィンチ" },
+        { "123b98f6-9d65-45cd-94d9-84f0a8b6aa0a": "ミケランジェロ" },
+        { "d619d96d-2b7e-4632-ae2e-5d5a43f3d2b7": "ラファエロ・サンティ" },
+        { "a89196e5-9f94-4eaf-9cc0-22d1b53c5c87": "サンドロ・ボッティチェリ" }
       ],
-      "correctAnswer": "レオナルド・ダ・ヴィンチ"
+      "correctAnswer": "fdc81f48-4e1e-4939-9730-9838b6b34a4e"
     },
     "q3": {
       "options": {
@@ -39,8 +39,13 @@
       },
       "statement": "太陽系で最も大きな惑星は次のうちどれですか？",
       "answerType": "select",
-      "choices": ["地球", "木星", "火星", "金星"],
-      "correctAnswer": "木星"
+      "choices": [
+        { "e6d8e3b9-42b3-48fc-9a2e-6f27be4741a9": "地球" },
+        { "64e4d9c9-6fbd-4f9c-8701-dde80eb7c58f": "木星" },
+        { "63f7c5d5-244f-40a6-8463-7ff5b7b1693d": "火星" },
+        { "788542e7-d117-4785-8ee7-18eab32e0c6e": "金星" }
+      ],
+      "correctAnswer": "64e4d9c9-6fbd-4f9c-8701-dde80eb7c58f"
     },
     "q4": {
       "options": {
@@ -48,8 +53,13 @@
       },
       "statement": "有名な物理学者アルベルト・アインシュタインの代表的な公式で、質量とエネルギーの関係を示す式は何ですか？",
       "answerType": "select",
-      "choices": ["E=mc²", "F=ma", "P=mv", "a²+b²=c²"],
-      "correctAnswer": "E=mc²"
+      "choices": [
+        { "ba0d08d0-e1bf-4f87-b3a4-789e0da6b26f": "E=mc²" },
+        { "9422c1a9-5f41-4d7b-bf0b-91c91ac26c3b": "F=ma" },
+        { "b6e25b89-bb87-46b4-a4a2-41ca4e3998f5": "P=mv" },
+        { "22ea5b3c-83c9-4987-af0f-2abebd2c64d3": "a²+b²=c²" }
+      ],
+      "correctAnswer": "ba0d08d0-e1bf-4f87-b3a4-789e0da6b26f"
     },
     "q5": {
       "options": {
@@ -57,8 +67,13 @@
       },
       "statement": "世界で最も広く話されている言語は次のうちどれですか？",
       "answerType": "select",
-      "choices": ["フランス語", "スペイン語", "中国語", "ロシア語"],
-      "correctAnswer": "中国語"
+      "choices": [
+        { "52c5a41d-4f48-4c90-926b-5e3d01cc5c18": "フランス語" },
+        { "2b07a109-2453-4c3f-93b3-6b4de83e6e68": "スペイン語" },
+        { "8792b2b5-937e-45f2-b3ce-6fffa823b968": "中国語" },
+        { "ed0a6d8d-ded3-4cc6-b42c-77d1a6ca8cbf": "ロシア語" }
+      ],
+      "correctAnswer": "8792b2b5-937e-45f2-b3ce-6fffa823b968"
     }
   }
 }
