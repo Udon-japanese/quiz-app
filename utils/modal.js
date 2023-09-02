@@ -14,8 +14,8 @@ export function openModal(option) {
   modalClone.querySelector(".modal-body").innerHTML = body;
 
   if (colorClass) {
-    const elsNeedBgColor = modalClone.querySelectorAll(".modal-header, .modal-body, .modal-footer");
-    elsNeedBgColor.forEach(e => {
+    const elemsNeedBgColor = modalClone.querySelectorAll(".modal-header, .modal-body, .modal-footer");
+    elemsNeedBgColor.forEach(e => {
       e.classList.add(colorClass);
     });
   }
@@ -97,7 +97,7 @@ export function closeModal() {
  * @returns {void} なし
  */
 function trapFocus(elem) {
-  const focusableEls = elem.querySelectorAll(
+  const focusableElems = elem.querySelectorAll(
     `a[href]:not([disabled]):not([tabindex="-1"]),
     button:not([disabled]):not([tabindex="-1"]),
     textarea:not([disabled]):not([tabindex="-1"]),
@@ -106,20 +106,20 @@ function trapFocus(elem) {
     input[type="checkbox"]:not([disabled]):not([tabindex="-1"]),
     select:not([disabled]):not([tabindex="-1"])`
   );
-  const firstFocusableEl = focusableEls[0];
-  const lastFocusableEl = focusableEls[focusableEls.length - 1];
+  const firstFocusableElem = focusableElems[0];
+  const lastFocusableElem = focusableElems[focusableElems.length - 1];
 
   elem.addEventListener("keydown", (e) => {
     if (!e.key === "Tab") return;
 
     if (e.shiftKey) {
-      if (document.activeElement === firstFocusableEl) {
-        lastFocusableEl.focus();
+      if (document.activeElement === firstFocusableElem) {
+        lastFocusableElem.focus();
         e.preventDefault();
       }
     } else {
-      if (document.activeElement === lastFocusableEl) {
-        firstFocusableEl.focus();
+      if (document.activeElement === lastFocusableElem) {
+        firstFocusableElem.focus();
         e.preventDefault();
       }
     }

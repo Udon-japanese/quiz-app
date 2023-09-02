@@ -223,9 +223,9 @@ crtQPage.addEventListener("click", (e) => {
     } else if (classList.contains("open-del-q-d-m")) {
       const delQDId = elem.id.split("del-draft-")[1];
       const delQD = crtQuizObj.quizDraftListObj[delQDId];
-      const optionTimer = delQD?.options?.timer;
+      const optionTimer = delQD.options?.timer;
       const optionExpls = Object.values(delQD.questions)
-        .map((qD) => qD?.options?.explanation)
+        .map((qD) => qD.options?.explanation)
         .filter((expl) => expl);
       openModal({
         title: "下書きを削除",
@@ -422,6 +422,7 @@ function createQuiz(existsId, quizType = "new") {
   const description = descriptionElem.value;
 
   const questions = getQuestions();
+  const prevQuiz = getQuizFromStorage(id);
 
   /**
    * @type {Quiz}
@@ -493,15 +494,20 @@ function createQuiz(existsId, quizType = "new") {
         break;
       }
       case "select": {
+        const prevQuizChoices = isValidQuizObj(prevQuiz)
+          ? prevQuiz.questions[questionKey].choices
+          : [];
         quiz.questions[questionKey].choices = [];
         if (isTFQuiz) {
           let noneChecked = true;
           const setCorrects = [];
           const choices = question.querySelectorAll(".tf-choice");
           choices.forEach((choice, i) => {
+            const choiceUUID = prevQuizChoices[i]
+              ? Object.keys(prevQuizChoices[i])[0]
+              : randomUUID();
             const correctAnswerElem = choice.querySelector(".set-correct");
             const tfChoice = quiz.options.tf[i];
-            const choiceUUID = randomUUID();
 
             quiz.questions[questionKey].choices.push({
               [choiceUUID]: tfChoice,
@@ -524,7 +530,9 @@ function createQuiz(existsId, quizType = "new") {
           let noneChecked = true;
           const setCorrects = [];
           choices.forEach((choice, i) => {
-            const choiceUUID = randomUUID();
+            const choiceUUID = prevQuizChoices[i]
+              ? Object.keys(prevQuizChoices[i])[0]
+              : randomUUID();
             const choiceValElem = choice.querySelector(".type-choice");
             const choiceVal = choiceValElem.value;
             if (!choiceVal) {
@@ -553,17 +561,22 @@ function createQuiz(existsId, quizType = "new") {
         break;
       }
       case "select-all": {
+        const prevQuizChoices = isValidQuizObj(prevQuiz)
+          ? prevQuiz.questions[questionKey].choices
+          : [];
         quiz.questions[questionKey].choices = [];
         quiz.questions[questionKey].correctAnswers = [];
         const { selectAllChoices: choices } = getChoices(questionN);
         let noneChecked = true;
         const setCorrects = [];
         choices.forEach((choice, i) => {
-          const choiceElemem = choice.querySelector(".type-choice");
-          const choiceVal = choiceElemem.value;
-          const choiceUUID = randomUUID();
+          const choiceUUID = prevQuizChoices[i]
+            ? Object.keys(prevQuizChoices[i])[0]
+            : randomUUID();
+          const choiceElem = choice.querySelector(".type-choice");
+          const choiceVal = choiceElem.value;
           if (!choiceVal) {
-            addValidatedClass(choiceElemem);
+            addValidatedClass(choiceElem);
             if (!invalidForm) invalidForm = question;
           }
           quiz.questions[questionKey].choices.push({
@@ -596,6 +609,7 @@ function createQuiz(existsId, quizType = "new") {
       if (expl) quiz.questions[questionKey].options.explanation = expl;
     }
   });
+
   if (invalidForm) {
     showToast("red", "未入力のフォームがあります。入力してください");
     invalidForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -603,7 +617,6 @@ function createQuiz(existsId, quizType = "new") {
   }
 
   if (quizType === "edit") {
-    const prevQuiz = getQuizFromStorage(id);
     if (areQuizzesEqual(prevQuiz, quiz)) {
       // 編集前と変化がないときは保存とトースト表示をしない
       initCrtQuizPage();
@@ -651,22 +664,22 @@ function createChoice(questionN, isInit = false) {
   const selectChoice = cloneFromTemplate("select-tem");
   const selectAllChoice = cloneFromTemplate("select-all-tem");
 
-  const selectElsHasAttrCN = selectChoice.querySelectorAll(
+  const selectElemsHasAttrCN = selectChoice.querySelectorAll(
     "[placeholder*='{c-num}'], [id*='{c-num}'], [for*='{c-num}'], [name*='{c-num}']"
   );
-  const selectElsHasAttrQN = selectChoice.querySelectorAll(
+  const selectElemsHasAttrQN = selectChoice.querySelectorAll(
     "[id*='{q-num}'], [for*='{q-num}'], [name*='{q-num}']"
   );
-  const selectAllElsHasAttrCN = selectAllChoice.querySelectorAll(
+  const selectAllElememsHasAttrCN = selectAllChoice.querySelectorAll(
     "[placeholder*='{c-num}'], [id*='{c-num}'], [for*='{c-num}'], [name*='{c-num}']"
   );
-  const selectAllElsHasAttrQN = selectAllChoice.querySelectorAll(
+  const selectAllElememsHasAttrQN = selectAllChoice.querySelectorAll(
     "[id*='{q-num}'], [for*='{q-num}'], [name*='{q-num}']"
   );
-  replaceAttrVals(selectElsHasAttrCN, "{c-num}", choiceN);
-  replaceAttrVals(selectAllElsHasAttrCN, "{c-num}", choiceN);
-  replaceAttrVals(selectElsHasAttrQN, "{q-num}", questionN);
-  replaceAttrVals(selectAllElsHasAttrQN, "{q-num}", questionN);
+  replaceAttrVals(selectElemsHasAttrCN, "{c-num}", choiceN);
+  replaceAttrVals(selectAllElememsHasAttrCN, "{c-num}", choiceN);
+  replaceAttrVals(selectElemsHasAttrQN, "{q-num}", questionN);
+  replaceAttrVals(selectAllElememsHasAttrQN, "{q-num}", questionN);
 
   if (isInit) {
     const selectSetCorrectLabel = selectChoice.querySelector(
@@ -709,11 +722,11 @@ function createQuestion(isInit = false, isScroll = true) {
   if (counter > createQuestionCallLimit) return;
 
   const question = cloneFromTemplate("question-tem");
-  const elsHasAttrQN = question.querySelectorAll(
+  const elemsHasAttrQN = question.querySelectorAll(
     "[id*='{num}'], [for*='{num}'], [name*='{num}']"
   );
   const questionN = isInit ? 1 : counter;
-  replaceAttrVals(elsHasAttrQN, "{num}", questionN);
+  replaceAttrVals(elemsHasAttrQN, "{num}", questionN);
   question.querySelector(".q-header").innerText = `${questionN}問目`;
   crtQuizObj.elem.questionsCont.appendChild(question);
 
@@ -758,10 +771,10 @@ function createQuestion(isInit = false, isScroll = true) {
  * @returns {void} なし
  */
 function toggleAnswerType(questionN) {
-  const answerTypeEl = document.getElementById(`q${questionN}-answer-type`);
+  const answerTypeElem = document.getElementById(`q${questionN}-answer-type`);
   const question = document.getElementById(`q${questionN}`);
   const strQN = questionN.toString();
-  const value = answerTypeEl.value;
+  const value = answerTypeElem.value;
   const select = "select";
   const selectAll = "select-all";
   const typeText = "type-text";
@@ -808,11 +821,11 @@ function toggleAnswerType(questionN) {
         if (i === 0) {
           typeTextInput.value = selectVal;
         }
-        const selectAllEl = selectAllChoices
+        const selectAllElem = selectAllChoices
           .item(i)
           ?.querySelector(".type-choice");
-        if (selectAllEl) {
-          selectAllEl.value = selectVal;
+        if (selectAllElem) {
+          selectAllElem.value = selectVal;
         }
       });
       break;
@@ -824,11 +837,11 @@ function toggleAnswerType(questionN) {
         if (i === 0) {
           typeTextInput.value = selectAllVal;
         }
-        const selectAllEl = selectChoices
+        const selectAllElem = selectChoices
           .item(i)
           ?.querySelector(".type-choice");
-        if (selectAllEl) {
-          selectAllEl.value = selectAllVal;
+        if (selectAllElem) {
+          selectAllElem.value = selectAllVal;
         }
       });
       break;
@@ -997,17 +1010,22 @@ function changeStrN(str, replacement, regExp) {
 /**
  * @description オプションのトグルボタンが変化したときにハンドリングする
  * @param {EventTarget | Element} target 変化したトグルボタンのinput要素
- * @param {string} optContCl オプションのコンテナのクラスネーム
- * @param {string} optInputCls 1つ以上のオプションの入力要素のクラスネーム
+ * @param {string} optContClass オプションのコンテナのクラスネーム
+ * @param {string} optInputClasses 1つ以上のオプションの入力要素のクラスネーム
  * @param {string} [defaultInputVals=""] 1つ以上のinputにデフォルトで設定しておきたい値
  * @returns {void} なし
  */
-function toggleOnchange(target, optContCl, optInputCls, defaultInputVals = "") {
+function toggleOnchange(
+  target,
+  optContClass,
+  optInputClasses,
+  defaultInputVals = ""
+) {
   const ToggleParent = target.parentNode;
   const checked = target.checked;
-  const optCont = ToggleParent.parentNode.querySelector(`.${optContCl}`);
+  const optCont = ToggleParent.parentNode.querySelector(`.${optContClass}`);
   if (!checked) {
-    const inputClasses = optInputCls.split(" ");
+    const inputClasses = optInputClasses.split(" ");
     inputClasses.forEach((inputClass, i) => {
       const input = optCont.querySelector(`.${inputClass}`);
       const defaultVals = defaultInputVals.split(" ");
@@ -1018,11 +1036,11 @@ function toggleOnchange(target, optContCl, optInputCls, defaultInputVals = "") {
 }
 /**
  * @description 指定した要素の親要素のclassにBootstrapのwas-validatedを追加する関数
- * @param {HTMLElement | Element | ParentNode} el HTML要素
+ * @param {HTMLElement | Element | ParentNode} elem HTML要素
  * @returns {void} なし
  */
-function addValidatedClass(el) {
-  el.parentNode.classList.add("was-validated");
+function addValidatedClass(elem) {
+  elem.parentNode.classList.add("was-validated");
 }
 /**
  * @description クイズの下書きを保存する(ユーザがサイトを去る時、クイズ作成ページから離れたときに実行)
@@ -1312,14 +1330,14 @@ function setQuizVals(quiz) {
   crtQPage.querySelector("#title").value = title;
   crtQPage.querySelector("#description").value = description;
 
-  if (quiz?.options?.timer) {
+  if (quiz.options?.timer) {
     const timerToggle = crtQPage.querySelector("#timer-toggle");
     timerToggle.checked = true;
     toggleOnchange(timerToggle, "type-timer-cont", "timer-input");
     crtQPage.querySelector("#timer").value = quiz.options.timer;
   }
 
-  const optionTF = quiz?.options?.tf;
+  const optionTF = quiz.options?.tf;
   if (optionTF) {
     const tfToggle = crtQPage.querySelector("#tf-toggle");
     tfToggle.checked = true;
@@ -1355,11 +1373,11 @@ function setQuizVals(quiz) {
       case "select":
       case "select-all": {
         if (optionTF) {
-          const choiceElemems = questionElem.querySelectorAll(".tf-choice");
-          choiceElemems.forEach((choiceElemem, i) => {
+          const choiceElems = questionElem.querySelectorAll(".tf-choice");
+          choiceElems.forEach((choiceElem, i) => {
             const choiceUUID = Object.keys(question.choices[i])[0];
             if (choiceUUID === question.correctAnswer) {
-              choiceElemem.querySelector(".set-correct").checked = true;
+              choiceElem.querySelector(".set-correct").checked = true;
             }
           });
         } else {
@@ -1372,16 +1390,16 @@ function setQuizVals(quiz) {
             answerType === "select-all"
               ? question.correctAnswers
               : question.correctAnswer;
-          let choiceElemems = choicesCont.querySelectorAll(".choice");
+          let choiceElems = choicesCont.querySelectorAll(".choice");
           for (let i = 0; i < choices.length; i++) {
             const choice = Object.values(choices[i])[0];
             const choiceUUID = Object.keys(choices[i])[0];
-            let choiceElem = choiceElemems[i];
+            let choiceElem = choiceElems[i];
 
             if (!choiceElem) {
               createChoice(questionN);
-              choiceElemems = choicesCont.querySelectorAll(".choice");
-              choiceElem = choiceElemems[i];
+              choiceElems = choicesCont.querySelectorAll(".choice");
+              choiceElem = choiceElems[i];
             }
 
             const typeChoice = choiceElem.querySelector(".type-choice");
@@ -1408,7 +1426,7 @@ function setQuizVals(quiz) {
       }
     }
 
-    if (question?.options?.explanation) {
+    if (question.options?.explanation) {
       const explToggle = questionElem.querySelector(".expl-toggle");
       explToggle.checked = true;
       toggleOnchange(explToggle, "type-expl-cont", "expl-textarea");
@@ -1451,14 +1469,16 @@ function displayQuizDraftList(obj = null, highlight = "") {
     if (!isValidQuizObj(quizD)) return;
     // 要素に下書きのデータを設定し、ハイライトがあればハイライトもつける
     const quizDraft = cloneFromTemplate("quiz-draft-tem");
-    const elsHasAttrQId = quizDraft.querySelectorAll("[id*='{quiz-draft-id}']");
-    replaceAttrVals(elsHasAttrQId, "{quiz-draft-id}", quizD.id);
-    const quizTitleEl = quizDraft.querySelector(".q-title");
-    quizTitleEl.innerText = quizD.title || "タイトルなし";
-    highlightText(highlight, quizTitleEl);
-    const quizDescEl = quizDraft.querySelector(".q-desc");
-    quizDescEl.innerText = quizD.description || "説明なし";
-    highlightText(highlight, quizDescEl);
+    const elemsHasAttrQId = quizDraft.querySelectorAll(
+      "[id*='{quiz-draft-id}']"
+    );
+    replaceAttrVals(elemsHasAttrQId, "{quiz-draft-id}", quizD.id);
+    const quizTitleElem = quizDraft.querySelector(".q-title");
+    quizTitleElem.innerText = quizD.title || "タイトルなし";
+    highlightText(highlight, quizTitleElem);
+    const quizDescElem = quizDraft.querySelector(".q-desc");
+    quizDescElem.innerText = quizD.description || "説明なし";
+    highlightText(highlight, quizDescElem);
     const hasOptions = {
       quiz: {
         timer: false,
@@ -1469,11 +1489,11 @@ function displayQuizDraftList(obj = null, highlight = "") {
     };
     Object.values(quizD.questions).forEach((question) => {
       if (hasOptions.question.explanation) return;
-      if (question?.options?.explanation) {
+      if (question.options?.explanation) {
         hasOptions.question.explanation = true;
       }
     });
-    const optionTimer = quizD?.options?.timer;
+    const optionTimer = quizD.options?.timer;
     if (optionTimer) {
       hasOptions.quiz.timer = true;
     }
@@ -1481,27 +1501,27 @@ function displayQuizDraftList(obj = null, highlight = "") {
     const hasAnyOption =
       hasOptions.quiz.timer || hasOptions.question.explanation;
     if (hasAnyOption) {
-      const quizInfoEl = quizDraft.querySelector(".q-info");
-      showElem(quizInfoEl);
+      const quizInfoElem = quizDraft.querySelector(".q-info");
+      showElem(quizInfoElem);
       if (hasOptions.quiz.timer) {
-        const timerIcon = quizInfoEl.querySelector(".timer-icon");
+        const timerIcon = quizInfoElem.querySelector(".timer-icon");
         replaceAttrVals([timerIcon], "{option-timer}", formatTime(optionTimer));
         toggleElem(timerIcon, !hasOptions.quiz.timer);
       }
       if (hasOptions.question.explanation) {
         toggleElem(
-          quizInfoEl.querySelector(".expl-icon"),
+          quizInfoElem.querySelector(".expl-icon"),
           !hasOptions.question.explanation
         );
       }
     }
 
-    const qLengthEl = quizDraft.querySelector(".q-length");
-    qLengthEl.innerText = qLengthEl.innerText.replace(
+    const qLengthElem = quizDraft.querySelector(".q-length");
+    qLengthElem.innerText = qLengthElem.innerText.replace(
       "{quiz-length}",
       quizD.length
     );
-    highlightText(highlight, qLengthEl);
+    highlightText(highlight, qLengthElem);
     quizDraftsCont.appendChild(quizDraft);
   });
   initTooltips();
@@ -1514,22 +1534,22 @@ function displayQuizDraftList(obj = null, highlight = "") {
  */
 function handleSearchQuizDrafts(e) {
   const query = e.target.value;
-  const noneQuizDraftEl = document.getElementById("none-quiz-draft");
+  const noneQuizDraftElem = document.getElementById("none-quiz-draft");
 
   crtQPage
     .querySelector(".del-all-cont")
     .classList.toggle("hidden-del-all-cont", query); // 検索バーが空のときのみ下書き全削除ボタンを表示する
 
   if (!query) {
-    hideElem(noneQuizDraftEl);
+    hideElem(noneQuizDraftElem);
     displayQuizDraftList();
     return;
   }
 
   const qDListObj = searchQuizzes(query, crtQuizObj.quizDraftListObj);
   const noneResult = !Object.keys(qDListObj).length;
-  toggleElem(noneQuizDraftEl, !noneResult);
-  noneQuizDraftEl.querySelector(
+  toggleElem(noneQuizDraftElem, !noneResult);
+  noneQuizDraftElem.querySelector(
     "#none-quiz-draft-txt"
   ).innerText = `「${query}」に当てはまる下書きは見つかりませんでした`;
   if (noneResult) {
@@ -1546,12 +1566,10 @@ function handleSearchQuizDrafts(e) {
  * @returns {boolean} 二つのクイズオブジェクトが一致しているかどうか
  */
 function areQuizzesEqual(quiz1, quiz2) {
-  // タイプが異なる場合は不一致
   if (typeof quiz1 !== typeof quiz2) {
     return false;
   }
 
-  // オブジェクトがnullかundefinedの場合は不一致
   if (
     quiz1 === null ||
     quiz2 === null ||
@@ -1561,28 +1579,23 @@ function areQuizzesEqual(quiz1, quiz2) {
     return false;
   }
 
-  // タイプがオブジェクトの場合
   if (typeof quiz1 === "object") {
     const keys1 = Object.keys(quiz1);
     const keys2 = Object.keys(quiz2);
 
-    // キーの数が異なる場合は不一致
     if (keys1.length !== keys2.length) {
       return false;
     }
 
-    // すべてのプロパティを比較
     for (const key of keys1) {
       if (!areQuizzesEqual(quiz1[key], quiz2[key])) {
         return false;
       }
     }
 
-    // すべてのプロパティが一致した場合は一致
     return true;
   }
 
-  // タイプがオブジェクト以外の場合は値を比較
   return quiz1 === quiz2;
 }
 /**

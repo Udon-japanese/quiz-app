@@ -113,9 +113,9 @@ qListPage.addEventListener("click", (e) => {
     } else if (classList.contains("open-del-q-m")) {
       const delQId = elem.id.split("del-")[1];
       const delQ = qListObj.quizList[delQId];
-      const optionTimer = delQ?.options?.timer;
+      const optionTimer = delQ.options?.timer;
       const optionExpls = Object.values(delQ.questions)
-        .map((q) => q?.options?.explanation)
+        .map((q) => q.options?.explanation)
         .filter((expl) => expl);
       openModal({
         title: "クイズを削除",
@@ -334,10 +334,10 @@ export function displayQuizList(obj = null, highlight = "") {
     if (!isValidQuizObj(quiz)) return;
 
     const quizItem = cloneFromTemplate("quiz-item-tem");
-    const elsHasAttrQId = quizItem.querySelectorAll(
+    const elemsHasAttrQId = quizItem.querySelectorAll(
       "[id*='{quiz-id}'], [aria-labelledby*='{quiz-id}']"
     );
-    replaceAttrVals(elsHasAttrQId, "{quiz-id}", quiz.id);
+    replaceAttrVals(elemsHasAttrQId, "{quiz-id}", quiz.id);
 
     const quizTitleElem = quizItem.querySelector(".q-title");
     quizTitleElem.innerText = quiz.title;
@@ -357,11 +357,11 @@ export function displayQuizList(obj = null, highlight = "") {
     };
     Object.values(quiz.questions).forEach((question) => {
       if (hasOptions.question.explanation) return;
-      if (question?.options?.explanation) {
+      if (question.options?.explanation) {
         hasOptions.question.explanation = true;
       }
     });
-    const optionTimer = quiz?.options?.timer;
+    const optionTimer = quiz.options?.timer;
     if (optionTimer) {
       hasOptions.quiz.timer = true;
     }

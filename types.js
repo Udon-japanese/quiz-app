@@ -13,9 +13,9 @@
  * @typedef {Object} Question
  * @property {"select" | "select-all" | "type-text"} answerType - 回答形式
  * @property {string} statement 質問文
- * @property {string[]} [choices] 選択肢（select/select-all の場合）
- * @property {string} correctAnswer 正解の回答
- * @property {string[]} [correctAnswers] 正解の回答（select-all の場合）
+ * @property {Array<Object<string, string>>} [choices] 選択肢（select/select-all の場合, 選択肢のuUIDをキー、選択肢のテキストを値に持つオブジェクトの配列）
+ * @property {string} [correctAnswer] 正解の回答(selectの場合は選択肢のUUID, type-textの場合は正解のテキスト)
+ * @property {string[]} [correctAnswers] 正解の回答（select-all の場合、選択肢のUUIDの配列）
  * @property {QuestionOption} options 問題のオプション
  */
 /**

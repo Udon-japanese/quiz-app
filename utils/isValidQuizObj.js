@@ -14,10 +14,10 @@ export function isValidQuizObj(obj) {
 
   if (typeof questions !== "object") return false;
 
-  const optionTimer = obj?.options?.timer;
+  const optionTimer = obj.options?.timer;
   if (optionTimer && !isNumNotNaN(optionTimer)) return false;
 
-  const optionTF = obj?.options?.tf;
+  const optionTF = obj.options?.tf;
   if (
     optionTF &&
     !(
@@ -48,7 +48,7 @@ export function isValidQuizObj(obj) {
 function isValidQuestionObj(question) {
   const requiredKeys = ["answerType", "statement"];
 
-  const optionExplanation = question?.options?.explanation;
+  const optionExplanation = question.options?.explanation;
   if (optionExplanation && typeof optionExplanation !== "string") return false;
 
   const validAnswerTypes = ["select", "select-all", "type-text"];

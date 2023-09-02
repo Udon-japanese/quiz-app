@@ -168,7 +168,7 @@ decisionBtn.addEventListener("click", async () => {
       const isAnswerCorrect = userAnswer === correctAnswer;
       const choices = q.choices;
       handleQuizAnswerAndShowExpl(
-        q?.options?.explanation,
+        q.options?.explanation,
         isAnswerCorrect,
         getAnswerTxtByKey(choices, userAnswer),
         getAnswerTxtByKey(choices, correctAnswer)
@@ -189,7 +189,7 @@ decisionBtn.addEventListener("click", async () => {
       const isAnswerCorrect = areAnswersEqual(userAnswers, correctAnswers);
       const choices = q.choices;
       handleQuizAnswerAndShowExpl(
-        q?.options?.explanation,
+        q.options?.explanation,
         isAnswerCorrect,
         getJoinedAnswersByKey(choices, userAnswers), // 配列をカンマと空白でつなげて読みやすく
         getJoinedAnswersByKey(choices, correctAnswers) // 同上
@@ -202,48 +202,13 @@ decisionBtn.addEventListener("click", async () => {
       const userAnswer = typeTextInput.value;
       const isAnswerCorrect = userAnswer === correctAnswer;
       handleQuizAnswerAndShowExpl(
-        q?.options?.explanation,
+        q.options?.explanation,
         isAnswerCorrect,
         userAnswer,
         correctAnswer
       );
       break;
     }
-  }
-
-  /**
-   * @description 選択肢のキーから、それに対応するテキストを取得する
-   * @param {string[]} choices 選択肢のオブジェクトの配列
-   * @param {string} keyToFind 選択肢を検索するキー(UUID)
-   * @returns {string | null} 選択肢のテキスト(見つからなければnullを返す)
-   */
-  function getAnswerTxtByKey(choices, keyToFind) {
-    for (const choice of choices) {
-      const keys = Object.keys(choice);
-      if (keys.includes(keyToFind)) {
-        return choice[keyToFind];
-      }
-    }
-    return null;
-  }
-  /**
-   * @description 複数のキーから複数の選択肢を取得し、", "で連結して返す
-   * @param {Object<string, string>[]} choices 選択肢のオブジェクトの配列
-   * @param {string[]} keys 選択肢のオブジェクトのキーの配列
-   * @returns {string} 選択肢を", "でつなげた文字列
-   */
-  function getJoinedAnswersByKey(choices, keys) {
-    const valuesArray = [];
-  
-    choices.forEach(obj => {
-      keys.forEach(key => {
-        if (obj.hasOwnProperty(key)) {
-          valuesArray.push(obj[key]);
-        }
-      });
-    });
-  
-    return valuesArray.join(', ');
   }
 });
 toggleVolumeBtn.addEventListener("click", () => {
@@ -267,6 +232,40 @@ toggleVolumeBtn.addEventListener("click", () => {
 });
 audioVolumeInput.addEventListener("input", handleChangeVolumeInput);
 
+/**
+ * @description 選択肢のキーから、それに対応するテキストを取得する
+ * @param {Array<Object<string, string>>} choices 選択肢のオブジェクトの配列
+ * @param {string} keyToFind 選択肢を検索するキー(UUID)
+ * @returns {string | null} 選択肢のテキスト(見つからなければnullを返す)
+ */
+function getAnswerTxtByKey(choices, keyToFind) {
+  for (const choice of choices) {
+    const keys = Object.keys(choice);
+    if (keys.includes(keyToFind)) {
+      return choice[keyToFind];
+    }
+  }
+  return null;
+}
+/**
+ * @description 複数のキーから複数の選択肢を取得し、", "で連結して返す
+ * @param {Array<Object<string, string>>} choices 選択肢のオブジェクトの配列
+ * @param {string[]} keys 選択肢のオブジェクトのキーの配列
+ * @returns {string} 選択肢を", "でつなげた文字列
+ */
+function getJoinedAnswersByKey(choices, keys) {
+  const valuesArray = [];
+
+  choices.forEach((obj) => {
+    keys.forEach((key) => {
+      if (obj.hasOwnProperty(key)) {
+        valuesArray.push(obj[key]);
+      }
+    });
+  });
+
+  return valuesArray.join(", ");
+}
 /**
  * @description audioVolumeInputの値が変化したときにハンドリングする
  * @returns {void} なし
@@ -392,7 +391,7 @@ function showQuestion() {
   hideElem(explSection);
   // クイズ画面の初期設定をし、表示する
   decisionBtn.disabled = true;
-  const time = quizObj.quiz?.options?.timer;
+  const time = quizObj.quiz.options?.timer;
   const isNum = isNumNotNaN(time);
 
   if (isNum) {
@@ -513,13 +512,19 @@ function startTimer(seconds) {
           choiceCheck.disabled = true;
         });
       }
-
-      const { correctAnswer, correctAnswers } = q;
+      const { choices } = q;
+      const { answerType } = q;
+      const { correctAnswer: corrAns, correctAnswers: corrAnss } = q;
+      const correctAnswerOrAnswers =
+        answerType === "type-text"
+          ? corrAns
+          : getAnswerTxtByKey(choices, corrAns) ||
+            getJoinedAnswersByKey(choices, corrAnss);
       handleQuizAnswerAndShowExpl(
-        q?.options?.explanation,
+        q.options?.explanation,
         false,
         "",
-        correctAnswer || correctAnswers
+        correctAnswerOrAnswers
       );
     }
   }

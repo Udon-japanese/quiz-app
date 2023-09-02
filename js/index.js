@@ -345,8 +345,8 @@ export function initUploadBtn(btnCont, width = 0, className = "") {
   const uploadQBtn = cloneFromTemplate("upload-quiz-tem");
   btnCont.appendChild(uploadQBtn);
 
-  const uploadQBtnEls = btnCont.querySelectorAll(".upload-q-btn");
-  uploadQBtnEls.forEach((uploadBtn) => {
+  const uploadQBtnElems = btnCont.querySelectorAll(".upload-q-btn");
+  uploadQBtnElems.forEach((uploadBtn) => {
     if (uploadBtn.classList.contains("initialized")) return; // 初期化済みだったらリターン
     if (width) {
       uploadBtn.classList.add(`w-${width}`);
@@ -418,7 +418,7 @@ function monitorStorageCapacity() {
  */
 export function toggleBtnsByScrollability(pageName) {
   const delAllConts = document.querySelectorAll(".del-all-cont");
-  
+
   delAllConts.forEach((btnCont) => {
     showElem(btnCont); // ボタンの高さを含めてスクロール可能かどうか判断したいため
   });

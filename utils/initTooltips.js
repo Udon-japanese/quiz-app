@@ -6,7 +6,7 @@
 export function initTooltips() {
   document
     .querySelectorAll('[data-bs-toggle="tooltip"]')
-    .forEach((tooltipTriggerEl) => {
-      bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl);
+    .forEach((tooltipTriggerElem) => {
+      bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerElem);
     });
 }
