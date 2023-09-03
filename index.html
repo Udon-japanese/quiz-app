@@ -17,7 +17,7 @@
   <title>クイズビルダー</title>
 </head>
 <body class="bg-warning px-0" data-bs-theme="light"><!-- px-0は特定のandroid版chromeでモーダル表示時にbodyに異常なパディングが入る不具合を防ぐため -->
-  <nav id="navbar" class="navbar navbar-expand-sm navbar-light bg-light fixed-top px-0 z-1000 d-none"><!-- ツールチップよりも前面に表示させるため、z-1000 -->
+  <nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top px-0 z-1000"><!-- ツールチップよりも前面に表示させるため、z-1000 -->
     <div class="container-fluid">
       <a role="button" class="navbar-brand to-top-page">
         <img src="./images/icon.png" alt="クイズビルダー" width="150" height="30">
@@ -52,12 +52,6 @@
       </div>
     </div>
   </nav>
-  <div id="loading" class="w-100 h-100 text-primary d-flex flex-column justify-content-center align-items-center">
-    <div class="fs-2 fw-bold mb-4">読み込み中...</div>
-    <div class="spinner-border loading" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
   <div id="top-page" class="d-none page">
     <div class="container">
       <div class="card p-1 p-sm-3 my-4 col-xl-8 col-12 m-auto">

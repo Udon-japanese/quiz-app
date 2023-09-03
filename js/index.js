@@ -15,14 +15,13 @@ import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { saveQuizDraft, initCrtQuizPage, randomUUID } from "./createQuiz.js";
-import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
+import { showElem, toggleElem } from "../utils/elemManipulation.js";
 import { openModal } from "../utils/modal.js";
 
 const topPage = document.getElementById("top-page");
 const navToCrtQPBtn = document.querySelector(".nav-link.to-crt-q-page"); // ナビゲーションバー上にあるクイズ作成ページへ移動するボタン
 const navToQListPBtn = document.querySelector(".nav-link.to-q-list-page"); // ナビゲーションバー上にあるクイズ一覧ページへ移動するボタン
 const toggleThemeBtn = document.getElementById("toggle-theme");
-const loadingElem = document.getElementById("loading");
 const navbarBtns = [navToCrtQPBtn, navToQListPBtn];
 const pages = {
   top: topPage,
@@ -67,15 +66,12 @@ const welcomeTourMap = new Map([
   ],
 ]);
 
-showElem(loadingElem);
 initUploadBtn(topPage.querySelector(".btn-cont"), 100);
 loadInitialPage();
-showElem(document.getElementById("navbar"));
 const savedTheme = getThemeFromStorage();
 if (savedTheme === "dark" || savedTheme === "light") {
   applyTheme(savedTheme);
 }
-hideElem(loadingElem);
 
 window.addEventListener("load", monitorStorageCapacity);
 window.addEventListener("resize", () => {
