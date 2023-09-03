@@ -31,7 +31,7 @@ const quizObj = {
   countdownTimeout: null,
   waitTImeout: null,
   correctLength: 0,
-  volume: getVolumeFromStorage() ?? parseInt(audioVolumeInput.value / 100),
+  volume: getVolumeFromStorage() ?? parseInt(audioVolumeInput.value) / 100,
   confettiFrameId: 0,
   confettiTimeout: null,
   audioCtx: null,
