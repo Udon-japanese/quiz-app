@@ -10,6 +10,7 @@ html, body {
   width: 100%;
 }
 body {
+  /* navbarが他の要素に重ならないようにするため */
   padding-top: 60px !important;
 }
 textarea {
@@ -166,6 +167,12 @@ input:checked + .toggle-label::before {
   box-shadow: none !important;
   border: none;
   outline: none;
+}
+
+/* スピナー */
+.loading {
+  width: 150px;
+  height: 150px;
 }
 
 /* Bootstrapのスタイルを一部変更 */
