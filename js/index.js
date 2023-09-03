@@ -35,33 +35,33 @@ const welcomeTourMap = new Map([
     "createQuiz",
     {
       "3つの回答形式の中から、それぞれの問題に最適なものを選んで使えます":
-        "./images/carousel/create-quiz1.png",
+        "./images/carousel/create-quiz1.webp",
       "オプションで、クイズ作成時にマルバツクイズ(2択クイズ)にできます":
-        "./images/carousel/create-quiz2.png",
+        "./images/carousel/create-quiz2.webp",
       "下書きを複数保存することができ、後からいつでも続きから再開できます":
-        "./images/carousel/create-quiz3.png",
+        "./images/carousel/create-quiz3.webp",
     },
   ],
   [
     "quizList",
     {
       "三点リーダーをクリックすると、クイズの共有・編集・削除ができます":
-        "./images/carousel/quiz-list1.png",
+        "./images/carousel/quiz-list1.webp",
       "検索バーを使うと、クイズを絞り込めます":
-        "./images/carousel/quiz-list2.png",
+        "./images/carousel/quiz-list2.webp",
       "クイズを読み込むボタンで、ほかの人が作成したクイズを保存できます。また、ほかの人のクイズを編集することもできます":
-        "./images/carousel/quiz-list3.png",
+        "./images/carousel/quiz-list3.webp",
     },
   ],
   [
     "quiz",
     {
       "3つの回答形式があり、択一なら一つ選び、複数回答なら1つ以上選び、入力なら答えを入力します":
-        "./images/carousel/quiz1.png",
+        "./images/carousel/quiz1.webp",
       "タイマーが設定されている問題もあります。時間内に間に合うように頑張りましょう！":
-        "./images/carousel/quiz2.png",
+        "./images/carousel/quiz2.webp",
       "クイズ終了後のリザルト画面では、正答率のグラフ、正答数、メッセージが見られます。全問正解時には特別な演出もあります！":
-        "./images/carousel/quiz3.png",
+        "./images/carousel/quiz3.webp",
     },
   ],
 ]);
