@@ -27,3 +27,7 @@
  * @property {QuizOption} options クイズのオプション
  * @property {Object<string, Question>} questions クイズの質問
  */
+
+/**
+ * @typedef {"quizList" | "createQuiz" | "top" | "quiz"} Page
+ */

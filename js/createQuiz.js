@@ -243,7 +243,7 @@ crtQPage.addEventListener("click", (e) => {
     } else if (classList.contains("open-del-all-qds-m")) {
       openDelAllQuizModal("draft");
     } else if (classList.contains("open-del-all-qds-m-again")) {
-      showConfirmDelAllQuizzes("draft");
+      showConfirmDelAllQuizzes("draft", crtQuizObj);
     } else if (classList.contains("del-all-quiz-drafts")) {
       removeQuizDraftsFromStorage();
       closeModal();
@@ -1449,7 +1449,7 @@ function areQuizzesEqual(quiz1, quiz2) {
     quiz2 === null ||
     quiz1 === undefined ||
     quiz2 === undefined
-  ) {
+  ) {// 空文字列は許可したいため、値がnullまたはundefinedの場合のみfalseを返す
     return false;
   }
 

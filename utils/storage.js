@@ -6,6 +6,7 @@ const QUIZZES_KEY = "quizzes";
 const VOLUME_KEY = "volume";
 const THEME_KEY = "theme";
 const QUIZ_DRAFTS_KEY = "quizDrafts";
+const IS_FIRST_VISIT_KEY = "isFirstVisit";
 /**
  * @description 複数または一つのクイズを保存する
  * @param {Object<string, Quiz>} quizzes クイズのオブジェクトが集まったオブジェクト
@@ -206,19 +207,30 @@ export function updateQuizDraftToStorage(updatedQuizDraft) {
 
 /**
  * @description ユーザがそのページにすでに訪れたことをセットする(falseがセットされる)
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName ページの名前
+ * @param {Exclude<Page, "top">} pageName ページの名前
  * @returns {void} なし
  */
 export function setIsFirstVisitToStorage(pageName) {
-  storage.setItem(`${pageName}FirstVisit`, false);
+  const isFirstVisits = getIsFirstVisitsFromStorage();
+  isFirstVisits[pageName] = false;
+  storage.setItem(IS_FIRST_VISIT_KEY, JSON.stringify(isFirstVisits));
 }
 /**
  * @description ユーザがそのページに初めて訪れたかどうかの値を取得する
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName ページの名前
+ * @param {Exclude<Page, "top">} pageName ページの名前
  * @returns {boolean} ユーザがそのページに初めて訪れたならtrue,そうでないならfalseを返す
  */
 export function getIsFirstVisitFromStorage(pageName) {
-  const isFirstVisit = storage.getItem(`${pageName}FirstVisit`);
-  if (isFirstVisit === null) return true;
+  const isFirstVisits = getIsFirstVisitsFromStorage();
+  const isFirstVisit = isFirstVisits[pageName];
+  if (typeof isFirstVisit === "undefined") return true;
   return JSON.parse(isFirstVisit);
+}
+/**
+ * @description 初めて訪れたかどうかがページごとに存在するオブジェクトを返す
+ * @returns {Object<string, boolean | undefined> | {}} 初めて訪れたかどうかがページごとに存在するオブジェクト(存在しなければ空のオブジェクトを返す)
+ */
+function getIsFirstVisitsFromStorage() {
+  const isFirstVisits = storage.getItem(IS_FIRST_VISIT_KEY);
+  return JSON.parse(isFirstVisits) || {};
 }

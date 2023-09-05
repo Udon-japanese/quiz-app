@@ -151,7 +151,7 @@ toggleThemeBtn.addEventListener("click", toggleTheme);
 /**
  * @description 初回のみ使い方を表示する
  * @param {Object<string, string>} imageMap 画像代替テキストをキー、画像urlを値とするオブジェクト
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName ページの名前
+ * @param {Page} pageName ページの名前
  * @returns {void} なし
  */
 function showWelcomeTour(imageMap, pageName) {
@@ -241,7 +241,7 @@ function toggleTheme() {
 }
 /**
  * @description 現在のページの名前を取得する
- * @returns {"quizList" | "createQuiz" | "top" | "quiz" | null} 現在のページの名前(一致するものがなければnull)
+ * @returns {Page | null} 現在のページの名前(一致するものがなければnull)
  */
 function getCurrentPageName() {
   const currentPageElem = document.querySelector(".page:not(.d-none)"); // 現在のページ以外は非表示(class="d-none")のため
@@ -254,7 +254,7 @@ function getCurrentPageName() {
 }
 /**
  * @description 指定したページに移動し、ページごとに必要な処理を行う
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName 移動したいページの名前
+ * @param {Page} pageName 移動したいページの名前
  * @returns {void} なし
  */
 export function navigateToPage(pageName) {
@@ -302,7 +302,7 @@ export function navigateToPage(pageName) {
 }
 /**
  * @description 表示するページを切り替え、そのページにアクセスしたことをクッキーに保存する
- * @param {"quizList" | "createQuiz" | "top" | "quiz"} pageName 表示したいページの名前
+ * @param {Page} pageName 表示したいページの名前
  * @returns {void} なし
  */
 function switchToPage(pageName) {

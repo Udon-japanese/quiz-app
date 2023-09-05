@@ -648,6 +648,7 @@ function wait(seconds) {
  * @returns {Promise<AudioBuffer | void>} オーディオバッファ(コールバック関数が渡されていない場合)
  */
 async function loadAudioBuffer(url, callback = null) {
+  // HTMLAudioElementではなくWeb Audio APIを使用しているのは、webkit系のブラウザでオーディオが正常に再生されないことがあったため
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
   const audioBuffer = await quizObj.audioCtx.decodeAudioData(arrayBuffer);

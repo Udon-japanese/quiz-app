@@ -1,6 +1,5 @@
 "use strict";
 import { isNumNotNaN } from "./isNumNotNaN.js";
-import { isUUID } from "./isUUID.js";
 /**
  * @description 有効なクイズデータであればtrue,そうでなければfalseを返す
  * @param {object} obj 判別するオブジェクト
@@ -98,4 +97,14 @@ function isValidQuestionObj(question) {
   }
 
   return true;
+}
+/**
+ * @description 与えられた文字列がUUIDならtrue,それ以外ならfalseを返す
+ * @param {string} str 
+ * @returns {boolean} UUIDかどうか
+ */
+function isUUID(str) {
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidPattern.test(str);
 }

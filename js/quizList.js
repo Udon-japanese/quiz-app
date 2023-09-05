@@ -16,12 +16,12 @@ import { closeModal, openModal } from "../utils/modal.js";
 import { replaceAttrVals } from "../utils/elemManipulation.js";
 import { initQuizPage } from "./quiz.js";
 import { initCrtQuizPage } from "./createQuiz.js";
-import { formatTime } from "../utils/formatTime.js";
 import { initTooltips } from "../utils/initTooltips.js";
 import { createElement } from "../utils/elemManipulation.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { showToast } from "../utils/showToast.js";
 import { toggleElem, showElem } from "../utils/elemManipulation.js";
+import { isNumNotNaN } from "../utils/isNumNotNaN.js";
 
 const { default: commonSenseQuiz } = await import(
   "../quizzes/common-sense-quiz.json",
@@ -166,7 +166,7 @@ qListPage.addEventListener("click", (e) => {
       openDelAllQuizModal("quiz");
     } else if (classList.contains("open-del-all-qs-m-again")) {
       // ミスによりクイズがすべて削除されないように、削除承認モーダルを2回表示する
-      showConfirmDelAllQuizzes("quiz");
+      showConfirmDelAllQuizzes("quiz", qListObj);
     } else if (classList.contains("del-all-quizzes")) {
       removeQuizzesFromStorage();
       closeModal();
@@ -318,8 +318,11 @@ function highlightText(highlight, textElem) {
   }
 }
 /**
+ * @typedef {"draft" | "quiz"} QuizType
+ */
+/**
  * @description クイズリストのデータをクイズのアイテムの要素に設定し、それをコンテナに挿入する
- * @param {"draft" | "quiz"} quizType クイズの種類
+ * @param {QuizType} quizType クイズの種類
  * @param {Object<string, Quiz>} quizListObj クイズリストのオブジェクト
  * @param {HTMLElement} quizzesCont クイズの一覧を挿入するコンテナ要素
  * @param {string} highlight ハイライトをつける文字列
@@ -405,7 +408,7 @@ export function populateQuizItems(
 /**
  * @description クイズを削除するモーダルを表示する
  * @param {Quiz} delQuiz 削除するクイズ
- * @param {"draft" | "quiz"} quizType クイズの種類
+ * @param {QuizType} quizType クイズの種類
  * @returns {void} なし
  */
 export function openDelQuizModal(delQuiz, quizType) {
@@ -449,7 +452,7 @@ export function openDelQuizModal(delQuiz, quizType) {
 }
 /**
  * @description クイズ・下書きをすべて削除する時のモーダルを表示する
- * @param {"quiz" | "draft"} quizType
+ * @param {QuizType} quizType
  */
 export function openDelAllQuizModal(quizType) {
   const isDraft = quizType === "draft";
@@ -469,10 +472,11 @@ export function openDelAllQuizModal(quizType) {
 }
 /**
  * @description クイズ全削除モーダルの中身を書き換え、本当に削除していいのかを再度ユーザに確認してもらう
- * @param {"draft" | "quiz"} quizType クイズの種類
+ * @param {QuizType} quizType クイズの種類
+ * @param {Object} obj タイムアウトのidを代入するプロパティをもつオブジェクト
  * @returns {Promise<void>} プロミス
  */
-export async function showConfirmDelAllQuizzes(quizType) {
+export async function showConfirmDelAllQuizzes(quizType, obj) {
   const isDraft = quizType === "draft";
   document.querySelector(".modal-body").innerHTML = `
   <div class="text-center fw-bold">
@@ -494,10 +498,35 @@ export async function showConfirmDelAllQuizzes(quizType) {
   actionBtn.disabled = true;
   await new Promise((resolve) => {
     // 誤って削除ボタンを押さないように、3秒待たないと押せない仕様
-    qListObj.delQsWaitTImeout = setTimeout(() => {
+    const waitTimeoutKey = isDraft ? "delQDsWaitTImeout" : "delQsWaitTImeout";
+    obj[waitTimeoutKey] = setTimeout(() => {
       resolve();
     }, 3000);
   });
 
   actionBtn.disabled = false;
+}
+/**
+ * @description 秒の単位で与えられた数字を、読みやすくフォーマットする
+ * @param {number} seconds フォーマットしたい数字(単位:秒)
+ * @returns {string} フォーマット後の文字列(分、秒を含む)
+ */
+export function formatTime(seconds) {
+  if (!isNumNotNaN(seconds)) {
+    // 数字でない場合
+    return null;
+  }
+
+  if (seconds < 60) {
+    // 1分未満のとき
+    return `${seconds}秒`;
+  } else {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (remainingSeconds === 0) {
+      return `${minutes}分`;
+    } else {
+      return `${minutes}分${remainingSeconds}秒`;
+    }
+  }
 }
