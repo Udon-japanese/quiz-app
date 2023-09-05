@@ -63,6 +63,7 @@ const { default: tryYourLuck } = await import("../quizzes/try-your-luck.json", {
   assert: { type: "json" },
 });
 const qListPage = document.getElementById("quiz-list-page");
+const crtQPage = document.getElementById("crt-quiz-page");
 const quizzesCont = document.getElementById("quizzes");
 const searchQInput = document.getElementById("search-q");
 const headerBtnCont = document.getElementById("header-btn-cont");
@@ -113,47 +114,7 @@ qListPage.addEventListener("click", (e) => {
     } else if (classList.contains("open-del-q-m")) {
       const delQId = elem.id.split("del-")[1];
       const delQ = getQuizFromStorage(delQId);
-      const optionTimer = delQ.options?.timer;
-      const optionExpls = Object.values(delQ.questions)
-        .map((q) => q.options?.explanation)
-        .filter((expl) => expl);
-      openModal({
-        title: "クイズを削除",
-        body: `このクイズを削除します。よろしいですか？
-        <div class="card mt-3">
-          <div class="card-body gap-3">
-            <div class="d-flex flex-row">
-              <div>
-                <h5 class="card-title">${delQ.title}</h5>
-                <p class="card-text">${delQ.description}</p>
-                <span class="card-text text-primary">
-                  問題数: ${delQ.length}問
-                </span>
-                <div class="card-text q-info text-secondary d-flex gap-2">
-                ${
-                  optionTimer ? `<i class="bi bi-stopwatch-fill fs-3"></i>` : ""
-                }
-                ${
-                  optionExpls.length
-                    ? `<i class="bi bi-book-fill fs-3"></i>`
-                    : ""
-                }
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>`,
-        colorClass: "bg-light",
-        modalCont: qListPage,
-        actionBtn: {
-          text: "削除",
-          color: "red",
-          HTMLAttributes: {
-            id: `del-quiz-${delQId}`,
-            class: "del-quiz",
-          },
-        },
-      });
+      openDelQuizModal(delQ, "quiz");
     } else if (classList.contains("play-q")) {
       const quizId = elem.id.split("play-")[1];
       const quiz = getQuizFromStorage(quizId);
@@ -202,43 +163,10 @@ qListPage.addEventListener("click", (e) => {
         displayQuizList();
       }
     } else if (classList.contains("open-del-all-qs-m")) {
-      openModal({
-        title: "クイズをすべて削除",
-        body: "クイズをすべて削除します。よろしいですか？",
-        modalCont: qListPage,
-        actionBtn: {
-          text: "削除",
-          color: "red",
-          HTMLAttributes: {
-            class: "open-del-all-qs-m-again",
-          },
-        },
-      });
+      openDelAllQuizModal("quiz");
     } else if (classList.contains("open-del-all-qs-m-again")) {
       // ミスによりクイズがすべて削除されないように、削除承認モーダルを2回表示する
-      document.querySelector(".modal-body").innerHTML = `
-      <div class="text-center fw-bold">
-        <div class="text-bg-danger d-inline-block p-4 rounded-circle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-          </svg>
-        </div>
-        <div class="mt-4">この操作は取り消せません。本当にクイズをすべて削除しますか？</div>
-      </div>
-      `;
-      const actionBtn = document.querySelector(".action-btn");
-      actionBtn.innerText = "本当に削除する";
-      actionBtn.classList.remove("open-del-all-qs-m-again");
-      actionBtn.classList.add("del-all-quizzes");
-      actionBtn.disabled = true;
-      await new Promise((resolve) => {
-        // 誤って削除ボタンを押さないように、3秒待たないと押せない仕様
-        qListObj.delQsWaitTImeout = setTimeout(() => {
-          resolve();
-        }, 3000);
-      });
-      actionBtn.disabled = false;
+      showConfirmDelAllQuizzes("quiz");
     } else if (classList.contains("del-all-quizzes")) {
       removeQuizzesFromStorage();
       closeModal();
@@ -473,4 +401,103 @@ export function populateQuizItems(
 
   initTooltips();
   toggleBtnsByScrollability(isDraft ? "createQuiz" : "quizList");
+}
+/**
+ * @description クイズを削除するモーダルを表示する
+ * @param {Quiz} delQuiz 削除するクイズ
+ * @param {"draft" | "quiz"} quizType クイズの種類
+ * @returns {void} なし
+ */
+export function openDelQuizModal(delQuiz, quizType) {
+  const optionTimer = delQuiz.options?.timer;
+  const optionExpls = Object.values(delQuiz.questions)
+    .map((q) => q.options?.explanation)
+    .filter((expl) => expl);
+  const isDraft = quizType === "draft";
+  const quizTypeTxt = isDraft ? "下書き" : "クイズ";
+  openModal({
+    title: `${quizTypeTxt}を削除`,
+    body: `この${quizTypeTxt}を削除します。よろしいですか？
+    <div class="card mt-3">
+      <div class="card-body gap-3">
+        <div class="d-flex flex-row">
+          <div>
+            <h5 class="card-title">${delQuiz.title || "タイトルなし"}</h5>
+            <p class="card-text">${delQuiz.description || "説明なし"}</p>
+            <span class="card-text text-primary">
+              問題数: ${delQuiz.length}問
+            </span>
+            <div class="card-text q-info text-secondary d-flex gap-2">
+            ${optionTimer ? `<i class="bi bi-stopwatch-fill fs-3"></i>` : ""}
+            ${optionExpls.length ? `<i class="bi bi-book-fill fs-3"></i>` : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`,
+    colorClass: "bg-light",
+    modalCont: isDraft ? crtQPage : qListPage,
+    actionBtn: {
+      text: "削除",
+      color: "red",
+      HTMLAttributes: {
+        id: `del-quiz${isDraft ? "-draft" : ""}-${delQuiz.id}`,
+        class: `del-quiz${isDraft ? "-draft" : ""}`,
+      },
+    },
+  });
+}
+/**
+ * @description クイズ・下書きをすべて削除する時のモーダルを表示する
+ * @param {"quiz" | "draft"} quizType
+ */
+export function openDelAllQuizModal(quizType) {
+  const isDraft = quizType === "draft";
+  const quizTypeTxt = isDraft ? "下書き" : "クイズ";
+  openModal({
+    title: `${quizTypeTxt}をすべて削除`,
+    body: `${quizTypeTxt}をすべて削除します。よろしいですか？`,
+    modalCont: isDraft ? crtQPage : qListPage,
+    actionBtn: {
+      text: "削除",
+      color: "red",
+      HTMLAttributes: {
+        class: `open-del-all-${isDraft ? "qds" : "qs"}-m-again`, // qds: quiz drafts(複数の下書き), qs: quizzes(複数のクイズ)
+      },
+    },
+  });
+}
+/**
+ * @description クイズ全削除モーダルの中身を書き換え、本当に削除していいのかを再度ユーザに確認してもらう
+ * @param {"draft" | "quiz"} quizType クイズの種類
+ * @returns {Promise<void>} プロミス
+ */
+export async function showConfirmDelAllQuizzes(quizType) {
+  const isDraft = quizType === "draft";
+  document.querySelector(".modal-body").innerHTML = `
+  <div class="text-center fw-bold">
+    <div class="text-bg-danger d-inline-block p-4 rounded-circle">
+      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+      </svg>
+    </div>
+    <div class="mt-4">この操作は取り消せません。本当に${
+      isDraft ? "下書き" : "クイズ"
+    }をすべて削除しますか？</div>
+  </div>
+  `;
+  const actionBtn = document.querySelector(".action-btn");
+  actionBtn.innerText = "本当に削除する";
+  actionBtn.classList.remove(`open-del-all-${isDraft ? "qds" : "qs"}-m-again`);
+  actionBtn.classList.add(`del-all-${isDraft ? "quiz-drafts" : "quizzes"}`);
+  actionBtn.disabled = true;
+  await new Promise((resolve) => {
+    // 誤って削除ボタンを押さないように、3秒待たないと押せない仕様
+    qListObj.delQsWaitTImeout = setTimeout(() => {
+      resolve();
+    }, 3000);
+  });
+
+  actionBtn.disabled = false;
 }

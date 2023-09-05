@@ -24,7 +24,13 @@ import {
 } from "./index.js";
 import { showToast } from "../utils/showToast.js";
 import { replaceAttrVals } from "../utils/elemManipulation.js";
-import { populateQuizItems, searchQuizzes } from "./quizList.js";
+import {
+  openDelAllQuizModal,
+  openDelQuizModal,
+  populateQuizItems,
+  searchQuizzes,
+  showConfirmDelAllQuizzes,
+} from "./quizList.js";
 import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { initTooltips } from "../utils/initTooltips.js";
 import { closeModal, openModal } from "../utils/modal.js";
@@ -36,11 +42,12 @@ const answerTypeInitialState = null;
 const createChoiceCallLimit = 4;
 const createQuestionCallLimit = 10;
 const crtQuizObj = {};
+
 crtQPage.addEventListener("click", (e) => {
   const elems = e.composedPath();
   if (!elems) return;
 
-  Array.from(elems).forEach(async (elem) => {
+  Array.from(elems).forEach((elem) => {
     if (!elem.className) return;
     const classList = elem.classList;
 
@@ -117,7 +124,6 @@ crtQPage.addEventListener("click", (e) => {
       }
     } else if (classList.contains("add-question")) {
       createQuestion();
-      checkQuestionsState();
     } else if (classList.contains("crt-choice")) {
       const question = elem.closest(".question");
       const questionN = parseInt(question.id.match(/q(\d+)/)[1]);
@@ -220,48 +226,8 @@ crtQPage.addEventListener("click", (e) => {
       initCrtQuizPage(null, "new");
     } else if (classList.contains("open-del-q-d-m")) {
       const delQDId = elem.id.split("del-draft-")[1];
-      const delQD = crtQuizObj.quizDraftListObj[delQDId];
-      const optionTimer = delQD.options?.timer;
-      const optionExpls = Object.values(delQD.questions)
-        .map((qD) => qD.options?.explanation)
-        .filter((expl) => expl);
-      openModal({
-        title: "下書きを削除",
-        body: `この下書きを削除します。よろしいですか？
-        <div class="card mt-3">
-          <div class="card-body gap-3">
-            <div class="d-flex flex-row">
-              <div>
-                <h5 class="card-title">${delQD.title || "タイトルなし"}</h5>
-                <p class="card-text">${delQD.description || "説明なし"}</p>
-                <span class="card-text text-primary">
-                  問題数: ${delQD.length}問
-                </span>
-                <div class="card-text q-info text-secondary d-flex gap-2">
-                ${
-                  optionTimer ? `<i class="bi bi-stopwatch-fill fs-3"></i>` : ""
-                }
-                ${
-                  optionExpls.length
-                    ? `<i class="bi bi-book-fill fs-3"></i>`
-                    : ""
-                }
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>`,
-        colorClass: "bg-light",
-        modalCont: crtQPage,
-        actionBtn: {
-          text: "削除",
-          HTMLAttributes: {
-            id: `del-quiz-draft-${delQDId}`,
-            class: "del-quiz-draft",
-          },
-          color: "red",
-        },
-      });
+      const delQD = getQuizDraftFromStorage(delQDId);
+      openDelQuizModal(delQD, "draft");
     } else if (classList.contains("del-quiz-draft")) {
       const delQDId = elem.id.split("del-quiz-draft-")[1];
       removeQuizDraftFromStorage(delQDId);
@@ -275,41 +241,9 @@ crtQPage.addEventListener("click", (e) => {
         displayQuizDraftList();
       }
     } else if (classList.contains("open-del-all-qds-m")) {
-      openModal({
-        title: "下書きをすべて削除",
-        body: "下書きをすべて削除します。よろしいですか？",
-        modalCont: crtQPage,
-        actionBtn: {
-          text: "削除",
-          color: "red",
-          HTMLAttributes: {
-            class: "open-del-all-qds-m-again",
-          },
-        },
-      });
+      openDelAllQuizModal("draft");
     } else if (classList.contains("open-del-all-qds-m-again")) {
-      document.querySelector(".modal-body").innerHTML = `
-      <div class="text-center fw-bold">
-        <div class="text-bg-danger d-inline-block p-4 rounded-circle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-          </svg>
-        </div>
-        <div class="mt-4">この操作は取り消せません。本当に下書きをすべて削除しますか？</div>
-      </div>
-      `;
-      const actionBtn = document.querySelector(".action-btn");
-      actionBtn.innerText = "本当に削除する";
-      actionBtn.classList.remove("open-del-all-qds-m-again");
-      actionBtn.classList.add("del-all-quiz-drafts");
-      actionBtn.disabled = true;
-      await new Promise((resolve) => {
-        crtQuizObj.delQDsWaitTImeout = setTimeout(() => {
-          resolve();
-        }, 3000);
-      });
-      actionBtn.disabled = false;
+      showConfirmDelAllQuizzes("draft");
     } else if (classList.contains("del-all-quiz-drafts")) {
       removeQuizDraftsFromStorage();
       closeModal();
