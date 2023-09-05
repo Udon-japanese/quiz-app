@@ -276,16 +276,15 @@ export function navigateToPage(pageName) {
     createQuiz: navToCrtQPBtn,
   };
 
-  if (pageName === "quizList") {
-    displayQuizList();
-  } else if (pageName === "createQuiz") {
-    initCrtQuizPage();
-  }
-
   if (pageName === "quizList" || pageName === "createQuiz") {
+    if (pageName === "quizList") {
+      displayQuizList();
+    } else if (pageName === "createQuiz") {
+      initCrtQuizPage();
+    }
+
     navbarBtns.forEach((btn) => {
-      const isActive = btn === navbarBtnMap[pageName];
-      btn.classList.toggle("active", isActive);
+      btn.classList.toggle("active", btn === navbarBtnMap[pageName]);
     });
 
     toggleBtnsByScrollability(pageName);
@@ -417,8 +416,8 @@ function monitorStorageCapacity() {
  * @returns {void} なし
  */
 export function toggleBtnsByScrollability(pageName) {
-  const delAllConts = document.querySelectorAll(".del-all-cont");
-
+  const page = pages[pageName];
+  const delAllConts = page.querySelectorAll(".del-all-cont");
   delAllConts.forEach((btnCont) => {
     showElem(btnCont); // ボタンの高さを含めてスクロール可能かどうか判断したいため
   });
@@ -426,8 +425,7 @@ export function toggleBtnsByScrollability(pageName) {
 
   const body = document.body;
   const isScrollable = body.scrollHeight > body.clientHeight;
-  const screenWidth = window.innerWidth;
-  const isScreenSMOrWider = screenWidth > 575.98;
+  const isScreenSMOrWider = window.innerWidth > 575.98;
 
   let hasHiddenContClass = false;
   delAllConts.forEach((btnCont) => {

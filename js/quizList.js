@@ -112,7 +112,7 @@ qListPage.addEventListener("click", (e) => {
       elem.value = "";
     } else if (classList.contains("open-del-q-m")) {
       const delQId = elem.id.split("del-")[1];
-      const delQ = qListObj.quizList[delQId];
+      const delQ = getQuizFromStorage(delQId);
       const optionTimer = delQ.options?.timer;
       const optionExpls = Object.values(delQ.questions)
         .map((q) => q.options?.explanation)
@@ -267,13 +267,13 @@ searchQInput.addEventListener("input", handleSearchQuizzes);
  */
 function handleSearchQuizzes() {
   const query = searchQInput.value;
-
   delAllQuizzesCont.classList.toggle("hidden-del-all-cont", query); // 検索バーが空のときのみ表示する
 
   if (!query) {
     displayQuizList();
     return;
   }
+
   qListObj.quizList = getQuizzesFromStorage(); // 削除後、更新するため
   const quizList = searchQuizzes(query, qListObj.quizList);
   const noneResult = !Object.keys(quizList).length;
@@ -329,72 +329,7 @@ export function displayQuizList(obj = null, highlight = "") {
     noneQuiz || highlight
   ); // 検索バーを使用していなく(検索バーが空)、クイズが1つ以上あるときのみ表示
 
-  // テンプレートの中身をクイズのデータで置き換え手表示する
-  Object.values(qListObjToUse).forEach((quiz) => {
-    if (!isValidQuizObj(quiz)) return;
-
-    const quizItem = cloneFromTemplate("quiz-item-tem");
-    const elemsHasAttrQId = quizItem.querySelectorAll(
-      "[id*='{quiz-id}'], [aria-labelledby*='{quiz-id}']"
-    );
-    replaceAttrVals(elemsHasAttrQId, "{quiz-id}", quiz.id);
-
-    const quizTitleElem = quizItem.querySelector(".q-title");
-    quizTitleElem.innerText = quiz.title;
-    highlightText(highlight, quizTitleElem);
-
-    const quizDescElem = quizItem.querySelector(".q-desc");
-    quizDescElem.innerText = quiz.description || "説明なし";
-    highlightText(highlight, quizDescElem);
-
-    const hasOptions = {
-      quiz: {
-        timer: false,
-      },
-      question: {
-        explanation: false,
-      },
-    };
-    Object.values(quiz.questions).forEach((question) => {
-      if (hasOptions.question.explanation) return;
-      if (question.options?.explanation) {
-        hasOptions.question.explanation = true;
-      }
-    });
-    const optionTimer = quiz.options?.timer;
-    if (optionTimer) {
-      hasOptions.quiz.timer = true;
-    }
-    const hasAnyOption =
-      hasOptions.quiz.timer || hasOptions.question.explanation;
-    if (hasAnyOption) {
-      const quizInfoElem = quizItem.querySelector(".q-info");
-      showElem(quizInfoElem);
-      if (hasOptions.quiz.timer) {
-        const timerIcon = quizInfoElem.querySelector(".timer-icon");
-        replaceAttrVals([timerIcon], "{option-timer}", formatTime(optionTimer));
-        toggleElem(timerIcon, !hasOptions.quiz.timer);
-      }
-      if (hasOptions.question.explanation) {
-        toggleElem(
-          quizInfoElem.querySelector(".expl-icon"),
-          !hasOptions.question.explanation
-        );
-      }
-    }
-
-    const qLengthElem = quizItem.querySelector(".q-length");
-    qLengthElem.innerText = qLengthElem.innerText.replace(
-      "{quiz-length}",
-      quiz.length
-    );
-    highlightText(highlight, qLengthElem);
-
-    quizzesCont.appendChild(quizItem);
-  });
-
-  initTooltips();
-  toggleBtnsByScrollability("quizList");
+  populateQuizItems("quiz", qListObjToUse, quizzesCont, highlight);
 }
 /**
  * @description クイズ一覧のオブジェクトから、クエリを含むプロパティを持つオブジェクトを返す
@@ -433,7 +368,7 @@ export function searchQuizzes(query, quizListObj) {
  * @param {Element} textElem ハイライトを当てたい要素
  * @returns {void} なし
  */
-export function highlightText(highlight, textElem) {
+function highlightText(highlight, textElem) {
   if (!highlight) return;
 
   // ハイライトと要素のテキストを大文字に統一・比較することで、大文字小文字関係なく文字が一致していれば背景色を変える
@@ -453,4 +388,89 @@ export function highlightText(highlight, textElem) {
 
     textElem.innerHTML = text.replace(hlRegExp, hlRepl);
   }
+}
+/**
+ * @description クイズリストのデータをクイズのアイテムの要素に設定し、それをコンテナに挿入する
+ * @param {"draft" | "quiz"} quizType クイズの種類
+ * @param {Object<string, Quiz>} quizListObj クイズリストのオブジェクト
+ * @param {HTMLElement} quizzesCont クイズの一覧を挿入するコンテナ要素
+ * @param {string} highlight ハイライトをつける文字列
+ * @returns {void} なし
+ */
+export function populateQuizItems(
+  quizType,
+  quizListObj,
+  quizzesCont,
+  highlight
+) {
+  const isDraft = quizType === "draft";
+  Object.values(quizListObj).forEach((quiz) => {
+    // テンプレートの中身をクイズのデータで置き換え手表示する
+    if (!isValidQuizObj(quiz)) return;
+    const quizItemTemId = isDraft ? "quiz-draft-tem" : "quiz-item-tem";
+    const quizItem = cloneFromTemplate(quizItemTemId);
+
+    const placeholder = isDraft ? "{quiz-draft-id}" : "{quiz-id}";
+    const elemsHasAttrQId = quizItem.querySelectorAll(
+      `[id*='${placeholder}'], [aria-labelledby*='${placeholder}']`
+    );
+    replaceAttrVals(elemsHasAttrQId, placeholder, quiz.id);
+
+    const quizTitleElem = quizItem.querySelector(".q-title");
+    quizTitleElem.innerText = quiz.title || "タイトルなし";
+    highlightText(highlight, quizTitleElem);
+
+    const quizDescElem = quizItem.querySelector(".q-desc");
+    quizDescElem.innerText = quiz.description || "説明なし";
+    highlightText(highlight, quizDescElem);
+
+    const hasOptions = {
+      quiz: {
+        timer: false,
+      },
+      question: {
+        explanation: false,
+      },
+    };
+    Object.values(quiz.questions).forEach((question) => {
+      if (hasOptions.question.explanation) return;
+      if (question.options?.explanation) {
+        hasOptions.question.explanation = true;
+      }
+    });
+    const optionTimer = quiz.options?.timer;
+    if (optionTimer) {
+      hasOptions.quiz.timer = true;
+    }
+
+    const hasAnyOption =
+      hasOptions.quiz.timer || hasOptions.question.explanation;
+    if (hasAnyOption) {
+      const quizInfoElem = quizItem.querySelector(".q-info");
+      showElem(quizInfoElem);
+      if (hasOptions.quiz.timer) {
+        const timerIcon = quizInfoElem.querySelector(".timer-icon");
+        replaceAttrVals([timerIcon], "{option-timer}", formatTime(optionTimer));
+        toggleElem(timerIcon, !hasOptions.quiz.timer);
+      }
+      if (hasOptions.question.explanation) {
+        toggleElem(
+          quizInfoElem.querySelector(".expl-icon"),
+          !hasOptions.question.explanation
+        );
+      }
+    }
+
+    const qLengthElem = quizItem.querySelector(".q-length");
+    qLengthElem.innerText = qLengthElem.innerText.replace(
+      "{quiz-length}",
+      quiz.length
+    );
+    highlightText(highlight, qLengthElem);
+
+    quizzesCont.appendChild(quizItem);
+  });
+
+  initTooltips();
+  toggleBtnsByScrollability(isDraft ? "createQuiz" : "quizList");
 }
