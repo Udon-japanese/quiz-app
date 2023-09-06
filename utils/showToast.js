@@ -8,8 +8,7 @@ import { cloneFromTemplate } from "../js/index.js";
  */
 export function showToast(color, message) {
   const toastClone = cloneFromTemplate("toast-tem");
-  document.body.insertBefore(toastClone, document.body.firstChild);
-  const toast = document.getElementById("toast");
+  const toast = toastClone.querySelector(".toast");
 
   let toastColorClass = "text-bg-";
   switch (color) {
@@ -32,6 +31,8 @@ export function showToast(color, message) {
 
   const toastBody = toast.querySelector(".toast-body");
   toastBody.innerText = message;
+
+  document.getElementById("toast-container").appendChild(toastClone);
 
   toast.addEventListener("hidden.bs.toast", () => {
     toast.remove();

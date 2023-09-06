@@ -1,10 +1,5 @@
 "use strict";
-import {
-  createElement,
-  hideElem,
-  showElem,
-  toggleElem,
-} from "../utils/elemManipulation.js";
+import { hideElem, showElem, toggleElem } from "../utils/elemManipulation.js";
 import {
   addQuizToStorage,
   getQuizDraftFromStorage,
@@ -296,9 +291,10 @@ crtQPage.addEventListener("input", (e) => {
     const classList = elem.classList;
 
     if (classList.contains("timer-input")) {
-      if (elem.value < 1) {
-        elem.value = 1;
-      } else if (elem.value > 600) {
+      const val = parseInt(elem.value);
+      if (val < 1) {
+        elem.value = "";
+      } else if (val > 600) {
         elem.value = 600;
       }
     } else if (classList.contains("t-input")) {

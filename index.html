@@ -54,6 +54,7 @@
       </div>
     </div>
   </nav>
+  <div id="toast-container" class="toast-container position-fixed top-0 start-50 translate-middle-x mt-3"></div>
   <div id="top-page" class="d-none page">
     <div class="container">
       <div class="card p-1 p-sm-3 my-4 col-xl-8 col-12 m-auto">
@@ -261,7 +262,7 @@
   <!-- テンプレート -->
   <!-- 全体用テンプレート -->
   <template id="toast-tem">
-    <div id="toast" class="toast border-0 position-fixed top-0 start-50 translate-middle-x mt-3" role="alert"
+    <div class="toast border-0" role="alert"
       aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="true" data-bs-delay="4000">
       <!-- classに "text-bg-danger" | "text-bg-warning" | "text-bg-success" | "bg-info text-light" が入る -->
       <div class="d-flex" data-bs-theme="dark">
