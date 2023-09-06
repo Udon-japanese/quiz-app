@@ -1386,6 +1386,7 @@ function handleSearchQuizDrafts() {
     .classList.toggle("hidden-del-all-cont", query); // 検索バーが空のときのみ下書き全削除ボタンを表示する
 
   if (!query) {
+    hideElem(noneQuizDraftElem);
     displayQuizDraftList();
     return;
   }
