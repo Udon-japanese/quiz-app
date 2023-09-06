@@ -30,6 +30,7 @@ import { isValidQuizObj } from "../utils/isValidQuizObj.js";
 import { initTooltips } from "../utils/initTooltips.js";
 import { closeModal, openModal } from "../utils/modal.js";
 import { setCookie } from "../utils/cookie.js";
+import { isNumNotNaN } from "../utils/isNumNotNaN.js";
 
 const crtQPage = document.getElementById("crt-quiz-page");
 const counterInitialState = 2;
@@ -291,7 +292,11 @@ crtQPage.addEventListener("input", (e) => {
     const classList = elem.classList;
 
     if (classList.contains("timer-input")) {
-      const val = parseInt(elem.value);
+      const intVal = parseInt(elem.value);
+      elem.value = "";
+      elem.value = isNumNotNaN(intVal) ? intVal : "";
+
+      const val = elem.value;
       if (val < 1) {
         elem.value = "";
       } else if (val > 600) {
