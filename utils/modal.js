@@ -8,14 +8,17 @@ import { clearDelQsWaitTimeout } from "../js/quizList.js";
  * @returns {void} なし
  */
 export function openModal(option) {
-  const { title, body, colorClass, modalCont, header, cancelBtn, actionBtn } = option;
+  const { title, body, colorClass, modalCont, header, cancelBtn, actionBtn } =
+    option;
   const modalClone = cloneFromTemplate("modal-tem");
   modalClone.querySelector(".modal-title").innerText = title;
   modalClone.querySelector(".modal-body").innerHTML = body;
 
   if (colorClass) {
-    const elemsNeedBgColor = modalClone.querySelectorAll(".modal-header, .modal-body, .modal-footer");
-    elemsNeedBgColor.forEach(e => {
+    const elemsNeedBgColor = modalClone.querySelectorAll(
+      ".modal-header, .modal-body, .modal-footer"
+    );
+    elemsNeedBgColor.forEach((e) => {
       e.classList.add(colorClass);
     });
   }
@@ -44,7 +47,7 @@ export function openModal(option) {
       break;
   }
   actionBtnElem.classList.add(btnColor);
-  
+
   if (actionBtn?.HTMLAttributes) {
     applyAttributes(actionBtnElem, actionBtn.HTMLAttributes);
   }
@@ -54,25 +57,25 @@ export function openModal(option) {
   const modalElem = document.querySelector(".modal");
   trapFocus(modalElem);
   modalElem.addEventListener("hidden.bs.modal", () => {
-    clearDelQsWaitTimeout();// クイズ全削除ボタンが押せるようになるまでのsetTimeoutを解除
-    clearDelQDsWaitTimeout();// 下書き全削除ボタンが押せるようになるまでのsetTimeoutを解除
+    clearDelQsWaitTimeout(); // クイズ全削除ボタンが押せるようになるまでのsetTimeoutを解除
+    clearDelQDsWaitTimeout(); // 下書き全削除ボタンが押せるようになるまでのsetTimeoutを解除
     modalElem.remove();
   });
-  
+
   const modalInstance = new bootstrap.Modal(document.querySelector(".modal"));
   modalInstance.show();
 
   /**
    * @description 指定された属性を要素に適用する
    * @param {Element} element 属性を付与する要素
-   * @param {Object<string, string>} attributes 属性のオブジェクト 
+   * @param {Object<string, string>} attributes 属性のオブジェクト
    */
   function applyAttributes(element, attributes) {
-    Object.keys(attributes).forEach(key => {
+    Object.keys(attributes).forEach((key) => {
       const val = attributes[key];
       if (key === "class") {
         const classes = val.split(" ");
-        classes.forEach(className => {
+        classes.forEach((className) => {
           element.classList.add(className);
         });
       } else {
@@ -89,7 +92,6 @@ export function closeModal() {
   const modalElem = document.querySelector(".modal");
   bootstrap.Modal.getInstance(modalElem).hide();
 }
-
 // https://hidde.blog/using-javascript-to-trap-focus-in-an-element/
 /**
  * @description 要素からフォーカスが出ないようにする

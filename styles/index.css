@@ -160,13 +160,6 @@ input:checked + .toggle-label::before {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-/* ハンバーガーメニューのボタン */
-.navbar .navbar-toggler {
-  box-shadow: none !important;
-  border: none;
-  outline: none;
-}
-
 /* Bootstrapのスタイルを一部変更 */
 .navbar {
   z-index: 1000;/* tooltip の z-500より上に */
@@ -194,6 +187,12 @@ input:checked + .toggle-label::before {
 }
 .carousel-indicators button.active {
   background-color: #0d6efd !important;
+}
+/* ハンバーガーメニューのボタン */
+.navbar .navbar-toggler {
+  box-shadow: none !important;
+  border: none;
+  outline: none;
 }
 
 /* 音量調節用のinput type="range" */

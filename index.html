@@ -18,18 +18,18 @@
 <body class="bg-warning px-0" data-bs-theme="light"><!-- px-0は特定のandroid版chromeでモーダル表示時にbodyに異常なパディングが入る不具合を防ぐため -->
   <nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top px-0 z-1000"><!-- ツールチップよりも前面に表示させるため、z-1000 -->
     <div class="container-fluid">
-      <a role="button" class="navbar-brand to-top-page">
+      <button type="button" class="navbar-brand to-top-page nav-link">
         <img src="./images/icon.webp" alt="クイズビルダー" width="150" height="30">
-      </a>
+      </button>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas"
         aria-controls="offcanvas" aria-label="メニューを開く">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas" aria-labelledby="offcanvas-label">
         <div class="offcanvas-header">
-          <a role="button" class="navbar-brand to-top-page" id="offcanvas-label">
+          <button type="button" class="navbar-brand to-top-page nav-link" id="offcanvas-label">
             <img src="./images/icon.webp" alt="クイズビルダー" width="150" height="30">
-          </a>
+          </button>
           <button type="button" class="btn-close fs-5 text-reset" data-bs-dismiss="offcanvas"
             aria-label="Close"></button>
         </div>
@@ -54,7 +54,7 @@
   <div id="top-page" class="d-none page">
     <div class="container">
       <div class="card p-1 p-sm-3 my-4 col-xl-8 col-12 m-auto">
-        <img src="./images/thumbnail.webp" alt="クイズビルダー">
+        <img src="./images/thumbnail.webp" alt="クイズビルダー" class="img-fluid" width="1980" height="1050">
         <div class="card-body btn-cont">
           <h4 class="text-center">自分でクイズを作って遊んだり、他の人が作ったクイズで遊んだりしてみよう！</h4>
           <div class="d-grid gap-3 d-lg-block d-lg-flex justify-content-lg-center mt-4 mb-3">
@@ -76,7 +76,7 @@
         <h3 class="my-3 fw-bold text-nowrap text-center text-sm-start page-header">クイズ一覧</h3>
         <div id="header-btn-cont" class="w-100 d-flex justify-content-end"></div>
       </div>
-      <input type="text" id="search-q" class="form-control" placeholder="キーワードからクイズを検索">
+      <input type="text" id="search-q" class="form-control" placeholder="キーワードからクイズを検索" autocomplete="off">
       <div id="quizzes" class="row p-sm-0 mt-3 g-3"></div>
       <div id="none-quiz" class="card text-center d-none">
         <div class="card-body p-sm-3 p-2">
@@ -164,12 +164,14 @@
             <h2 class="card-title question-index mb-0 mb-sm-2">{questionIndex}問目</h2>
             <div id="timer-group" class="d-none">
               <div class="card-text text-center fs-5" id="timer-txt">残り: {timer-val}秒</div>
-              <div id="timer-cont" class="bg-secondary-subtle rounded-4 mt-1 border border-1 border-secondary overflow-hidden">
+              <div id="timer-cont"
+                class="bg-secondary-subtle rounded-4 mt-1 border border-1 border-secondary overflow-hidden">
                 <div id="timer-bar" class="py-2 bg-primary rounded-3"></div>
               </div>
             </div>
             <div class="d-flex flex-column align-items-center justify-content-center my-3 my-sm-5">
-              <p id="question-statement" class="card-text fs-4 fw-semibold text-pre-wrap text-break mw-100">{statement}</p>
+              <p id="question-statement" class="card-text fs-4 fw-semibold text-pre-wrap text-break mw-100">{statement}
+              </p>
             </div>
             <div id="answer-guide" class="text-center mb-1 small">正しいと思うものを一つ選んでください</div>
             <div id="choices-group" class="row g-2 g-sm-3 justify-content-center">
@@ -258,7 +260,7 @@
   <template id="toast-tem">
     <div id="toast" class="toast border-0 position-fixed top-0 start-50 translate-middle-x mt-3" role="alert"
       aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="true" data-bs-delay="4000">
-      <!-- classに"text-bg-danger" | "text-bg-warning" | "text-bg-success" | "bg-info text-light" が入る -->
+      <!-- classに "text-bg-danger" | "text-bg-warning" | "text-bg-success" | "bg-info text-light" が入る -->
       <div class="d-flex" data-bs-theme="dark">
         <div class="toast-body">
           {toast message}
@@ -268,7 +270,7 @@
     </div>
   </template>
   <template id="upload-quiz-tem">
-    <label class="btn btn-primary upload-q-btn" role="button">
+    <label class="btn btn-primary upload-q-btn">
       <input type="file" accept=".json" class="d-none upload-q">
       <i class="bi bi-upload me-lg-1 float-start me-0 me-sm-2"></i>クイズを読み込む(JSONファイル)
     </label>
@@ -395,7 +397,7 @@
             </button>
           </div>
         </div>
-        <input type="text" id="search-q-draft" class="form-control" placeholder="キーワードから下書きを検索">
+        <input type="text" id="search-q-draft" class="form-control" placeholder="キーワードから下書きを検索" autocomplete="off">
         <div id="quiz-drafts-cont" class="row p-sm-0 mt-3 g-3"></div>
         <div id="none-quiz-draft" class="card d-none">
           <div class="card-body text-center p-sm-3 p-2">
@@ -408,12 +410,14 @@
       </div>
       <div class="d-grid container del-all-cont"><!-- 画面幅に応じて適切な位置に配置される方のボタンのみ表示 -->
         <button type="button"
-          class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn" tabindex="-1">
+          class="btn btn-danger mx-auto col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 mt-4 open-del-all-qds-m visible-on-scrollable del-all-quiz-drafts-btn"
+          tabindex="-1">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
           下書きをすべて削除する
         </button>
         <button type="button"
-          class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qds-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quiz-drafts-btn" tabindex="-1">
+          class="btn btn-danger col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 open-del-all-qds-m hidden-on-scrollable position-absolute bottom-0 start-50 translate-middle-x del-all-quiz-drafts-btn"
+          tabindex="-1">
           <i class="bi bi-trash me-sm-2 me-0 float-start"></i>
           下書きをすべて削除する
         </button>
@@ -430,14 +434,15 @@
             <div>
               <label class="form-label" for="title">クイズのタイトル</label>
               <div class="input-group has-validation">
-                <input type="text" id="title" class="form-control" placeholder="例: どうぶつクイズ" required>
+                <input type="text" id="title" class="form-control" placeholder="例: どうぶつクイズ" required autocomplete="off">
                 <div class="invalid-feedback">タイトルを設定してください</div>
               </div>
             </div>
             <div>
               <label class="form-label" for="description">クイズの説明(任意)</label>
               <div class="input-group">
-                <input type="text" id="description" class="form-control" placeholder="例: 動物たちに関するクイズです！">
+                <input type="text" id="description" class="form-control" placeholder="例: 動物たちに関するクイズです！"
+                  autocomplete="off">
               </div>
             </div>
             <div id="quiz-options" class="mt-2 d-flex flex-column gap-2">
@@ -466,13 +471,13 @@
                   <label class="form-label" for="true">1つ目の選択肢を設定</label>
                   <div class="input-group">
                     <input type="text" class="form-control t-input mb-2" id="true" value="&#x3007;"
-                      placeholder="1つ目の選択肢" required>
+                      placeholder="1つ目の選択肢" required autocomplete="off">
                     <div class="invalid-feedback">選択肢を設定してください</div>
                   </div>
                   <label class="form-label" for="false">2つ目の選択肢を設定</label>
                   <div class="input-group">
                     <input type="text" class="form-control f-input" id="false" value="&#x2715;" placeholder="2つ目の選択肢"
-                      required>
+                      required autocomplete="off">
                     <div class="invalid-feedback">選択肢を設定してください</div>
                   </div>
                 </div>
@@ -510,7 +515,7 @@
           class="form-check-input set-correct mt-0" required aria-label="正解を設定">
       </label>
       <input type="text" id="q{q-num}-type-select-c{c-num}" class="form-control rounded-end type-choice"
-        placeholder="{c-num}つ目の選択肢" required>
+        placeholder="{c-num}つ目の選択肢" required autocomplete="off">
       <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice" tabindex="-1">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
@@ -524,7 +529,7 @@
           class="form-check-input set-correct mt-0" aria-label="正解を設定">
       </label>
       <input type="text" id="q{q-num}-type-select-all-c{c-num}" class="form-control rounded-end type-choice"
-        placeholder="{c-num}つ目の選択肢" required>
+        placeholder="{c-num}つ目の選択肢" required autocomplete="off">
       <button type="button" class="d-none btn btn-danger border-secondary-subtle del-choice" tabindex="-1">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
@@ -536,14 +541,16 @@
       <div class="row">
         <h3 class="col-sm-6 col-md-8 col-lg-9 order-1 mx-sm-auto q-header">1問目</h3>
         <div class="col-sm-6 col-md-4 col-lg-3 order-2">
-          <button class="d-none w-100 btn btn-danger open-del-q-m" tabindex="-1"><i class="bi bi-x-lg float-start"
-              aria-hidden="true"></i>この問題を削除</button>
+          <button class="d-none w-100 btn btn-danger open-del-q-m" tabindex="-1">
+            <i class="bi bi-x-lg float-start" aria-hidden="true"></i>この問題を削除
+          </button>
         </div>
       </div>
       <div>
         <label class="form-label" for="q{num}-statement">問題文</label>
         <div class="input-group has-validation">
-          <textarea id="q{num}-statement" rows="3" class="form-control" placeholder="例: パから始まってダで終わる動物の名前は？" required></textarea>
+          <textarea id="q{num}-statement" rows="3" class="form-control" placeholder="例: パから始まってダで終わる動物の名前は？"
+            required></textarea>
           <div class="invalid-feedback">問題文を入力してください</div>
         </div>
       </div>
@@ -578,7 +585,7 @@
         <div id="q{num}-type-txt-cont" class="d-none">
           <label for="q{num}-type-txt-correct" class="form-label">正解を設定</label>
           <div class="input-group has-validation">
-            <input type="text" id="q{num}-type-txt-correct" class="form-control" required>
+            <input type="text" id="q{num}-type-txt-correct" class="form-control" required autocomplete="off">
             <div class="invalid-feedback">正解を設定してください</div>
           </div>
         </div>
@@ -611,8 +618,8 @@
     </div>
   </template>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-  crossorigin="anonymous"></script>
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
   <script type="module" src="js/index.js"></script>
 </body>
 </html>

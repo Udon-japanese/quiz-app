@@ -1449,7 +1449,8 @@ function areQuizzesEqual(quiz1, quiz2) {
     quiz2 === null ||
     quiz1 === undefined ||
     quiz2 === undefined
-  ) {// 空文字列は許可したいため、値がnullまたはundefinedの場合のみfalseを返す
+  ) {
+    // 空文字列は許可したいため、値がnullまたはundefinedの場合のみfalseを返す
     return false;
   }
 

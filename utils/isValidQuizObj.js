@@ -100,7 +100,7 @@ function isValidQuestionObj(question) {
 }
 /**
  * @description 与えられた文字列がUUIDならtrue,それ以外ならfalseを返す
- * @param {string} str 
+ * @param {string} str
  * @returns {boolean} UUIDかどうか
  */
 function isUUID(str) {
