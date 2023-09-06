@@ -806,24 +806,10 @@ function checkChoicesState(strQN, addChoiceBtn) {
   updateChoicesUI(selectAllChoices);
 
   const isReachedLimit = selectChoices.length === createChoiceCallLimit;
-
+  const infoTxt = document.getElementById(`q${strQN}-choices-info-txt`);
   toggleElem(addChoiceBtn, isReachedLimit);
-
-  const existsInfoText = document
-    .getElementById(`q${strQN}`)
-    .querySelector(".choices-info-txt");
-  if (isReachedLimit) {
-    if (existsInfoText) return;
-    const infoText = createElement(
-      "p",
-      { class: "choices-info-txt" },
-      "選択肢は最大4つまで設定できます"
-    );
-    addChoiceBtn.parentNode.appendChild(infoText);
-  } else {
-    if (!existsInfoText) return;
-    existsInfoText.remove();
-  }
+  toggleElem(infoTxt, !isReachedLimit);
+  infoTxt.classList.toggle("d-sm-inline-block", isReachedLimit);
 
   /**
    * @description 選択肢の見た目を更新する
@@ -857,31 +843,13 @@ function checkQuestionsState() {
   const isReachedLimit = questionsLength === createQuestionCallLimit;
 
   toggleElem(crtQuizObj.elem.addQBtn, isReachedLimit);
+  toggleElem(document.getElementById("questions-info-txt"), !isReachedLimit);
 
   const addQBtnInner = crtQuizObj.elem.addQBtn.innerHTML;
   crtQuizObj.elem.addQBtn.innerHTML = addQBtnInner.replace(
     /\d+(?=\s*問目)/,
     questionsLength + 1
   );
-
-  const infoTextId = "questions-info-txt";
-  const existsInfoText = document.getElementById(infoTextId);
-
-  if (isReachedLimit) {
-    if (existsInfoText) return;
-    const infoText = createElement(
-      "p",
-      { id: infoTextId },
-      "問題は最大で10個まで作成できます"
-    );
-    crtQuizObj.elem.questionsCont.parentNode.insertBefore(
-      infoText,
-      crtQuizObj.elem.addQBtn.parentNode.nextSibling
-    );
-  } else {
-    if (!existsInfoText) return;
-    existsInfoText.remove();
-  }
 }
 /**
  * @description 現在存在する問題ごとのすべての選択肢を取得し、返す

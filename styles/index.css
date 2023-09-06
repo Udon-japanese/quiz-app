@@ -4,6 +4,7 @@
   word-break: break-all;
 }
 html, body {
+  font-family: 'Noto Sans JP', sans-serif;
   height: 100%;
   width: 100%;
 }

@@ -8,6 +8,9 @@
   <meta property="og:description" content="自分で作って遊んだり、他の人のクイズで遊んだりしよう！">
   <meta property="og:image"
     content="https://drive.google.com/uc?export=view&id=1H3jPDvtxPWAfVQiF64oznssJpXV3hsul&usp=sharing">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <meta property="og:url" content="https://udon-japanese.github.io/quiz-app/">
   <link rel="stylesheet" href="./styles/bootstrap-icons.min.css">
   <link rel="stylesheet" href="./styles/bootstrap.min.css">
@@ -446,7 +449,7 @@
               </div>
             </div>
             <div id="quiz-options" class="mt-2 d-flex flex-column gap-2">
-              <h5 class="card-subtitle">オプション</h5>
+              <h5 class="card-subtitle fw-bold">オプション</h5>
               <div id="option-timer">
                 <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
                   <label class="user-select-none" for="timer-toggle">各問題に制限時間を設ける</label>
@@ -494,9 +497,13 @@
               <i class="bi bi-plus-lg float-start me-0 me-sm-2"></i>
               {q-n}問目を追加する
             </button>
+            <span id="questions-info-txt" class="p-2 mb-4 border border-1 border-success bg-success-subtle rounded">
+              <i class="bi bi-info-circle me-1"></i>
+              問題は最大10問まで作成できます
+            </span>
           </div>
         </div>
-        <button id="crt-quiz" type="button" class="btn btn-success my-sm-5 mt-2 mt">クイズを作成する</button>
+        <button id="crt-quiz" type="button" class="btn btn-success mt-sm-5 mt-3">クイズを作成する</button>
       </div>
     </div>
   </template>
@@ -598,10 +605,14 @@
             <span>正解と選択肢を設定</span>
             <div class="select-alls mt-2"></div>
           </div>
+          <div id="q{num}-choices-info-txt" class="p-2 border border-1 border-success bg-success-subtle rounded d-sm-inline-block">
+            <i class="bi bi-info-circle me-1"></i>
+            選択肢は最大4つまで追加できます
+          </div>
         </div>
       </div>
       <div id="q{num}-options">
-        <h5>オプション</h5>
+        <h5 class="fw-bold">オプション</h5>
         <div id="q{num}-option-expl">
           <div class="d-flex align-items-center justify-content-between col-sm-9 col-md-7 col-lg-5 col-xxl-3">
             <label for="q{num}-expl-toggle" class="user-select-none">解説を設定する</label>
