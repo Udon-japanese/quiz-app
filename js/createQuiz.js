@@ -1114,7 +1114,13 @@ export function saveQuizDraft() {
     }
   });
 
-  if (!isEmptyQuiz) {
+  if (isEmptyQuiz) {
+    if (quizDraftId) {
+      removeQuizDraftFromStorage(id);
+      showToast("sky-blue", "下書きが空になったため、自動的に削除されました");
+      setCookie(LAST_ACCESS_KEY_NAME, "createQuiz");
+    }
+  } else {
     if (quizDraftId) {
       if (areQuizzesEqual(prevQuizDraft, quizDraft)) return; // 下書きに変化がないときは保存とトースト表示をしない
 
@@ -1123,11 +1129,7 @@ export function saveQuizDraft() {
       addQuizDraftToStorage(quizDraft);
     }
     showToast("sky-blue", "下書きが保存されました");
-  } else {
-    if (quizDraftId) {
-      removeQuizDraftFromStorage(id);
-      showToast("sky-blue", "下書きが空になったため、自動的に削除されました");
-    }
+    setCookie(LAST_ACCESS_KEY_NAME, `createQuiz?draftId=${quizDraft.id}`);
   }
 }
 /**
