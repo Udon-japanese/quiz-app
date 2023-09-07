@@ -26,7 +26,7 @@ import {
   searchQuizzes,
   showConfirmDelAllQuizzes,
 } from "./quizList.js";
-import { isValidQuizObj } from "../utils/isValidQuizObj.js";
+import { isInvalidQuizList, isValidQuizObj } from "../utils/validateQuiz.js";
 import { initTooltips } from "../utils/initTooltips.js";
 import { closeModal, openModal } from "../utils/modal.js";
 import { setCookie } from "../utils/cookie.js";
@@ -1362,15 +1362,14 @@ function displayQuizDraftList(obj = null, highlight = "") {
 
   if (!obj) {
     crtQuizObj.quizDraftListObj = getQuizDraftsFromStorage();
-    if (!crtQuizObj.quizDraftListObj) return;
   }
 
-  if (!Object.keys(crtQuizObj.quizDraftListObj).length) {
+  const qListObjToUse = obj ? obj : crtQuizObj.quizDraftListObj;
+  if (!Object.keys(qListObjToUse).length || !qListObjToUse || isInvalidQuizList(qListObjToUse)) {
     // 残り1個の下書きが削除された後に、新規クイズ作成画面に切り替える
     initCrtQuizPage(null, "new");
   }
 
-  const qListObjToUse = obj ? obj : crtQuizObj.quizDraftListObj;
   populateQuizItems("draft", qListObjToUse, quizDraftsCont, highlight);
 }
 /**

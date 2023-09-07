@@ -91,7 +91,7 @@
     },
     "q8": {
       "options": {},
-      "statement": "最も多くの葉をもつ動物は何でしょう？",
+      "statement": "最も多くの歯をもつ動物は何でしょう？",
       "answerType": "select",
       "choices": [
         { "589da19a-7e6d-47c3-a9c2-e97719bb3006": "シャチ" },

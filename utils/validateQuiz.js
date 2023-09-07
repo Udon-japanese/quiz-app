@@ -108,3 +108,22 @@ function isUUID(str) {
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidPattern.test(str);
 }
+/**
+ * @description クイズデータのリストが無効かどうかを調べ、無効であればtrue,有効であればfalseを返す
+ * @param {Object<string, Quiz>} quizList クイズデータのリスト
+ * @returns {boolean} 無効なクイズデータのリストかどうか
+ */
+export function isInvalidQuizList(quizList) {
+  let invalidQuizCounter = 0;
+  Object.values(quizList).forEach((quiz) => {
+    if (!isValidQuizObj(quiz)) {
+      invalidQuizCounter++;
+    }
+  });
+
+  if (invalidQuizCounter === Object.keys(quizList).length) {
+    return true;
+  }
+
+  return false;
+}

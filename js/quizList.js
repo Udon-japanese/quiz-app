@@ -18,7 +18,7 @@ import { initQuizPage } from "./quiz.js";
 import { initCrtQuizPage } from "./createQuiz.js";
 import { initTooltips } from "../utils/initTooltips.js";
 import { createElement } from "../utils/elemManipulation.js";
-import { isValidQuizObj } from "../utils/isValidQuizObj.js";
+import { isInvalidQuizList, isValidQuizObj } from "../utils/validateQuiz.js";
 import { showToast } from "../utils/showToast.js";
 import { toggleElem, showElem } from "../utils/elemManipulation.js";
 import { isNumNotNaN } from "../utils/isNumNotNaN.js";
@@ -241,7 +241,7 @@ export function displayQuizList(obj = null, highlight = "") {
   }
 
   const qListObjToUse = obj ? obj : qListObj.quizList;
-  const noneQuiz = !Object.keys(qListObjToUse).length || !qListObjToUse;
+  const noneQuiz = !Object.keys(qListObjToUse).length || !qListObjToUse || isInvalidQuizList(qListObjToUse);
   if (noneQuiz) {
     noneQuizTxtElem.innerHTML = `
     <div>
@@ -262,29 +262,30 @@ export function displayQuizList(obj = null, highlight = "") {
 /**
  * @description クイズ一覧のオブジェクトから、クエリを含むプロパティを持つオブジェクトを返す
  * @param {string} query 検索する文字列(searchQInputのvalue)
- * @param {Object<string, Quiz>} クイズ一覧のオブジェクト
+ * @param {Object<string, Quiz>} quizListObj クイズ一覧のオブジェクト
  * @returns {Object<string, Quiz> | {}} ヒットしたクイズのオブジェクト(何もヒットしなければ空のオブジェクト)
  */
 export function searchQuizzes(query, quizListObj) {
   const resultObj = {};
 
-  Object.keys(quizListObj).forEach((id) => {
-    const quiz = quizListObj[id];
+  Object.values(quizListObj).forEach((quiz) => {
+    if (!isValidQuizObj(quiz)) return;
+
     const title = quiz.title || "タイトルなし";
     const description = quiz.description || "説明なし";
     const quizLength = quiz.length;
 
     // 小文字大文字関係なく一致させるため、大文字に統一する
-    const lowercaseQuery = query.toUpperCase();
-    const lowercaseTitle = title.toUpperCase();
-    const lowercaseDesc = description.toUpperCase();
+    const uppercaseQuery = query.toUpperCase();
+    const uppercaseTitle = title.toUpperCase();
+    const uppercaseDesc = description.toUpperCase();
 
     if (
-      lowercaseTitle.includes(lowercaseQuery) ||
-      lowercaseDesc.includes(lowercaseQuery) ||
+      uppercaseTitle.includes(uppercaseQuery) ||
+      uppercaseDesc.includes(uppercaseQuery) ||
       `問題数:${quizLength}問`.includes(query)
     ) {
-      resultObj[id] = quiz;
+      resultObj[quiz.id] = quiz;
     }
   });
 

@@ -13,7 +13,7 @@ import { displayQuizList } from "./quizList.js";
 import { showToast } from "../utils/showToast.js";
 import { setCookie, getCookie } from "../utils/cookie.js";
 import { endQuiz, initQuizPage } from "./quiz.js";
-import { isValidQuizObj } from "../utils/isValidQuizObj.js";
+import { isValidQuizObj } from "../utils/validateQuiz.js";
 import { saveQuizDraft, initCrtQuizPage, randomUUID } from "./createQuiz.js";
 import { showElem, toggleElem } from "../utils/elemManipulation.js";
 import { openModal } from "../utils/modal.js";
